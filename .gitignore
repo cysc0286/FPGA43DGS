@@ -1,0 +1,14 @@
+# Local reference packages and the existing board-build workspace.
+/2026FPGAInfo/
+/papers/
+/platform/
+/tmp/
+/_tmp*
+
+# Reproducible simulation output.
+/examples/adder_smoke/build/
+.Xil/
+*.jou
+*.log
+*.wdb
+*.pb
