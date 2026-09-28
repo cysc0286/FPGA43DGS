@@ -6,7 +6,6 @@
 
 ```text
 视频输入 → 位姿与稀疏重建 → 高斯生成/优化 → CPU＋FPGA 渲染
-   A              A              B                 C
 ```
 
 | 模块 | 核心目录 | 当前状态 |
@@ -18,7 +17,7 @@
 | 实际渲染后端 | `examples/3dgs_flicker_hw` | CPU 投影/SH/分组排序，FPGA 筛选/求值/合成；四单元基线已留存 |
 | NPU 候选 | `examples/3dgs_reconstruction/npu_frontend` | 匹配正确性已做局部实测，尚未形成默认加速收益 |
 
-统一入口为 [pipeline.py](examples/3dgs_reconstruction/pipeline.py)。详细阅读：[目录与计划](MAINLINE.md)、[三人分工](TEAM_MODULES.md)、[数据接口](examples/3dgs_reconstruction/modules/INTERFACES.md)、[仓库复用与反向传播](examples/3dgs_reconstruction/REPOSITORIES_AND_BACKPROP.md)、[NPU 加速分析](examples/3dgs_reconstruction/NPU_ACCELERATION_ANALYSIS_20260928.md)。
+统一入口为 [pipeline.py](examples/3dgs_reconstruction/pipeline.py)。详细阅读：[目录与计划](MAINLINE.md)、[数据接口](examples/3dgs_reconstruction/modules/INTERFACES.md)、[仓库复用与反向传播](examples/3dgs_reconstruction/REPOSITORIES_AND_BACKPROP.md)、[NPU 加速分析](examples/3dgs_reconstruction/NPU_ACCELERATION_ANALYSIS_20260928.md)。
 
 ## 下载后检查
 
@@ -46,4 +45,4 @@ python examples/3dgs_reconstruction/pipeline.py --help
 
 四单元回退源码和接口见 [releases](releases/README.md)。后续候选应另建版本，不覆盖原 BOOT、位流或测量结果。FLICKER是当前渲染方法主线，整篇论文的所有机制尚未复现。
 
-仍被主线引用的 `examples/3dgs_compositor/board`、`3dgs_scene` 和 `3dgs_flicker_cat` 保留原路径。加法器和 ALU 源码在 [archive](archive/basic_demos_20260928/README.md)。第三方来源、版本及许可证见 [third_party/sources.json](third_party/sources.json)；仓库不包含设备密码或私钥。
+仍被主线引用的 `examples/3dgs_compositor/board`、`3dgs_scene` 和 `3dgs_flicker_cat` 保留原路径。基础 ALU 源码在 [archive](archive/basic_demos_20260928/README.md)。第三方来源、版本及许可证见 [third_party/sources.json](third_party/sources.json)；仓库不包含设备密码或私钥。

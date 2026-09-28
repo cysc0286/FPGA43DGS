@@ -27,7 +27,7 @@ RenderResult：frame.bin + frame.ppm + result.json
 
 统一分阶段入口：[pipeline.py](examples/3dgs_reconstruction/pipeline.py)。详细字段与命令：[接口文档](examples/3dgs_reconstruction/modules/INTERFACES.md)。旧 `stages.py` / `run_cpu.py` / `bounded/run.py` 继续使用同一套模块实现，不保留第二份计算代码。
 
-三人开发按“视频与位姿 / 高斯重建 / 渲染”划分，人员代码范围、最小交接文件、芯片部署建议及联合验收见 [TEAM_MODULES.md](TEAM_MODULES.md)。独立交付使用 `pipeline.py validate --only`，整段检查保留 `--through`。
+模块独立交付使用 `pipeline.py validate --only`，整段检查保留 `--through`。
 
 2026-09-28 新分析目标：以质量合格后的总耗时最短为优先，允许充分使用板上资源；NPU 的前馈高斯、特征和批量属性候选见 [加速分析](examples/3dgs_reconstruction/NPU_ACCELERATION_ANALYSIS_20260928.md)。这些是候选研究，尚未切换默认重建方法或重新上板验证。
 
@@ -43,7 +43,7 @@ RenderResult：frame.bin + frame.ppm + result.json
 
 ## 实验与共享依赖
 
-已独立归档的加法器、基础 ALU 在 [archive/basic_demos_20260928](archive/basic_demos_20260928/README.md)，包含原始压缩包、展开目录和 SHA256 清单。
+基础 ALU 源码与历史清单在 [archive/basic_demos_20260928](archive/basic_demos_20260928/README.md)；原始压缩包与实验输出仅保留在本地。
 
 以下目录不作为主线入口，但暂不整目录移动：
 

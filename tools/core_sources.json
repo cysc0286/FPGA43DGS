@@ -1,7 +1,10 @@
 {
   "files": [
-    ".gitignore", ".gitattributes", "README.md", "AGENTS.md", "MAINLINE.md", "TEAM_MODULES.md",
-    "FLICKER_REPRODUCTION.md", "team_workplan_2026-09-22.md", "requirements-core.txt",
+    ".gitignore", ".gitattributes", "README.md", "AGENTS.md", "MAINLINE.md",
+    "FLICKER_REPRODUCTION.md", "requirements-core.txt",
+    "archive/basic_demos_20260928/README.md",
+    "archive/basic_demos_20260928/manifest.json",
+    "archive/basic_demos_20260928/migration_changes.json",
     "examples/3dgs_batch/board/batch.hpp",
     "examples/3dgs_reconstruction/evidence/versions.csv",
     "releases/README.md",
@@ -17,7 +20,7 @@
     "tools", "docs", "third_party",
     "examples/3dgs_reconstruction", "examples/3dgs_flicker_hw",
     "examples/3dgs_flicker_cat", "examples/3dgs_scene", "examples/3dgs_compositor",
-    "archive/basic_demos_20260928",
+    "archive/basic_demos_20260928/basic_alu",
     "releases/3dgs_renderer_v1_20260928/src"
   ],
   "skip_directories": [

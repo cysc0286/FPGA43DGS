@@ -47,7 +47,7 @@ python examples/3dgs_reconstruction/pipeline.py validate --run RUN_DIR --through
 
 `validate` 验证产物接口，不能把历史产物检查写成“本轮重新上板通过”。
 
-三人独立交接时用 `--only`，不要求接收人带上不需要的上游产物：
+模块独立交接时用 `--only`，不要求接收人带上不需要的上游产物：
 
 ```text
 python examples/3dgs_reconstruction/pipeline.py validate --run POSE_RUN --only pose
@@ -56,7 +56,7 @@ python examples/3dgs_reconstruction/pipeline.py validate --run RENDER_RUN --only
 python examples/3dgs_reconstruction/pipeline.py validate --run RENDER_RUN --only render --out RENDER_OUTPUT
 ```
 
-`--only` 与 `--through` 互斥；不指定时仍检查从 video 到 export 的整段产物。`--only export` 检查默认 `novel_midpoint.bin`；其他目标相机使用 `render --camera NAME.bin --plan` 检查。独立检查只是当前边界的验收，不证明其上游重建准确、所有文件具备跨版本溯源或整链已经跑通。人员范围与联合验收见 [三人分工](../../../TEAM_MODULES.md)。
+`--only` 与 `--through` 互斥；不指定时仍检查从 video 到 export 的整段产物。`--only export` 检查默认 `novel_midpoint.bin`；其他目标相机使用 `render --camera NAME.bin --plan` 检查。独立检查只是当前边界的验收，不证明其上游重建准确、所有文件具备跨版本溯源或整链已经跑通。
 
 ## 旧入口、打包和续跑
 

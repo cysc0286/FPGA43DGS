@@ -1,6 +1,6 @@
 # 核心源码交付（2026-09-28）
 
-这是供三人分模块开发的源码交付。主线为视频 → 位姿与稀疏点 → 高斯生成 → CPU＋FPGA 渲染；前馈 NPU 高斯预测仍是候选，不是本次发布的新能力。
+这是按模块组织的核心源码交付。主线为视频 → 位姿与稀疏点 → 高斯生成 → CPU＋FPGA 渲染；前馈 NPU 高斯预测仍是候选，不是本次发布的新能力。
 
 ## 下载后先做什么
 
@@ -20,7 +20,7 @@ python examples/3dgs_reconstruction/pipeline.py --help
 
 检查使用程序生成的合成文件接口样例，不需要下载视频、模型、OpenSplat、Vivado 或连接板卡。它验证16项接口/错误输入以及8项资源控制行为，不等价于完成重建或上板。已有真实30帧样例的本地回归可通过 `HGS_TEST_REFERENCE_RUN` 指定独立运行目录；其格式和分辨率需符合测试约定。
 
-三人入口：[工作分工](../TEAM_MODULES.md)、[接口](../examples/3dgs_reconstruction/modules/INTERFACES.md)、[反向传播位置](../examples/3dgs_reconstruction/REPOSITORIES_AND_BACKPROP.md)。A 主责 video_input/pose_estimation，B 主责 gaussian_generation/bounded，C 主责 CPU＋FPGA 后端。创建各自分支提交，接口变更同时验证生产方和消费方。
+开发入口：[接口](../examples/3dgs_reconstruction/modules/INTERFACES.md)、[反向传播位置](../examples/3dgs_reconstruction/REPOSITORIES_AND_BACKPROP.md)。模块通过文件接口交接；接口变更同时验证生产方和消费方。
 
 ## 发布范围
 
@@ -31,7 +31,7 @@ python examples/3dgs_reconstruction/pipeline.py --help
 | NPU | 前端匹配候选及 CPU/NPU 比较入口，当前不作为默认加速后端 |
 | 冻结四单元回退 | `releases/3dgs_renderer_v1_20260928` 中源码、接口、原始清单；完整本地运行包继续保留 |
 | 共享依赖 | 仍被引用的 compositor 板卡工具及 scene/CAT 检查器；不是另起一条旧实验主线 |
-| 基础示例 | 原加法器移动到 archive；附基础 ALU 源码和测试入口 |
+| 基础示例 | 基础 ALU 源码和测试入口；加法器 smoke test 不随源码发布 |
 | 历史结果 | 报告和小型汇总；大部分逐次日志、图像、原始回读不随源码发布 |
 
 **GitHub 源码包不是可直接烧录的板卡镜像或完整训练环境。** SDK、厂家平台工程、BOOT/bitstream、已编译程序、视频、场景模型、Python 环境和大体积原始证据不在本次源码包中。历史文档中的绝对本地路径、`runs/`、`evidence/` 和平台目录属于原实验环境，不能理解为 clone 后自动存在；本页和主线接口是新人入口。

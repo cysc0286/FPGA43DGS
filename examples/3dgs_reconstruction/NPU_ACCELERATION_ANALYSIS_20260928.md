@@ -7,7 +7,6 @@
 ```text
 FPGA43DGS/
 ├── MAINLINE.md                        主线导航
-├── TEAM_MODULES.md                    三人边界与联合验收
 ├── examples/
 │   ├── 3dgs_reconstruction/
 │   │   ├── pipeline.py                独立 video/pose/gaussian/export/render/validate
