@@ -1,0 +1,15 @@
+{
+  "baseline_files": {
+    "examples\\3dgs_flicker_hw\\rtl\\flicker_top.sv": "c2063769732480762f63885fdb82386b1bb4266f2dd0442d2350eedf5b3fd878",
+    "examples\\3dgs_flicker_hw\\rtl\\flicker_regs.sv": "486ba8e13b203ab51f3114de1301942d97cb0f80e94a542e44f60e9f53b21d15",
+    "examples\\3dgs_flicker_hw\\rtl\\flicker_dma.sv": "4a176027180f10fd95d270c61f52d844ccf8ad3da3169c2701d88efda59ca5e3"
+  },
+  "changes": [
+    "FLK1 capability/ABI",
+    "mode range 0..5",
+    "HLS render top",
+    "FLK1-only DMA storage writes moved to clock-only process for LUTRAM inference; resettable pointers and occupancy remain unchanged"
+  ],
+  "dma": "FLK0 protocol and FIFO depths retained; storage inference changed only in pipeline/rtl/flicker_dma.sv. Original rtl/flicker_dma.sv is unchanged.",
+  "dma_verification": "evidence/pipeline_integration_20260927T164003: six modes, 4608 pixel outputs and cycle counts match the original-storage integration evidence/pipeline_integration_20260927T155536"
+}

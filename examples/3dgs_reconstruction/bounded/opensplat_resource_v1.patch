@@ -1,0 +1,264 @@
+--- a/opensplat.cpp
++++ b/opensplat.cpp
+@@ -10,6 +10,8 @@
+ #include "image_pipeline.hpp"
+ #include "sysinfo.hpp"
+ #include <chrono>
++#include <ATen/Parallel.h>
++#include "resource_limits.hpp"
+ #include <cxxopts.hpp>
+ 
+ #ifdef USE_VISUALIZATION
+@@ -20,6 +22,21 @@
+ using namespace torch::indexing;
+ 
+ int main(int argc, char *argv[]){
++    try {
++        const auto &resource = hgs::limits();
++        if (argc == 2 && std::string(argv[1]) == "--resource-info") {
++            hgs::describe();
++            return EXIT_SUCCESS;
++        }
++        if (resource.cpuThreads) {
++            at::set_num_threads(resource.cpuThreads);
++            at::set_num_interop_threads(1);
++            cv::setNumThreads(resource.cpuThreads);
++        }
++    } catch (const std::exception &e) {
++        std::cerr << e.what() << std::endl;
++        return EXIT_FAILURE;
++    }
+     cxxopts::Options options("opensplat", "Open Source 3D Gaussian Splats generator - " APP_VERSION);
+     options.add_options()
+         ("i,input", "Path to nerfstudio project", cxxopts::value<std::string>())
+@@ -136,6 +153,10 @@
+         std::string projectPath = projectRoot;
+         if (isZipArchive(projectRoot)) projectPath = extractZipToCache(projectRoot, sceneDir.string());
+         InputData inputData = inputDataFromX(projectPath);
++        hgs::describe();
++        if (hgs::limits().strictGaussians && maxGaussians > 0 &&
++            inputData.points.xyz.size(0) > maxGaussians)
++            throw std::runtime_error("Initial sparse points exceed strict Gaussian cap; no silent pruning");
+ 
+         int numMasks = 0;
+         if (!noMasks){
+@@ -148,7 +169,9 @@
+ 
+         // Images are preprocessed once into a compressed cache (90% of RAM,
+         // saving to disk next to the scene) and decoded on demand while training
+-        ImageStore imageStore(physicalRamBytes() / 10 * 9, sceneDir);
++        ImageStore imageStore(hgs::limits().cacheMiB
++            ? (static_cast<uint64_t>(hgs::limits().cacheMiB) << 20)
++            : physicalRamBytes() / 10 * 9, sceneDir);
+         imageStore.prepare(inputData.cameras, downScaleFactor, numDownscales);
+ 
+         // Withhold a validation camera if necessary
+@@ -192,7 +215,7 @@
+         model.edgeGuidance = !result["no-edge-guidance"].as<bool>();
+ 
+         const int hw = (std::max)(1u, std::thread::hardware_concurrency());
+-        const int decodeThreads = device == torch::kCPU ? (std::max)(1, hw / 4) : (std::max)(1, (std::min)(8, hw / 2));
++        const int decodeThreads = hgs::limits().imageWorkers ? hgs::limits().imageWorkers : device == torch::kCPU ? (std::max)(1, hw / 4) : (std::max)(1, (std::min)(8, hw / 2));
+         ImagePipeline images(imageStore, device, decodeThreads);
+         model.images = &images;
+ 
+@@ -205,6 +228,8 @@
+ 
+         if (resume != ""){
+             step = model.loadPly(resume) + 1;
++            if (hgs::limits().strictGaussians && maxGaussians > 0 && model.means.size(0) > maxGaussians)
++                throw std::runtime_error("Resumed model exceeds strict Gaussian cap");
+         }
+ 
+         for (; step <= numIters; step++){
+--- a/image_store.cpp
++++ b/image_store.cpp
+@@ -6,6 +6,7 @@
+ #include <opencv2/imgproc.hpp>
+ #include "image_store.hpp"
+ #include "sysinfo.hpp"
++#include "resource_limits.hpp"
+ #include "undistort.hpp"
+ #include "utils.hpp"
+ 
+@@ -50,7 +51,7 @@
+     if (resident <= cap) return;
+ 
+     if (!lowRamGuardTripped && availableRamBytes() < physicalRamBytes() / 10){
+-        cap = (std::max)(cap / 2, static_cast<uint64_t>(64) << 20);
++        cap = (std::min)(cap, (std::max)(cap / 2, static_cast<uint64_t>(64) << 20));
+         lowRamGuardTripped = true;
+     }
+ 
+@@ -160,7 +161,9 @@
+     for (const Camera &cam : cameras){
+         maxPixels = (std::max)(maxPixels, static_cast<uint64_t>(cam.width) * cam.height);
+     }
+-    const size_t chunk = static_cast<size_t>(std::clamp<uint64_t>(availableRamBytes() / 2 / (maxPixels * 17), 1, 32));
++    const size_t automaticChunk = static_cast<size_t>(std::clamp<uint64_t>(availableRamBytes() / 2 / (maxPixels * 17), 1, 32));
++    const size_t chunk = hgs::limits().prepareImages
++        ? (std::min)(automaticChunk, static_cast<size_t>(hgs::limits().prepareImages)) : automaticChunk;
+ 
+     const size_t total = cameras.size();
+     std::atomic<size_t> done{0};
+--- a/image_pipeline.cpp
++++ b/image_pipeline.cpp
+@@ -1,4 +1,4 @@
+-﻿#include <algorithm>
++#include <algorithm>
+ #include <chrono>
+ #include <cmath>
+ #include <cstring>
+@@ -7,6 +7,7 @@
+ #include <opencv2/imgproc.hpp>
+ #include "image_pipeline.hpp"
+ #include "sysinfo.hpp"
++#include "resource_limits.hpp"
+ 
+ namespace {
+ 
+@@ -264,12 +265,14 @@
+     }else{
+         t = (std::max)(base, t);
+     }
+-    t = std::clamp(t, MIN_PREFETCH, MAX_PREFETCH);
++    const int prefetchCap = hgs::limits().imageSlots
++        ? (std::min)(MAX_PREFETCH, hgs::limits().imageSlots - 2) : MAX_PREFETCH;
++    t = std::clamp(t, MIN_PREFETCH, prefetchCap);
+     target = t;
+ 
+     // Frames stay resident while memory allows: the pool holds at least the
+     // prefetch window and grows up to half of the device memory free at start
+     if (frameBudget == 0) frameBudget = freeDeviceMemoryBytes(device.is_cuda()) / 2;
+     int maxSlots = maxSlotBytes > 0 ? static_cast<int>((std::min<uint64_t>)(frameBudget / maxSlotBytes, MAX_SLOTS)) : 0;
+-    capacity = (std::max)(t + 2, maxSlots);
+-}
++    capacity = hgs::limits().imageSlots ? hgs::limits().imageSlots : (std::max)(t + 2, maxSlots);
++}
+--- a/model.cpp
++++ b/model.cpp
+@@ -1,4 +1,5 @@
+-﻿#include <filesystem>
++#include "resource_limits.hpp"
++#include <filesystem>
+ #include <random>
+ #include <numeric>
+ #include <algorithm>
+@@ -473,6 +474,22 @@
+         }
+     }
+ 
++    // Bound even the temporary clone+split parameter population, before parents
++    // are pruned. Preserve upstream candidate order; do not invent new scores.
++    if (hgs::limits().strictGaussians && maxGaussians > 0) {
++        long long remaining = (std::max)(0LL, static_cast<long long>(maxGaussians) - numPointsBefore);
++        auto first = [](const torch::Tensor &mask, long long allowance) {
++            auto ids = torch::where(mask)[0];
++            if (ids.numel() <= allowance) return mask;
++            auto kept = torch::zeros_like(mask);
++            if (allowance > 0) kept.index_put_({ids.slice(0, 0, allowance)}, true);
++            return kept;
++        };
++        cloneMask = first(cloneMask, remaining);
++        remaining -= cloneMask.sum().item<int64_t>();
++        splitMask = first(splitMask, remaining / 2);
++    }
++
+     // Clone: duplicate small high-error gaussians
+     torch::Tensor cloneIdx = torch::where(cloneMask)[0];
+     if (cloneIdx.numel() > 0){
+--- a/rasterizer/gsplat-cpu/gsplat_cpu.cpp
++++ b/rasterizer/gsplat-cpu/gsplat_cpu.cpp
+@@ -1,4 +1,4 @@
+-﻿// Originally started from https://github.com/nerfstudio-project/gsplat
++// Originally started from https://github.com/nerfstudio-project/gsplat
+ // This implementation has been substantially changed and optimized 
+ // Licensed under the AGPLv3
+ // Piero Toffanin - 2024
+@@ -12,6 +12,7 @@
+ #include <tuple>
+ #include <thread>
+ #include <atomic>
++#include "../../resource_limits.hpp"
+ 
+ using namespace torch::indexing;
+ 
+@@ -19,9 +20,12 @@
+ 
+ int rasterWorkers(int height, size_t floatsPerWorker = 0){
+     int workers = static_cast<int>((std::max)(1u, std::thread::hardware_concurrency()));
++    if (hgs::limits().rasterThreads) workers = (std::min)(workers, hgs::limits().rasterThreads);
+     workers = (std::min)(workers, (std::max)(1, height));
+     if (floatsPerWorker > 0){
+-        const size_t budget = 64ull << 20;
++        const size_t budget = static_cast<size_t>(hgs::limits().gradientMiB) << 20;
++        if (hgs::limits().strictGaussians && floatsPerWorker > budget / sizeof(float))
++            throw std::runtime_error("One raster backward worker exceeds HGS_GRADIENT_MIB");
+         const int maxWorkers = (std::max)(1, static_cast<int>(budget / (floatsPerWorker * sizeof(float) + 1)));
+         workers = (std::min)(workers, maxWorkers);
+     }
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -20,12 +20,8 @@
+ file(READ "VERSION" APP_VERSION)
+ string(STRIP "${APP_VERSION}" APP_VERSION)
+ 
+-# Read git commit
+-set(GIT_REV "")
+-execute_process(COMMAND git rev-parse --short HEAD
+-                WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" 
+-                OUTPUT_VARIABLE GIT_REV 
+-                ERROR_QUIET)
++# Pinned archive: do not accidentally identify the enclosing HeteroGS git repository.
++set(GIT_REV "62fd86f-heterogs-resource-v1")
+ string(REGEX REPLACE "\n$" "" GIT_REV "${GIT_REV}")
+ if (NOT "${GIT_REV}" STREQUAL "")
+     set(DAPP_VERSION "${APP_VERSION} (git commit ${GIT_REV})")
+--- /dev/null
++++ b/resource_limits.hpp
+@@ -0,0 +1,45 @@
++// HeteroGS CPU resource controls, applied to the pinned OpenSplat source only.
++// Upstream and modifications are distributed under AGPL-3.0; see LICENSE.txt.
++#pragma once
++#include <cstdlib>
++#include <cstdint>
++#include <iostream>
++#include <stdexcept>
++#include <string>
++
++namespace hgs {
++inline int integer(const char *key, int fallback, int low, int high) {
++    const char *raw = std::getenv(key);
++    if (!raw) return fallback;
++    const std::string s(raw);
++    if (s.empty() || s.find_first_not_of("0123456789") != std::string::npos)
++        throw std::runtime_error(std::string("Invalid resource setting: ") + key);
++    const long long v = std::stoll(s);
++    if (v < low || v > high)
++        throw std::runtime_error(std::string("Out of range resource setting: ") + key);
++    return static_cast<int>(v);
++}
++struct Limits {
++    // Zero (only when unset) retains the upstream heuristic.
++    int cpuThreads = integer("HGS_CPU_THREADS", 0, 1, 256);
++    int rasterThreads = integer("HGS_RASTER_THREADS", 0, 1, 256);
++    int gradientMiB = integer("HGS_GRADIENT_MIB", 64, 1, 4096);
++    int imageWorkers = integer("HGS_IMAGE_WORKERS", 0, 1, 64);
++    int cacheMiB = integer("HGS_IMAGE_CACHE_MIB", 0, 1, 4096);
++    int imageSlots = integer("HGS_IMAGE_SLOTS", 0, 4, 128);
++    int prepareImages = integer("HGS_PREPARE_IMAGES", 0, 1, 32);
++    int strictGaussians = integer("HGS_STRICT_GAUSSIANS", 0, 0, 1);
++};
++inline const Limits &limits() { static const Limits v; return v; }
++inline void describe() {
++    const auto &v = limits();
++    std::cout << "{\"resource_abi\":1,\"cpu_threads\":" << v.cpuThreads
++              << ",\"raster_threads\":" << v.rasterThreads
++              << ",\"gradient_mib\":" << v.gradientMiB
++              << ",\"image_workers\":" << v.imageWorkers
++              << ",\"image_cache_mib\":" << v.cacheMiB
++              << ",\"image_slots\":" << v.imageSlots
++              << ",\"prepare_images\":" << v.prepareImages
++              << ",\"strict_gaussians\":" << v.strictGaussians << "}" << std::endl;
++}
++}

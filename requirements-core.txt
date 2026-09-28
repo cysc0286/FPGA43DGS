@@ -1,0 +1,4 @@
+# Host contract/control tests. Full training and board builds use their own setup.
+numpy>=1.23,<3
+plyfile>=1.0,<2
+psutil>=5.9,<8

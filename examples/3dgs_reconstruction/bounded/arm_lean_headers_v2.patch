@@ -1,0 +1,191 @@
+--- bounded_v1/cv_utils.hpp
++++ arm_v2/cv_utils.hpp
+@@ -1,7 +1,7 @@
+ #ifndef CV_UTILS
+ #define CV_UTILS
+ 
+-#include <torch/torch.h>
++#include <torch/types.h>
+ #include <opencv2/core/core.hpp>
+ #include <opencv2/imgcodecs.hpp>
+ #include <opencv2/imgproc.hpp>
+--- bounded_v1/image_pipeline.hpp
++++ arm_v2/image_pipeline.hpp
+@@ -8,7 +8,7 @@
+ #include <mutex>
+ #include <thread>
+ #include <vector>
+-#include <torch/torch.h>
++#include <torch/types.h>
+ #include "image_store.hpp"
+ 
+ // A decoded camera image resident on the training device
+--- bounded_v1/input_data.hpp
++++ arm_v2/input_data.hpp
+@@ -5,7 +5,7 @@
+ #include <string>
+ #include <fstream>
+ #include <unordered_map>
+-#include <torch/torch.h>
++#include <torch/types.h>
+ 
+ enum CameraType { Perspective };
+ struct Camera{
+--- bounded_v1/kdtree_tensor.hpp
++++ arm_v2/kdtree_tensor.hpp
+@@ -1,7 +1,7 @@
+ #ifndef KDTREE_TENSOR
+ #define KDTREE_TENSOR
+ 
+-#include <torch/torch.h>
++#include <torch/types.h>
+ #include <nanoflann.hpp>
+ 
+ struct PointsTensor {
+--- bounded_v1/model.hpp
++++ arm_v2/model.hpp
+@@ -2,7 +2,9 @@
+ #define MODEL_H
+ 
+ #include <iostream>
+-#include <torch/torch.h>
++#include <torch/types.h>
++#include <torch/utils.h>
++#include <torch/optim/adam.h>
+ #include <torch/csrc/api/include/torch/version.h>
+ #include "nerfstudio.hpp"
+ #include "kdtree_tensor.hpp"
+--- bounded_v1/nerfstudio.hpp
++++ arm_v2/nerfstudio.hpp
+@@ -4,7 +4,7 @@
+ #include <iostream>
+ #include <string>
+ #include <fstream>
+-#include <torch/torch.h>
++#include <torch/types.h>
+ #include <nlohmann/json_fwd.hpp>
+ #include "input_data.hpp"
+ 
+--- bounded_v1/openmvg.hpp
++++ arm_v2/openmvg.hpp
+@@ -5,7 +5,7 @@
+ #include <string>
+ #include <fstream>
+ #include <unordered_map>
+-#include <torch/torch.h>
++#include <torch/types.h>
+ #include <nlohmann/json_fwd.hpp>
+ #include "input_data.hpp"
+ 
+--- bounded_v1/opensfm.hpp
++++ arm_v2/opensfm.hpp
+@@ -5,7 +5,7 @@
+ #include <string>
+ #include <fstream>
+ #include <unordered_map>
+-#include <torch/torch.h>
++#include <torch/types.h>
+ #include <nlohmann/json_fwd.hpp>
+ #include "input_data.hpp"
+ 
+--- bounded_v1/point_io.hpp
++++ arm_v2/point_io.hpp
+@@ -3,7 +3,7 @@
+ 
+ #include <iostream>
+ #include <fstream>
+-#include <torch/torch.h>
++#include <torch/types.h>
+ 
+ #ifdef WITH_PDAL
+ #include <pdal/Options.hpp>
+--- bounded_v1/project_gaussians.hpp
++++ arm_v2/project_gaussians.hpp
+@@ -1,7 +1,8 @@
+ #ifndef PROJECT_GAUSSIANS_H
+ #define PROJECT_GAUSSIANS_H
+ 
+-#include <torch/torch.h>
++#include <torch/types.h>
++#include <torch/csrc/autograd/custom_function.h>
+ #include "tile_bounds.hpp"
+ #include "gsplat.hpp"
+ 
+--- bounded_v1/rasterize_gaussians.hpp
++++ arm_v2/rasterize_gaussians.hpp
+@@ -1,7 +1,8 @@
+ ﻿#ifndef RASTERIZE_GAUSSIANS_H
+ #define RASTERIZE_GAUSSIANS_H
+ 
+-#include <torch/torch.h>
++#include <torch/types.h>
++#include <torch/csrc/autograd/custom_function.h>
+ #include "tile_bounds.hpp"
+ 
+ using namespace torch::autograd;
+--- bounded_v1/rasterizer/gsplat-cpu/bindings.h
++++ arm_v2/rasterizer/gsplat-cpu/bindings.h
+@@ -8,7 +8,7 @@
+ #include <vector>
+ #include <math.h>
+ #include <tuple>
+-#include <torch/all.h>
++#include <torch/types.h>
+ 
+ std::tuple<
+     torch::Tensor,
+--- bounded_v1/rasterizer/gsplat-cpu/gsplat_cpu.cpp
++++ arm_v2/rasterizer/gsplat-cpu/gsplat_cpu.cpp
+@@ -4,6 +4,9 @@
+ // Piero Toffanin - 2024
+ 
+ #include "bindings.h"
++#include <torch/utils.h>
++#include <torch/nn/functional/normalization.h>
++#include <torch/nn/functional/padding.h>
+ #include "../gsplat/config.h"
+ 
+ #include <cstdio>
+--- bounded_v1/spherical_harmonics.hpp
++++ arm_v2/spherical_harmonics.hpp
+@@ -1,7 +1,8 @@
+ #ifndef SPHERICAL_HARMONICS_H
+ #define SPHERICAL_HARMONICS_H
+ 
+-#include <torch/torch.h>
++#include <torch/types.h>
++#include <torch/csrc/autograd/custom_function.h>
+ #include "gsplat.hpp"
+ 
+ using namespace torch::autograd;
+--- bounded_v1/ssim.hpp
++++ arm_v2/ssim.hpp
+@@ -1,7 +1,8 @@
+ #ifndef SSIM_H
+ #define SSIM_H
+ 
+-#include <torch/torch.h>
++#include <torch/types.h>
++#include <torch/csrc/autograd/custom_function.h>
+ 
+ // Fused (1-ssimWeight)*L1 + ssimWeight*DSSIM loss with autograd support.
+ // mask may be empty; validPadding excludes the blur border from the unmasked loss
+--- bounded_v1/tensor_math.cpp
++++ arm_v2/tensor_math.cpp
+@@ -1,4 +1,5 @@
+ #include "tensor_math.hpp"
++#include <torch/nn/functional/normalization.h>
+ 
+ using namespace torch::indexing;
+ 
+--- bounded_v1/tensor_math.hpp
++++ arm_v2/tensor_math.hpp
+@@ -1,7 +1,7 @@
+ #ifndef TENSOR_MATH_H
+ #define TENSOR_MATH_H
+ 
+-#include <torch/torch.h>
++#include <torch/types.h>
+ #include <tuple>
+ #include "constants.hpp"
+ 

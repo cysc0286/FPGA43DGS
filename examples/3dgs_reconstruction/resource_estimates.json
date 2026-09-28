@@ -1,0 +1,43 @@
+{
+  "type": "analytical lower-component estimate, not measured peak memory",
+  "formula": "N * parameter_count * 4 float32 bytes * 4 arrays (parameter, gradient, Adam m, Adam v)",
+  "excludes": [
+    "images",
+    "pose/SfM data",
+    "optimizer temporaries",
+    "rasterization intermediates",
+    "tile duplicates",
+    "runtime/OS",
+    "hardware buffers"
+  ],
+  "rows": [
+    {
+      "gaussians": 20000,
+      "SH3_parameters_per_gaussian": 59,
+      "SH0_parameters_per_gaussian": 14,
+      "fp32_parameter_gradient_adam_m_v_SH3_MiB": 18.00537109375,
+      "fp32_parameter_gradient_adam_m_v_SH0_MiB": 4.2724609375
+    },
+    {
+      "gaussians": 50000,
+      "SH3_parameters_per_gaussian": 59,
+      "SH0_parameters_per_gaussian": 14,
+      "fp32_parameter_gradient_adam_m_v_SH3_MiB": 45.013427734375,
+      "fp32_parameter_gradient_adam_m_v_SH0_MiB": 10.68115234375
+    },
+    {
+      "gaussians": 100000,
+      "SH3_parameters_per_gaussian": 59,
+      "SH0_parameters_per_gaussian": 14,
+      "fp32_parameter_gradient_adam_m_v_SH3_MiB": 90.02685546875,
+      "fp32_parameter_gradient_adam_m_v_SH0_MiB": 21.3623046875
+    },
+    {
+      "gaussians": 559263,
+      "SH3_parameters_per_gaussian": 59,
+      "SH0_parameters_per_gaussian": 14,
+      "fp32_parameter_gradient_adam_m_v_SH3_MiB": 503.4868927001953,
+      "fp32_parameter_gradient_adam_m_v_SH0_MiB": 119.47146606445312
+    }
+  ]
+}

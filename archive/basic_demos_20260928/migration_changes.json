@@ -1,0 +1,14 @@
+{
+  "adder_smoke/README.md": {
+    "reason": "Update executable commands after relocation",
+    "sha256": "1f0914bf91745fa8cf156246ec7c10b13c7c45b71e8cab1c3b0ffc120b3ccf8f"
+  },
+  "basic_alu/README.md": {
+    "reason": "Update executable commands after relocation",
+    "sha256": "0ba97ba9f66dd55b77ac14d879c7cb164c459b80eb21a9ee84564d52db82cddd"
+  },
+  "basic_alu/board/prepare_project.py": {
+    "reason": "Find actual repository root after relocation",
+    "sha256": "69884ceedc4d819d6efbe671086d13818639a877191b5ffb61d398fc9293599f"
+  }
+}

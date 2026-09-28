@@ -1,0 +1,10 @@
+{
+  "baseline_sha256": "6fbdecf001163f9c4371041e7243c3d59521c09920b0895b4b9a1d9923a60ee4",
+  "source": "board/render.cpp",
+  "changes": [
+    "FLK1 capability and ABI",
+    "mode 0..5 selector passed to descriptor",
+    "FP32 feature copy, no CPU half conversion or CAT"
+  ],
+  "derived_sha256": "e60214143eeffc7815c7ab08c86516fac146cea03034a30b62963f0681128419"
+}

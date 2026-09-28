@@ -1,0 +1,23 @@
+{
+  "OpenSplat": {
+    "repository": "https://github.com/pierotofy/OpenSplat",
+    "commit": "62fd86fe3b62644b65890557ad9bf397abdc7cfb",
+    "license": "AGPL-3.0; see OpenSplat-LICENSE.txt",
+    "local_path": "examples/3dgs_reconstruction/vendor/OpenSplat",
+    "patch_entry": "examples/3dgs_reconstruction/bounded/prepare_source.py"
+  },
+  "MVSplat": {
+    "repository": "https://github.com/donydchen/mvsplat",
+    "commit": "01f9a28edb5eb68416e7e63b01f8d90c3bdfbf01",
+    "revision_source": "GitHub codeload ZIP comment",
+    "source_archive_sha256": "55b9dd485902313366c304d435cc32b5ad3000efaf1274aa26d53cee5a6da9fe",
+    "license": "MIT; see MVSplat-LICENSE.txt",
+    "local_path": "examples/3dgs_reconstruction/vendor/MVSplat_reference",
+    "deployment_status": "source acquired only; weights and NPU deployment not included"
+  },
+  "GraphDECO": {
+    "repository": "https://github.com/graphdeco-inria/gaussian-splatting",
+    "license_file": "examples/3dgs_flicker_hw/frontend/LICENSE-GraphDECO.md",
+    "scope": "Rendering conventions and derived preprocessing; keep source notices"
+  }
+}
