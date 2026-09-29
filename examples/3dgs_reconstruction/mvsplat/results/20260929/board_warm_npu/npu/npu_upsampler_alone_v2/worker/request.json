@@ -1,0 +1,42 @@
+{
+  "backend": "npu",
+  "bundle": "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/candidate/compiled",
+  "names": [
+    "upsampler"
+  ],
+  "library": "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/arm_bridge/libmgs_npu.so",
+  "protocol_version": 2,
+  "buffer_plan": {
+    "schema": "mvsplat_buffers_v2",
+    "policy": "shared",
+    "files": {
+      "input.bin": 2097152,
+      "output.bin": 16777216
+    },
+    "views": {
+      "upsampler": {
+        "input": {
+          "file": "input.bin",
+          "shape": [
+            2,
+            32,
+            32,
+            256
+          ]
+        },
+        "output": {
+          "file": "output.bin",
+          "shape": [
+            2,
+            128,
+            128,
+            128
+          ]
+        }
+      }
+    },
+    "allocated_bytes": 18874368,
+    "logical_io_bytes": 18874368
+  },
+  "buffer_limit_bytes": 134217728
+}

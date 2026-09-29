@@ -4,6 +4,7 @@ import gc
 import os
 from pathlib import Path
 import time
+from common import save
 
 
 def render_environment():
@@ -30,10 +31,8 @@ class WarmSession:
         self.resources = ExitStack()
         started = time.monotonic()
         try:
-            # Import/load Torch before OpenCV for the board's OpenMP environment.
-            from initialize.model_runtime import ModelRuntime
-            self.model = ModelRuntime(args.weights, args.vendor, args.threads, 16, out / "initialize")
             self.partitions = None
+            numerical_readiness = None
             if args.backend != "cpu":
                 from npu.runtime import PartitionRuntime
                 self.partitions = self.resources.enter_context(PartitionRuntime(
@@ -41,6 +40,16 @@ class WarmSession:
                     library=args.npu_library, worker_python=args.worker_python,
                     environment=worker_environment() if args.backend == "npu" else None,
                     buffer_policy=args.buffer_policy, buffer_limit_mib=args.buffer_limit_mib))
+                if args.backend == "npu":
+                    from npu.readiness import validate_oracles
+                    graphs = getattr(args, "oracle_graphs", None) or Path(args.partition_bundle).parent/"graphs"
+                    numerical_readiness = validate_oracles(self.partitions, graphs, out/"npu_readiness.json")
+            # NPU checks are in a separate SDK process. Import/load Torch before
+            # OpenCV for the board's OpenMP environment; reject bad hardware
+            # outputs before spending time and memory loading the full model.
+            from initialize.model_runtime import ModelRuntime
+            self.model = ModelRuntime(args.weights, args.vendor, args.threads, 16, out / "initialize")
+            if self.partitions is not None:
                 self.model.attach_partitions(self.partitions)
             # Imports and package/device initialization are outside the video clock.
             import video_input.prepare
@@ -57,7 +66,12 @@ class WarmSession:
                 rss_mib_at_ready=self._rss())
             if self.partitions:
                 self.record["partitions"] = self.partitions.report()
-        except BaseException:
+                self.record["numerical_readiness"] = numerical_readiness
+        except BaseException as exc:
+            save(out/"initialize_failure.json", dict(
+                error=type(exc).__name__+": "+str(exc), public_ready=False,
+                preheat_seconds_record_only=time.monotonic()-started,
+                partitions=self.partitions.report() if self.partitions is not None else None))
             self.resources.close()
             raise
 

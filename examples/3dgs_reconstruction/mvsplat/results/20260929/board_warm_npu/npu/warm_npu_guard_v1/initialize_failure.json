@@ -1,0 +1,54 @@
+{
+  "error": "ValueError: NPU numerical readiness failed: backbone_cnn",
+  "public_ready": false,
+  "preheat_seconds_record_only": 1.9850704000000405,
+  "partitions": {
+    "backend": "npu",
+    "npu_executed": true,
+    "selected_partitions": [
+      "backbone_cnn"
+    ],
+    "cpu_partitions": [
+      "regressor_residual",
+      "depth_head",
+      "upsampler",
+      "proj_feature",
+      "to_gaussians",
+      "to_disparity"
+    ],
+    "cpu_remainder": "camera geometry, cost-volume warping, multi-view attention, refinement UNets, Gaussian adapter",
+    "calls": [
+      {
+        "event": "COMPLETE",
+        "sequence": 0,
+        "name": "backbone_cnn",
+        "backend": "npu",
+        "npu_executed": true,
+        "worker_seconds": 0.029752580000149464,
+        "sdk_seconds": [
+          0.00028294,
+          0.01489437,
+          0.01140456
+        ],
+        "pack_seconds": 0.0031664399998589943,
+        "wait_seconds": 0.030781280000155675,
+        "unpack_seconds": 0.006495690000065224,
+        "total_seconds": 0.040443410000079894,
+        "input_bytes": 393216,
+        "output_bytes": 1048576
+      }
+    ],
+    "total_partition_seconds": 0.040443410000079894,
+    "transfer_bytes": 1441792,
+    "transfer_bytes_scope": "logical partition I/O bytes; not measured DMA/DDR traffic or all memory copies",
+    "bundle_sha256": "b48c8f0e4579839cef3aee15ccd3a869b4d12abac6334104b08b88b21bd3afb3",
+    "oracle_manifest_sha256": "f89115f773e5811f81a3197953a05c7c3d2a4c944daf4cc464553f193695828b",
+    "bridge_sha256": "e189aaf9974038bc7b8005fbb543767a9e3cc4b139f919986d57cf96fa60175a",
+    "buffer_policy": "shared",
+    "shared_buffers_bytes": 1441792,
+    "legacy_buffers_bytes": 1441792,
+    "protocol_version": 2,
+    "input_packing": "direct layout copy into IPC buffer, no contiguous float temporary",
+    "transfer_scope": "shared-file IPC plus SDK copies; not proven zero-copy"
+  }
+}

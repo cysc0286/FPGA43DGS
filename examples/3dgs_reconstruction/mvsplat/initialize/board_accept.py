@@ -17,13 +17,17 @@ def main():
     p.add_argument("--renderer", default="/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928")
     p.add_argument("--run", required=True)
     p.add_argument("--out", required=True, type=Path)
-    p.add_argument("--threads", type=int, default=2)
+    p.add_argument("--threads", type=int, default=4)
     p.add_argument("--prepare-threads", type=int, default=1)
-    p.add_argument("--serial-prepare", action="store_true")
+    schedule = p.add_mutually_exclusive_group()
+    schedule.add_argument("--serial-prepare", dest="serial_prepare", action="store_true")
+    schedule.add_argument("--overlap-prepare", dest="serial_prepare", action="store_false")
+    p.set_defaults(serial_prepare=True)
     p.add_argument("--backend", choices=("cpu", "npu"), default="cpu")
     p.add_argument("--partition-bundle")
     p.add_argument("--partitions", nargs="+")
     p.add_argument("--npu-library")
+    p.add_argument("--oracle-graphs")
     p.add_argument("--buffer-policy", choices=("shared", "per_partition"), default="shared")
     p.add_argument("--buffer-limit-mib", type=int, default=128)
     a = p.parse_args()
@@ -47,7 +51,11 @@ def main():
             "--prepare-threads", str(a.prepare_threads), "--backend", a.backend]
     if a.serial_prepare:
         args.append("--serial-prepare")
+    else:
+        args.append("--overlap-prepare")
     if a.backend == "npu":
+        if a.oracle_graphs:
+            args += ["--oracle-graphs", a.oracle_graphs]
         args += ["--partition-bundle", a.partition_bundle, "--npu-library", a.npu_library,
                  "--buffer-policy", a.buffer_policy, "--buffer-limit-mib", str(a.buffer_limit_mib),
                  "--partitions"] + a.partitions

@@ -1,0 +1,10 @@
+[2026-03-13 03:59:40.943] [info] Device initialization successful, version information:
+[2026-03-13 03:59:40.944] [info] 	icore: FMSHZGV3TECH-AID - 24160628
+[2026-03-13 03:59:40.944] [info] 	device: 25122301
+[2026-03-13 03:59:40.944] [info] Device Protocol: axi
+[2026-03-13 03:59:40.944] [info] Device Name: zg330aiu
+[2026-03-13 03:59:40.944] [info] Device Parameters: 
+[2026-03-13 03:59:40.944] [info] 	dma: 0x80000000
+[2026-03-13 03:59:40.944] [info] 	npu: 0x40000000
+[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2KOutput ready timeout
+Board stage failed: process_failed

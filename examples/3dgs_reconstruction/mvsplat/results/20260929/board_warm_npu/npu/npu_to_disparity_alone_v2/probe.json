@@ -1,0 +1,130 @@
+{
+  "complete": false,
+  "npu_executed": true,
+  "partitions": {
+    "to_disparity": [
+      {
+        "passed": false,
+        "max_abs": 0.027269840240478516,
+        "mean_abs": 0.0028280621328431177,
+        "rmse": 0.004567792408250181
+      },
+      {
+        "passed": false,
+        "max_abs": 0.027269840240478516,
+        "mean_abs": 0.0028280621328431177,
+        "rmse": 0.004567792408250181
+      }
+    ]
+  },
+  "scope": "real NPU partition oracles only; not full model or image quality",
+  "readiness": {
+    "event": "READY",
+    "backend": "npu",
+    "npu_executed": false,
+    "bindings": {
+      "to_disparity": 2
+    },
+    "protocol_version": 2,
+    "buffer_plan": {
+      "schema": "mvsplat_buffers_v2",
+      "policy": "shared",
+      "files": {
+        "input.bin": 4194304,
+        "output.bin": 262144
+      },
+      "views": {
+        "to_disparity": {
+          "input": {
+            "file": "input.bin",
+            "shape": [
+              2,
+              128,
+              128,
+              32
+            ]
+          },
+          "output": {
+            "file": "output.bin",
+            "shape": [
+              2,
+              128,
+              128,
+              2
+            ]
+          }
+        }
+      },
+      "allocated_bytes": 4456448,
+      "logical_io_bytes": 4456448
+    }
+  },
+  "worker": {
+    "backend": "npu",
+    "npu_executed": true,
+    "selected_partitions": [
+      "to_disparity"
+    ],
+    "cpu_partitions": [
+      "backbone_cnn",
+      "regressor_residual",
+      "depth_head",
+      "upsampler",
+      "proj_feature",
+      "to_gaussians"
+    ],
+    "cpu_remainder": "camera geometry, cost-volume warping, multi-view attention, refinement UNets, Gaussian adapter",
+    "calls": [
+      {
+        "event": "COMPLETE",
+        "sequence": 0,
+        "name": "to_disparity",
+        "backend": "npu",
+        "npu_executed": true,
+        "worker_seconds": 0.03149847000031514,
+        "sdk_seconds": [
+          0.00507991,
+          0.01832871,
+          0.00243815
+        ],
+        "pack_seconds": 0.1103598099998635,
+        "wait_seconds": 0.032567610000114655,
+        "unpack_seconds": 0.0006819199998062686,
+        "total_seconds": 0.14360933999978442,
+        "input_bytes": 4194304,
+        "output_bytes": 262144
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 1,
+        "name": "to_disparity",
+        "backend": "npu",
+        "npu_executed": true,
+        "worker_seconds": 0.02144279000003735,
+        "sdk_seconds": [
+          0.00246784,
+          0.009152,
+          0.00580915
+        ],
+        "pack_seconds": 0.09963706999997157,
+        "wait_seconds": 0.02251116000024922,
+        "unpack_seconds": 0.0006361299997479364,
+        "total_seconds": 0.12278435999996873,
+        "input_bytes": 4194304,
+        "output_bytes": 262144
+      }
+    ],
+    "total_partition_seconds": 0.26639369999975315,
+    "transfer_bytes": 8912896,
+    "transfer_bytes_scope": "logical partition I/O bytes; not measured DMA/DDR traffic or all memory copies",
+    "bundle_sha256": "b48c8f0e4579839cef3aee15ccd3a869b4d12abac6334104b08b88b21bd3afb3",
+    "bridge_sha256": "e189aaf9974038bc7b8005fbb543767a9e3cc4b139f919986d57cf96fa60175a",
+    "buffer_policy": "shared",
+    "shared_buffers_bytes": 4456448,
+    "legacy_buffers_bytes": 4456448,
+    "protocol_version": 2,
+    "input_packing": "direct layout copy into IPC buffer, no contiguous float temporary",
+    "transfer_scope": "shared-file IPC plus SDK copies; not proven zero-copy"
+  },
+  "error": "ValueError: One or more NPU partitions failed the unchanged numerical gate"
+}

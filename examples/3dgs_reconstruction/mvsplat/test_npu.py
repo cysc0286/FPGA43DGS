@@ -109,6 +109,18 @@ class NpuContractTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 relative_file(root, "../outside")
 
+    def test_windows_manifest_paths_resolve_on_the_board(self):
+        # Windows compiler manifests must resolve against a POSIX extraction.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root/"nested").mkdir()
+            expected = root/"nested/model.json"
+            expected.write_text("{}")
+            self.assertEqual(relative_file(root, r"nested\model.json"), expected.resolve())
+            for path in (r"..\outside", r"C:\outside.json", r"\\server\share\file.json"):
+                with self.assertRaises(ValueError):
+                    relative_file(root, path)
+
     def test_worker_rejects_cpu_claiming_npu(self):
         # A stale or mislabeled reply must never be recorded as NPU completion.
         import queue

@@ -29,6 +29,8 @@ def main(argv=None):
         folder = new_directory(bundle/kind)
         manifest = dict(manifest, partitions={name:manifest["partitions"][name] for name in a.partitions})
         if kind == "compiled":
+            manifest["partitions"] = {name:dict(item, graph=item["graph"].replace("\\", "/"),
+                raw=item["raw"].replace("\\", "/")) for name,item in manifest["partitions"].items()}
             manifest["origin_source_manifest_sha256"] = compiled.get(
                 "origin_source_manifest_sha256", compiled["source_manifest_sha256"])
             manifest["source_manifest_sha256"] = sha(bundle/"graphs/manifest.json")

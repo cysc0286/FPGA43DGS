@@ -1,0 +1,28 @@
+{
+  "exit_code": 0,
+  "command": [
+    "g++",
+    "-O3",
+    "-std=gnu++17",
+    "-ffp-contract=off",
+    "-shared",
+    "-fPIC",
+    "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat/npu/bridge.cpp",
+    "-o",
+    "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/arm_bridge/libmgs_npu.so",
+    "-I/root/heterogs_npu/sdk_3.36.1/usr/include",
+    "-L/root/heterogs_npu/sdk_3.36.1/usr/lib/aarch64-linux-gnu",
+    "-Wl,-rpath,/root/heterogs_npu/sdk_3.36.1/usr/lib/aarch64-linux-gnu",
+    "-licraft_zg330backend",
+    "-licraft_hostbackend",
+    "-licraft_xrt",
+    "-licraft_xir",
+    "-licraft_utils",
+    "-ldw",
+    "-ldl",
+    "-pthread"
+  ],
+  "source_sha256": "a702decde24ee35197e3aa108d881c6f12d5a9df076f5d64f79c599238931247",
+  "syntax_only": false,
+  "npu_executed": false
+}

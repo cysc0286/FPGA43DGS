@@ -1,0 +1,258 @@
+{
+  "versions": [
+    {
+      "version": "warm_cpu_default_v6",
+      "threads": 4,
+      "scene_preparation_seconds": 28.065871740000148,
+      "scene_ready_seconds": 27.177991460000158,
+      "first_render_seconds": 0.8878802799999903,
+      "inference_seconds": 13.330624830000033,
+      "preheat_seconds_record_only": 49.11925237000014,
+      "overlap_seconds": 0.0,
+      "peak_rss_mib": 585.0546875,
+      "min_available_mib": 263.734375,
+      "whole_process_cpu_seconds": 89.003761,
+      "whole_process_wall_seconds": 84.3771840000004,
+      "frame_sha256": "1e47daa80f10c77cda8740403b9dca2d546acc3ab380b4f091a3b6ac38f84790",
+      "gaussian_sha256": "3a0ba5a41a76e914d581e34f457821ba0bedd7227f5c59c1cda54b28d8e5f165",
+      "sample_scope": "single scene; preheat excluded from main time"
+    },
+    {
+      "version": "warm_cpu_overlap3_v1",
+      "threads": 3,
+      "scene_preparation_seconds": 33.38016580999988,
+      "scene_ready_seconds": 32.480745150000075,
+      "first_render_seconds": 0.8994206599998051,
+      "inference_seconds": 21.01185975999988,
+      "preheat_seconds_record_only": 46.187387629999876,
+      "overlap_seconds": 3.328235749999976,
+      "peak_rss_mib": 600.765625,
+      "min_available_mib": 236.16015625,
+      "whole_process_cpu_seconds": 85.853093,
+      "whole_process_wall_seconds": 86.71558054999991,
+      "frame_sha256": "34119a4c1ca905a3c6085ca02274ef689076549ab2801c8bcd9c25d2db9b5126",
+      "gaussian_sha256": "c12e70d43779b3e44622e89a1aeaae1c0aa34e481295a63266776844bea92cd6",
+      "sample_scope": "single scene; preheat excluded from main time"
+    },
+    {
+      "version": "warm_cpu_overlap3_v3",
+      "threads": 3,
+      "scene_preparation_seconds": 26.974601610000263,
+      "scene_ready_seconds": 26.092127379999965,
+      "first_render_seconds": 0.8824742300002981,
+      "inference_seconds": 16.297218180000073,
+      "preheat_seconds_record_only": 47.08604932000026,
+      "overlap_seconds": 3.346663449999596,
+      "peak_rss_mib": 619.52734375,
+      "min_available_mib": 239.859375,
+      "whole_process_cpu_seconds": 86.534406,
+      "whole_process_wall_seconds": 81.02221232000011,
+      "frame_sha256": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+      "gaussian_sha256": "3564f8d10a49ccb46c8c06acc03e32be0619a8e65babee6aa147abdcfc4a2319",
+      "sample_scope": "single scene; preheat excluded from main time"
+    },
+    {
+      "version": "warm_cpu_overlap3_v5",
+      "threads": 3,
+      "scene_preparation_seconds": 28.242596950000006,
+      "scene_ready_seconds": 27.377482930000042,
+      "first_render_seconds": 0.8651140199999645,
+      "inference_seconds": 16.383150569999998,
+      "preheat_seconds_record_only": 44.113820229999874,
+      "overlap_seconds": 3.3557253500002844,
+      "peak_rss_mib": 617.61328125,
+      "min_available_mib": 219.48046875,
+      "whole_process_cpu_seconds": 86.334995,
+      "whole_process_wall_seconds": 80.91226752000011,
+      "frame_sha256": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+      "gaussian_sha256": "3564f8d10a49ccb46c8c06acc03e32be0619a8e65babee6aa147abdcfc4a2319",
+      "sample_scope": "single scene; preheat excluded from main time"
+    },
+    {
+      "version": "warm_cpu_serial4_v2",
+      "threads": 4,
+      "scene_preparation_seconds": 27.212746080000215,
+      "scene_ready_seconds": 26.330336030000126,
+      "first_render_seconds": 0.8824100500000895,
+      "inference_seconds": 13.361988159999783,
+      "preheat_seconds_record_only": 43.69410847999984,
+      "overlap_seconds": 0.0,
+      "peak_rss_mib": 588.25,
+      "min_available_mib": 301.9296875,
+      "whole_process_cpu_seconds": 88.38317900000001,
+      "whole_process_wall_seconds": 77.02254272000005,
+      "frame_sha256": "1e47daa80f10c77cda8740403b9dca2d546acc3ab380b4f091a3b6ac38f84790",
+      "gaussian_sha256": "3a0ba5a41a76e914d581e34f457821ba0bedd7227f5c59c1cda54b28d8e5f165",
+      "sample_scope": "single scene; preheat excluded from main time"
+    },
+    {
+      "version": "warm_cpu_serial4_v4",
+      "threads": 4,
+      "scene_preparation_seconds": 28.349818210000194,
+      "scene_ready_seconds": 27.461321599999792,
+      "first_render_seconds": 0.8884966100004021,
+      "inference_seconds": 13.663234789999933,
+      "preheat_seconds_record_only": 45.30929799000023,
+      "overlap_seconds": 0.0,
+      "peak_rss_mib": 573.25,
+      "min_available_mib": 289.875,
+      "whole_process_cpu_seconds": 88.99543899999999,
+      "whole_process_wall_seconds": 81.71689880999975,
+      "frame_sha256": "1e47daa80f10c77cda8740403b9dca2d546acc3ab380b4f091a3b6ac38f84790",
+      "gaussian_sha256": "3a0ba5a41a76e914d581e34f457821ba0bedd7227f5c59c1cda54b28d8e5f165",
+      "sample_scope": "single scene; preheat excluded from main time"
+    },
+    {
+      "version": "warm_cpu_serial_v0",
+      "threads": 2,
+      "scene_preparation_seconds": 35.929030799999964,
+      "scene_ready_seconds": 34.698268780000035,
+      "first_render_seconds": 1.2307620199999292,
+      "inference_seconds": 21.59372266999992,
+      "preheat_seconds_record_only": 47.92183874,
+      "overlap_seconds": 0.0,
+      "peak_rss_mib": 594.41796875,
+      "min_available_mib": 269.6328125,
+      "whole_process_cpu_seconds": 84.154761,
+      "whole_process_wall_seconds": 90.92986007999991,
+      "frame_sha256": "1e47daa80f10c77cda8740403b9dca2d546acc3ab380b4f091a3b6ac38f84790",
+      "gaussian_sha256": "3a0ba5a41a76e914d581e34f457821ba0bedd7227f5c59c1cda54b28d8e5f165",
+      "sample_scope": "single scene; preheat excluded from main time"
+    }
+  ],
+  "groups": {
+    "cpu4_serial": {
+      "samples": 3,
+      "mean_seconds": 27.87614534333352,
+      "median_seconds": 28.065871740000148,
+      "min_seconds": 27.212746080000215,
+      "max_seconds": 28.349818210000194,
+      "p95_seconds": 28.321423563000188,
+      "p99_seconds": 28.344139280600192,
+      "note": "Small-sample empirical quantiles, not a stable tail-latency claim",
+      "peak_rss_mib": 588.25,
+      "min_available_mib": 263.734375
+    },
+    "cpu3_overlap": {
+      "samples": 2,
+      "mean_seconds": 27.608599280000135,
+      "median_seconds": 27.608599280000135,
+      "min_seconds": 26.974601610000263,
+      "max_seconds": 28.242596950000006,
+      "p95_seconds": 28.17919718300002,
+      "p99_seconds": 28.22991699660001,
+      "note": "Small-sample empirical quantiles, not a stable tail-latency claim",
+      "peak_rss_mib": 619.52734375,
+      "min_available_mib": 219.48046875
+    }
+  },
+  "quality": {
+    "frame_000007": {
+      "fpga_vs_rgb": {
+        "psnr_db": 19.45186915469186,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.8044606524314345,
+        "mae": 0.06569594734074818,
+        "max_abs_error": 0.8664088828890931
+      },
+      "cpu_vs_rgb": {
+        "psnr_db": 19.453591105939214,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.804966477780189,
+        "mae": 0.06564371146921326,
+        "max_abs_error": 0.8665087057679307
+      },
+      "fpga_vs_cpu": {
+        "psnr_db": 54.77212983713525,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.999622451984296,
+        "mae": 0.0008478077720705338,
+        "max_abs_error": 0.09137299656867981
+      },
+      "local": {
+        "rgb_mae": 0.06569594734074818,
+        "pixel_rgb_mae_p95": 0.20484978170955878,
+        "worst_16x16_tile_rgb_mae": 0.29526388918360075,
+        "worst_16x16_tile_xy": [
+          112,
+          112
+        ]
+      },
+      "rgb_gate_passed": false,
+      "frozen_timed_speedup": 1.3697569934675553,
+      "frozen_process_speedup": 1.0399955544753614,
+      "resident_seconds": 0.8285268900003757
+    },
+    "frame_000015": {
+      "fpga_vs_rgb": {
+        "psnr_db": 20.222318256295946,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.7851344704682225,
+        "mae": 0.04667660396285903,
+        "max_abs_error": 0.9368435728783701
+      },
+      "cpu_vs_rgb": {
+        "psnr_db": 20.225457819324525,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.7856200384990651,
+        "mae": 0.04664418317328441,
+        "max_abs_error": 0.9360579203302953
+      },
+      "fpga_vs_cpu": {
+        "psnr_db": 52.35791630219622,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.9995022078361551,
+        "mae": 0.0010043550859274812,
+        "max_abs_error": 0.08963140845298767
+      },
+      "local": {
+        "rgb_mae": 0.04667660396285903,
+        "pixel_rgb_mae_p95": 0.17204526016135605,
+        "worst_16x16_tile_rgb_mae": 0.23285604730930204,
+        "worst_16x16_tile_xy": [
+          0,
+          64
+        ]
+      },
+      "rgb_gate_passed": true,
+      "frozen_timed_speedup": 1.3697864731100375,
+      "frozen_process_speedup": 1.0405020464951282,
+      "resident_seconds": 0.8265828200001124
+    },
+    "frame_000022": {
+      "fpga_vs_rgb": {
+        "psnr_db": 21.348635371575565,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.7842314982301974,
+        "mae": 0.043374023466672317,
+        "max_abs_error": 0.8993070714613971
+      },
+      "cpu_vs_rgb": {
+        "psnr_db": 21.349152989464415,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.7845367527798596,
+        "mae": 0.04335945142394596,
+        "max_abs_error": 0.8999176763436374
+      },
+      "fpga_vs_cpu": {
+        "psnr_db": 54.27899610426182,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.9995356337675044,
+        "mae": 0.0009452481747563487,
+        "max_abs_error": 0.07515618205070496
+      },
+      "local": {
+        "rgb_mae": 0.043374023466672317,
+        "pixel_rgb_mae_p95": 0.14653187870200132,
+        "worst_16x16_tile_rgb_mae": 0.15167811968747308,
+        "worst_16x16_tile_xy": [
+          0,
+          64
+        ]
+      },
+      "rgb_gate_passed": true,
+      "frozen_timed_speedup": 1.369975438061018,
+      "frozen_process_speedup": 1.0140176378730086,
+      "resident_seconds": 0.8251827700000831
+    }
+  },
+  "npu_formal_gate_passed": false,
+  "resident_complete": true,
+  "resident_return_hash_equal": true,
+  "frozen_fpga_hash_equal": true,
+  "cold_historical_cpu4_scene_seconds": 71.735,
+  "seconds_reduction_vs_historical_cpu4": 43.85885465666648,
+  "speedup_vs_historical_cpu4": 2.5733471796937364,
+  "note": "Historical cold comparison is not a randomized paired benchmark; weights/devices preloaded before input in warm runs"
+}

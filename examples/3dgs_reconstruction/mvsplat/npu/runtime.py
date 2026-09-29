@@ -64,6 +64,7 @@ class PartitionRuntime:
                 raise ValueError("Missing runtime NPU compute binding")
             self.readiness = response
             self.provenance = dict(bundle_sha256=sha(Path(bundle) / "manifest.json"),
+                oracle_manifest_sha256=data.get("source_manifest_sha256", sha(Path(bundle)/"manifest.json")),
                 bridge_sha256=sha(library) if library is not None else None,
                 buffer_policy=buffer_policy, shared_buffers_bytes=plan["allocated_bytes"],
                 legacy_buffers_bytes=plan["logical_io_bytes"], protocol_version=PROTOCOL_VERSION,

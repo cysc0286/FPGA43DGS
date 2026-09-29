@@ -1,0 +1,11 @@
+proj_feature 0 {"passed": false, "max_abs": 0.0023595690727233887, "mean_abs": 0.00012238053948521443, "rmse": 0.0001713796908177855}
+proj_feature 1 {"passed": false, "max_abs": 0.0023595690727233887, "mean_abs": 0.00012238053948521443, "rmse": 0.0001713796908177855}
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat/npu/oracle_probe.py", line 68, in <module>
+    main()
+  File "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat/npu/oracle_probe.py", line 56, in main
+    raise ValueError("One or more NPU partitions failed the unchanged numerical gate")
+ValueError: One or more NPU partitions failed the unchanged numerical gate
+Board stage failed: process_failed

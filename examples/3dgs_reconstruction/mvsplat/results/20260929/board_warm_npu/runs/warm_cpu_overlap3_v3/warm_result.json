@@ -1,0 +1,140 @@
+{
+  "complete": true,
+  "mode": "warm_fast_pair",
+  "backend": "cpu",
+  "result_scope": "one target frame; not full video coverage",
+  "initialize": {
+    "preheat_seconds_record_only": 47.08604932000026,
+    "model_load_seconds_record_only": 28.51142652999988,
+    "backend": "cpu",
+    "threads": {
+      "inference": 3,
+      "preparation": 1
+    },
+    "warm_scope": "weights, Python dependencies, selected compiled sessions, FPGA device/runtime",
+    "kernel_first_use_warmed": false,
+    "scene_cache": "Gaussian rows loaded once; projection remains per view",
+    "rss_mib_at_ready": 429.21875
+  },
+  "video_receipt": {
+    "path": "/root/fpga43dgs_reconstruction/initialize_candidate_20260929/input/nyu_snippet_curl.mp4",
+    "sha256": "0a7e3c684e917dd937ae1ec6c64f770c111b939f08f020b66965c1fccf9ae86a",
+    "bytes": 4900963,
+    "verify_seconds": 0.22862683999983346,
+    "video_input_seconds_record_only": null
+  },
+  "frame": {
+    "complete": true,
+    "backend": "fpga",
+    "model_sha256": "1bf1d17c725a3df437b25280ef861cf91f8d46caa1c82b04e991a71e2cf2828e",
+    "camera_sha256": "44d265dca6e1d68355412e70a6f57219dac3aaa4c9ac74acc336529458c219ce",
+    "package": "3dgs_renderer_v1_20260928",
+    "resident_scene": {
+      "path": "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/warm_cpu_overlap3_v3/renderer_input/model.ply",
+      "sha256": "1bf1d17c725a3df437b25280ef861cf91f8d46caa1c82b04e991a71e2cf2828e",
+      "gaussians": 32768,
+      "load_seconds": 0.016207060000397178,
+      "residence": "CPU Gaussian rows"
+    },
+    "attributes_ms": 175.78550000007453,
+    "group_sort_ms": 84.50292999987141,
+    "render_ms": 44.85835000014049,
+    "scene_sha256": "16758c403ed9d779e217a0d851431149ed434edb369d333c12b9ed2842b38a6f",
+    "frame_sha256": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+    "total_ms": 743.6914199997773
+  },
+  "inference": {
+    "complete": true,
+    "device": "cpu",
+    "backend": "cpu",
+    "machine": "aarch64",
+    "platform": "Linux-5.4.52-aarch64-with-glibc2.31",
+    "source_commit": "01f9a28edb5eb68416e7e63b01f8d90c3bdfbf01",
+    "weight_sha256": "83d0d9eaa753fa4a1f925288dc1f90b8c3297fad0ab0f6ed1f11a1c5946da25a",
+    "input_sha256": "8f01469ed479d249550121b6bb12b920b7e1af8063a2eaf25ccf2c721df21d87",
+    "threads": 3,
+    "depth_chunk": 16,
+    "parameter_count": 11955734,
+    "checkpoint_encoder_tensor_count": 471,
+    "checkpoint_non_encoder_keys": [],
+    "checkpoint_load": "memory mapped; temporary state released before inference",
+    "versions": {
+      "torch": "2.7.1",
+      "einops": "0.8.1",
+      "e3nn": "0.5.8",
+      "numpy": "2.2.6"
+    },
+    "input_shape": [
+      1,
+      2,
+      3,
+      128,
+      128
+    ],
+    "load_and_setup_seconds": 0.09520310000016252,
+    "inference_seconds": 16.297218180000073,
+    "gaussians": 32768,
+    "sh_degree": 4,
+    "gaussian_sha256": "3564f8d10a49ccb46c8c06acc03e32be0619a8e65babee6aa147abdcfc4a2319",
+    "training_steps": 0,
+    "process_seconds": 17.286783689999993,
+    "scope": "Warm inference and output save; fixed weights loaded before video",
+    "npu_executed": false
+  },
+  "scheduling": {
+    "context_ready_seconds": 5.609957459999805,
+    "inference_begin_seconds": 5.6101623200001995,
+    "poses_complete_seconds": 8.956825769999796,
+    "inference_end_seconds": 22.905393399999866,
+    "combined_seconds": 22.905958010000177,
+    "overlap_seconds": 3.346663449999596
+  },
+  "events": [
+    {
+      "event": "READY",
+      "epoch": 1773374794.1760879,
+      "monotonic": 2309.04573956,
+      "backend": "cpu",
+      "weight_sha256": "83d0d9eaa753fa4a1f925288dc1f90b8c3297fad0ab0f6ed1f11a1c5946da25a",
+      "video_processed": false
+    },
+    {
+      "event": "VIDEO_COMPLETE",
+      "epoch": 1773374794.1870005,
+      "monotonic": 2309.05665177,
+      "path": "/root/fpga43dgs_reconstruction/initialize_candidate_20260929/input/nyu_snippet_curl.mp4",
+      "bytes": 4900963,
+      "receipt_scope": "closed local file handed to pipeline; acquisition not measured"
+    },
+    {
+      "event": "SCENE_READY",
+      "epoch": 1773374820.2791305,
+      "monotonic": 2335.14877915,
+      "gaussian_sha256": "3564f8d10a49ccb46c8c06acc03e32be0619a8e65babee6aa147abdcfc4a2319",
+      "model_sha256": "1bf1d17c725a3df437b25280ef861cf91f8d46caa1c82b04e991a71e2cf2828e",
+      "camera": "frame_000007.bin",
+      "resident_scene": {
+        "path": "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/warm_cpu_overlap3_v3/renderer_input/model.ply",
+        "sha256": "1bf1d17c725a3df437b25280ef861cf91f8d46caa1c82b04e991a71e2cf2828e",
+        "gaussians": 32768,
+        "load_seconds": 0.016207060000397178,
+        "residence": "CPU Gaussian rows"
+      },
+      "scope": "validated scene files and CPU-resident Gaussian rows"
+    },
+    {
+      "event": "FRAME_COMPLETE",
+      "epoch": 1773374821.161602,
+      "monotonic": 2336.03125338,
+      "frame_sha256": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+      "camera": "frame_000007.bin"
+    }
+  ],
+  "timing": {
+    "complete": true,
+    "ready_to_receipt_seconds_record_only": 0.010912209999787592,
+    "gaussian_scene_seconds": 26.092127379999965,
+    "first_render_seconds": 0.8824742300002981,
+    "scene_preparation_seconds": 26.974601610000263
+  }
+}

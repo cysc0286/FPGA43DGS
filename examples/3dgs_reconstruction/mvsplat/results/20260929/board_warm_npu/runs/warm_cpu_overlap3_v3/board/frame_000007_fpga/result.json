@@ -1,0 +1,20 @@
+{
+  "complete": true,
+  "backend": "fpga",
+  "model_sha256": "1bf1d17c725a3df437b25280ef861cf91f8d46caa1c82b04e991a71e2cf2828e",
+  "camera_sha256": "44d265dca6e1d68355412e70a6f57219dac3aaa4c9ac74acc336529458c219ce",
+  "package": "3dgs_renderer_v1_20260928",
+  "resident_scene": {
+    "path": "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/warm_cpu_overlap3_v3/renderer_input/model.ply",
+    "sha256": "1bf1d17c725a3df437b25280ef861cf91f8d46caa1c82b04e991a71e2cf2828e",
+    "gaussians": 32768,
+    "load_seconds": 0.016207060000397178,
+    "residence": "CPU Gaussian rows"
+  },
+  "attributes_ms": 175.78550000007453,
+  "group_sort_ms": 84.50292999987141,
+  "render_ms": 44.85835000014049,
+  "scene_sha256": "16758c403ed9d779e217a0d851431149ed434edb369d333c12b9ed2842b38a6f",
+  "frame_sha256": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+  "total_ms": 743.6914199997773
+}

@@ -1,0 +1,173 @@
+{
+  "complete": true,
+  "npu_executed": false,
+  "board_dependencies_checked": true,
+  "files_verified": 38,
+  "candidate_index_sha256": "08817a3a7d71c3d4569fd552a1e408df06ea8a48c9fa8c4eb7c7535b6a4f811b",
+  "buffer_plan": {
+    "schema": "mvsplat_buffers_v2",
+    "policy": "shared",
+    "files": {
+      "input.bin": 21364736,
+      "output.bin": 16777216
+    },
+    "views": {
+      "backbone_cnn": {
+        "input": {
+          "file": "input.bin",
+          "shape": [
+            2,
+            128,
+            128,
+            3
+          ]
+        },
+        "output": {
+          "file": "output.bin",
+          "shape": [
+            2,
+            32,
+            32,
+            128
+          ]
+        }
+      },
+      "regressor_residual": {
+        "input": {
+          "file": "input.bin",
+          "shape": [
+            2,
+            32,
+            32,
+            256
+          ]
+        },
+        "output": {
+          "file": "output.bin",
+          "shape": [
+            2,
+            32,
+            32,
+            128
+          ]
+        }
+      },
+      "depth_head": {
+        "input": {
+          "file": "input.bin",
+          "shape": [
+            2,
+            32,
+            32,
+            128
+          ]
+        },
+        "output": {
+          "file": "output.bin",
+          "shape": [
+            2,
+            32,
+            32,
+            128
+          ]
+        }
+      },
+      "upsampler": {
+        "input": {
+          "file": "input.bin",
+          "shape": [
+            2,
+            32,
+            32,
+            256
+          ]
+        },
+        "output": {
+          "file": "output.bin",
+          "shape": [
+            2,
+            128,
+            128,
+            128
+          ]
+        }
+      },
+      "proj_feature": {
+        "input": {
+          "file": "input.bin",
+          "shape": [
+            2,
+            128,
+            128,
+            128
+          ]
+        },
+        "output": {
+          "file": "output.bin",
+          "shape": [
+            2,
+            128,
+            128,
+            32
+          ]
+        }
+      },
+      "to_gaussians": {
+        "input": {
+          "file": "input.bin",
+          "shape": [
+            2,
+            128,
+            128,
+            163
+          ]
+        },
+        "output": {
+          "file": "output.bin",
+          "shape": [
+            2,
+            128,
+            128,
+            84
+          ]
+        }
+      },
+      "to_disparity": {
+        "input": {
+          "file": "input.bin",
+          "shape": [
+            2,
+            128,
+            128,
+            32
+          ]
+        },
+        "output": {
+          "file": "output.bin",
+          "shape": [
+            2,
+            128,
+            128,
+            2
+          ]
+        }
+      }
+    },
+    "allocated_bytes": 38141952,
+    "logical_io_bytes": 83361792
+  },
+  "partitions": [
+    "backbone_cnn",
+    "regressor_residual",
+    "depth_head",
+    "upsampler",
+    "proj_feature",
+    "to_gaussians",
+    "to_disparity"
+  ],
+  "estimated_ipc_bytes": 38141952,
+  "sdk_session_memory_bytes": null,
+  "total_runtime_memory_bytes": null,
+  "note": "Integrity and IPC capacity only; SDK sessions, device access and numerical output untested",
+  "library_sha256": "e189aaf9974038bc7b8005fbb543767a9e3cc4b139f919986d57cf96fa60175a"
+}

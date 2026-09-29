@@ -1,5 +1,7 @@
 # MVSplat 板端重建主线
 
+最新实板结果（2026-09-29）：`pipeline.py initialize` 默认视频前预热、四线程串行，三次场景准备平均 **27.88 秒**；`--threads 3 --overlap-prepare` 保留重叠实验。连续换视角约 0.83 秒，和冻结 FPGA 输出一致。首目标画质尚未过 20 dB；真实 NPU 分区数值校验失败，因此仍选 CPU 前馈＋FPGA 渲染。[完整报告与效果图](BOARD_WARM_NPU_VALIDATION.md)。原 `reconstruct` 冷启动及完整 SfM 质量回退保留。
+
 新增预热/常驻与 NPU 候选（2026-09-29）：[initialize 使用说明](initialize/README.md)、[NPU 导出和接入](npu/README.md)、[本轮离线验证](INITIALIZE_NPU_VALIDATION.md)。当前用户在外，新增代码没有实板验收。下文已验证的冷路径继续保留；不要把子图编译成功写成整网 NPU 已部署。
 
 本目录将固定权重 MVSplat 作为当前主线的高斯生成实现。完整路径使用真实 COLMAP 产物；快速候选直接从视频估计两视图几何。两者输出相同的 `model.ply`、`FLCAM001` 相机和 `manifest.json`，接入冻结 CPU+FPGA 渲染包。原 OpenSplat 分阶段训练代码保留为历史对照。

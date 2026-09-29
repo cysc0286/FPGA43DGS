@@ -17,14 +17,21 @@ def main(argv=None):
     p.add_argument("--renderer", type=Path, required=True)
     p.add_argument("--resident-binary", type=Path, default=Path(__file__).with_name("render_resident"))
     p.add_argument("--size", type=int, default=128)
-    p.add_argument("--threads", type=int, default=2, help="Torch intra-op threads")
+    p.add_argument("--threads", type=int, default=4, help="Torch intra-op threads; measured 30TAI CPU default")
     p.add_argument("--prepare-threads", type=int, default=1, help="OpenCV/decoder budget")
-    p.add_argument("--serial-prepare", action="store_true", help="Disable PnP/inference overlap for comparison")
+    schedule = p.add_mutually_exclusive_group()
+    schedule.add_argument("--serial-prepare", dest="serial_prepare", action="store_true",
+                          help="Complete poses before inference (measured default)")
+    schedule.add_argument("--overlap-prepare", dest="serial_prepare", action="store_false",
+                          help="Overlap PnP with inference; use --threads 3 on the four-core board")
+    p.set_defaults(serial_prepare=True)
     p.add_argument("--focal-ratio", type=float, default=0.9)
     p.add_argument("--backend", choices=("cpu", "onnx_reference", "npu"), default="cpu")
     p.add_argument("--partition-bundle", type=Path)
     p.add_argument("--partitions", nargs="+")
     p.add_argument("--npu-library", type=Path)
+    p.add_argument("--oracle-graphs", type=Path,
+                   help="Real-input export oracles; NPU default is graphs beside compiled bundle")
     p.add_argument("--worker-python", type=Path)
     p.add_argument("--buffer-policy", choices=("shared", "per_partition"), default="shared")
     p.add_argument("--buffer-limit-mib", type=int, default=128)

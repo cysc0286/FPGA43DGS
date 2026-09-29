@@ -58,12 +58,13 @@ def main(argv=None):
     p.add_argument("--compiler", type=Path, default=Path(__file__).resolve().parents[4] / "npu_3dgs/.vendor/icraft-3.36.1/bin")
     p.add_argument("--partitions", nargs="+")
     p.add_argument("--timeout", type=int, default=240)
+    p.add_argument("--qdtype", choices=("tf32", "fp32"), default="tf32")
     a = p.parse_args(argv)
     meta = json.loads((a.graphs / "manifest.json").read_text())
     out = new_directory(a.out.resolve())
     manifest = dict(schema="mvsplat_compiled_v1", source_manifest_sha256=sha(a.graphs / "manifest.json"),
                     weight_sha256=meta["weight_sha256"], input_shape=meta["input_shape"],
-                    npu_executed=False, partitions={})
+                    npu_executed=False, qdtype=a.qdtype, partitions={})
     env = dict(os.environ)
     env["PATH"] = str(a.compiler.resolve())+os.pathsep+env.get("PATH", "")
     for name in (a.partitions or meta["partitions"]):
@@ -87,7 +88,7 @@ def main(argv=None):
                 if stage != "generate":
                     args += ["--target", "zhuge"]
                 if stage == "quantize":
-                    args += ["--qdtype", "tf32", "--no_transinput", "true", "--no_imagemake", "true"]
+                    args += ["--qdtype", a.qdtype, "--no_transinput", "true", "--no_imagemake", "true"]
                 commands.append((stage, args))
             for stage, args in commands:
                 binary = a.compiler.resolve() / ("icraft-"+stage+".exe")
@@ -102,8 +103,8 @@ def main(argv=None):
                     raise RuntimeError("ICraft " + stage + " failed")
             compiled, params = folder / (name+"_ZG.json"), folder / (name+"_ZG.raw")
             record["audit"] = audit(compiled, params, m)
-            record.update(complete=True, graph=str(compiled.relative_to(out)),
-                          raw=str(params.relative_to(out)), status="compiled_not_executed")
+            record.update(complete=True, graph=compiled.relative_to(out).as_posix(),
+                          raw=params.relative_to(out).as_posix(), status="compiled_not_executed")
         except Exception as exc:
             record.update(status="compile_failed", error=type(exc).__name__+": "+str(exc))
         manifest["partitions"][name] = record

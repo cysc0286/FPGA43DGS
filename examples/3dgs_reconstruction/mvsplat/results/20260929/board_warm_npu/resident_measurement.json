@@ -1,0 +1,35 @@
+{
+  "status": "passed",
+  "returncode": 0,
+  "command": [
+    "env",
+    "LD_LIBRARY_PATH=/root/fpga43dgs_reconstruction/arm_env/lib",
+    "LD_PRELOAD=/root/fpga43dgs_reconstruction/arm_env/lib/libgomp.so.1 /root/fpga43dgs_reconstruction/arm_env/lib/python3.11/site-packages/torch.libs/libgomp-58a43326.so.1.0.0",
+    "PYTHONPATH=/root/fpga43dgs_reconstruction/npu_board_v2_20260929/deps",
+    "OPENBLAS_NUM_THREADS=2",
+    "OMP_NUM_THREADS=2",
+    "MKL_NUM_THREADS=2",
+    "/root/fpga43dgs_reconstruction/arm_env/bin/python3",
+    "-m",
+    "initialize.validate_resident",
+    "--scene",
+    "../warm_cpu_serial4_v2/renderer_input",
+    "--renderer",
+    "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928",
+    "--out",
+    "../resident_views_v0"
+  ],
+  "wall_seconds": 34.02023334000023,
+  "child_cpu_seconds": 30.503263,
+  "peak_process_tree_rss_mib_sampled": 19.85546875,
+  "samples": 660,
+  "child_maxrss_mib_kernel": 19.85546875,
+  "min_available_mib_sampled": 724.15625,
+  "sample_interval_seconds": 0.05,
+  "limits": {
+    "rss_mib": 650.0,
+    "reserve_mib": 128.0,
+    "timeout": 300.0
+  },
+  "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+}

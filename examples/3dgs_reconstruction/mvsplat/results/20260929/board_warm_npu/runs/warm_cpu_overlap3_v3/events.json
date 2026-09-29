@@ -1,0 +1,44 @@
+{
+  "schema": "mvsplat_lifecycle_v1",
+  "events": [
+    {
+      "event": "READY",
+      "epoch": 1773374794.1760879,
+      "monotonic": 2309.04573956,
+      "backend": "cpu",
+      "weight_sha256": "83d0d9eaa753fa4a1f925288dc1f90b8c3297fad0ab0f6ed1f11a1c5946da25a",
+      "video_processed": false
+    },
+    {
+      "event": "VIDEO_COMPLETE",
+      "epoch": 1773374794.1870005,
+      "monotonic": 2309.05665177,
+      "path": "/root/fpga43dgs_reconstruction/initialize_candidate_20260929/input/nyu_snippet_curl.mp4",
+      "bytes": 4900963,
+      "receipt_scope": "closed local file handed to pipeline; acquisition not measured"
+    },
+    {
+      "event": "SCENE_READY",
+      "epoch": 1773374820.2791305,
+      "monotonic": 2335.14877915,
+      "gaussian_sha256": "3564f8d10a49ccb46c8c06acc03e32be0619a8e65babee6aa147abdcfc4a2319",
+      "model_sha256": "1bf1d17c725a3df437b25280ef861cf91f8d46caa1c82b04e991a71e2cf2828e",
+      "camera": "frame_000007.bin",
+      "resident_scene": {
+        "path": "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/warm_cpu_overlap3_v3/renderer_input/model.ply",
+        "sha256": "1bf1d17c725a3df437b25280ef861cf91f8d46caa1c82b04e991a71e2cf2828e",
+        "gaussians": 32768,
+        "load_seconds": 0.016207060000397178,
+        "residence": "CPU Gaussian rows"
+      },
+      "scope": "validated scene files and CPU-resident Gaussian rows"
+    },
+    {
+      "event": "FRAME_COMPLETE",
+      "epoch": 1773374821.161602,
+      "monotonic": 2336.03125338,
+      "frame_sha256": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+      "camera": "frame_000007.bin"
+    }
+  ]
+}

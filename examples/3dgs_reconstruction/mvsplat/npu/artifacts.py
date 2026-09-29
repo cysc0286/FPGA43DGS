@@ -1,6 +1,6 @@
 """Validate deployment assets and translate logical NCHW to audited host layouts."""
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 import numpy as np
 from common import FULL_WEIGHT_SHA256, sha
 from npu.catalog import PARTITIONS
@@ -8,7 +8,12 @@ from npu.catalog import PARTITIONS
 
 def relative_file(root, name):
     root = Path(root).resolve()
-    path = (root / name).resolve()
+    # Legacy compiler manifests were written on Windows. Interpret separators
+    # as a portable relative path, never as Linux filename characters.
+    portable = PurePosixPath(str(name).replace("\\", "/"))
+    if portable.is_absolute() or PureWindowsPath(name).drive or ".." in portable.parts:
+        raise ValueError("Artifact outside bundle or missing: " + str(name))
+    path = root.joinpath(*portable.parts).resolve()
     if root not in path.parents or not path.is_file():
         raise ValueError("Artifact outside bundle or missing: " + str(name))
     return path

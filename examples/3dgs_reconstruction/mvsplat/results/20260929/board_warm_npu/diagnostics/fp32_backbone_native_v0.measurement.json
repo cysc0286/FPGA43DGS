@@ -1,0 +1,29 @@
+{
+  "status": "process_failed",
+  "returncode": 1,
+  "command": [
+    "env",
+    "-u",
+    "LD_PRELOAD",
+    "LD_LIBRARY_PATH=/root/heterogs_npu/sdk_3.36.1/usr/lib/aarch64-linux-gnu",
+    "/root/heterogs_npu/harness/icraft_run_336",
+    "zg330",
+    "fp32_diagnostic/backbone_cnn_ZG.json",
+    "fp32_diagnostic/backbone_cnn_ZG.raw",
+    "fp32_diagnostic/native",
+    "fp32_diagnostic/input.bin"
+  ],
+  "wall_seconds": 10.951532769999858,
+  "child_cpu_seconds": 10.851726000000001,
+  "peak_process_tree_rss_mib_sampled": 23.671875,
+  "samples": 213,
+  "child_maxrss_mib_kernel": 23.85546875,
+  "min_available_mib_sampled": 742.2109375,
+  "sample_interval_seconds": 0.05,
+  "limits": {
+    "rss_mib": 650.0,
+    "reserve_mib": 128.0,
+    "timeout": 120.0
+  },
+  "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+}

@@ -1,5 +1,7 @@
 # 3DGS 主线与目录入口
 
+2026-09-29 实板更新：视频前预热 CPU＋FPGA 路径已验证，四线程串行三次场景准备平均 **27.88 秒**（27.21–28.35 秒），预热 43.69–49.12 秒仅记录。默认 `initialize` 采用四线程串行，重叠候选保留；原冷 `reconstruct` 和完整 SfM 质量回退保持。常驻模型连续换视角约 0.83 秒，帧哈希匹配冻结 FPGA。首目标质量仍 19.45 dB、未过 20 dB；NPU 七分区真实执行但数值验收失败，不能标为可用整链后端。[本轮数据、效果图、失败分析及下一步](examples/3dgs_reconstruction/mvsplat/BOARD_WARM_NPU_VALIDATION.md)。下文是此前各阶段历史记录，以本条和实板报告为准。
+
 2026-09-29 NPU 部署 v2 离线验证完成：默认顺序共享 IPC 缓冲由 79.5 降到 36.375 MiB，真实输入新旧模式 Gaussian 哈希一致；新增包完整性预检、ABI 2 和逐分区 CPU/候选测速，实际 NPU/整链收益仍待回板。逻辑 I/O 仍为 79.5 MiB，不能将容量下降当成搬运量或端到端时延下降。详见 [v2 报告与效果图](examples/3dgs_reconstruction/mvsplat/NPU_DEPLOYMENT_V2.md)。
 
 2026-09-29 新增**离线候选**：视频前预热在 `mvsplat/initialize/`，视频接收及快速位姿在 `mvsplat/video_input/`，视频后的调度在 `mvsplat/warm_pipeline.py`；冷路径仍为 `reconstruct`，新候选入口是 `pipeline.py initialize`。NPU 子图导出、编译、常驻运行和核验位于 `mvsplat/npu/`。本轮用户在外，未访问板卡；7 子图编译及电脑参考回归通过不代表实板 NPU 部署成功。详见 [本轮实现与验收边界](examples/3dgs_reconstruction/mvsplat/INITIALIZE_NPU_VALIDATION.md)。

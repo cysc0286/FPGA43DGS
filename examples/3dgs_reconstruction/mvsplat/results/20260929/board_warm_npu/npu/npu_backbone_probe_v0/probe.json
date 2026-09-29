@@ -1,0 +1,105 @@
+{
+  "complete": false,
+  "npu_executed": true,
+  "partitions": {
+    "backbone_cnn": [
+      {
+        "passed": false,
+        "max_abs": 0.0400121808052063,
+        "mean_abs": 0.003915512136146503,
+        "rmse": 0.005194630638224611
+      }
+    ]
+  },
+  "scope": "real NPU partition oracles only; not full model or image quality",
+  "readiness": {
+    "event": "READY",
+    "backend": "npu",
+    "npu_executed": false,
+    "bindings": {
+      "backbone_cnn": 16
+    },
+    "protocol_version": 2,
+    "buffer_plan": {
+      "schema": "mvsplat_buffers_v2",
+      "policy": "shared",
+      "files": {
+        "input.bin": 393216,
+        "output.bin": 1048576
+      },
+      "views": {
+        "backbone_cnn": {
+          "input": {
+            "file": "input.bin",
+            "shape": [
+              2,
+              128,
+              128,
+              3
+            ]
+          },
+          "output": {
+            "file": "output.bin",
+            "shape": [
+              2,
+              32,
+              32,
+              128
+            ]
+          }
+        }
+      },
+      "allocated_bytes": 1441792,
+      "logical_io_bytes": 1441792
+    }
+  },
+  "worker": {
+    "backend": "npu",
+    "npu_executed": true,
+    "selected_partitions": [
+      "backbone_cnn"
+    ],
+    "cpu_partitions": [
+      "regressor_residual",
+      "depth_head",
+      "upsampler",
+      "proj_feature",
+      "to_gaussians",
+      "to_disparity"
+    ],
+    "cpu_remainder": "camera geometry, cost-volume warping, multi-view attention, refinement UNets, Gaussian adapter",
+    "calls": [
+      {
+        "event": "COMPLETE",
+        "sequence": 0,
+        "name": "backbone_cnn",
+        "backend": "npu",
+        "npu_executed": true,
+        "worker_seconds": 0.030326020000075005,
+        "sdk_seconds": [
+          0.00021816,
+          0.01500352,
+          0.01185057
+        ],
+        "pack_seconds": 0.003385470000011992,
+        "wait_seconds": 0.03143789000000652,
+        "unpack_seconds": 0.006546419999949649,
+        "total_seconds": 0.04136977999996816,
+        "input_bytes": 393216,
+        "output_bytes": 1048576
+      }
+    ],
+    "total_partition_seconds": 0.04136977999996816,
+    "transfer_bytes": 1441792,
+    "transfer_bytes_scope": "logical partition I/O bytes; not measured DMA/DDR traffic or all memory copies",
+    "bundle_sha256": "b48c8f0e4579839cef3aee15ccd3a869b4d12abac6334104b08b88b21bd3afb3",
+    "bridge_sha256": "e189aaf9974038bc7b8005fbb543767a9e3cc4b139f919986d57cf96fa60175a",
+    "buffer_policy": "shared",
+    "shared_buffers_bytes": 1441792,
+    "legacy_buffers_bytes": 1441792,
+    "protocol_version": 2,
+    "input_packing": "direct layout copy into IPC buffer, no contiguous float temporary",
+    "transfer_scope": "shared-file IPC plus SDK copies; not proven zero-copy"
+  },
+  "error": "ValueError: NPU partition numerical gate failed: backbone_cnn"
+}

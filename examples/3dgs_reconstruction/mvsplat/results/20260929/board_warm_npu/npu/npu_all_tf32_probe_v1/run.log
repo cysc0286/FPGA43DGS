@@ -1,0 +1,19 @@
+backbone_cnn 0 {"passed": false, "max_abs": 0.0400121808052063, "mean_abs": 0.003915512136146503, "rmse": 0.005194630638224611}
+backbone_cnn 1 {"passed": false, "max_abs": 0.0400121808052063, "mean_abs": 0.003915512136146503, "rmse": 0.005194630638224611}
+regressor_residual 0 {"passed": false, "max_abs": 0.011614799499511719, "mean_abs": 0.00027675556344397556, "rmse": 0.0003970137258473125}
+regressor_residual 1 {"passed": false, "max_abs": 0.011614799499511719, "mean_abs": 0.00027675556344397556, "rmse": 0.0003970137258473125}
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat/npu/oracle_probe.py", line 68, in <module>
+    main()
+  File "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat/npu/oracle_probe.py", line 47, in main
+    actual = worker.execute(name, value)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat/npu/runtime.py", line 111, in execute
+    response = self._response()
+               ^^^^^^^^^^^^^^^^
+  File "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat/npu/runtime.py", line 93, in _response
+    raise RuntimeError(value["error"])
+RuntimeError: ValueError: Nonfinite output
+Board stage failed: process_failed

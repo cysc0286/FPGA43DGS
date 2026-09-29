@@ -1,5 +1,7 @@
 # MVSplat NPU 子图迁移候选
 
+**实板更新：ARM ABI 2 已链接并实际执行七个 MVSplat 分区，但全部未通过原定 FP32 误差门槛；多会话还出现过非有限输出。暂不启用整网 NPU 路径。** [测试结果与失败证据](../BOARD_WARM_NPU_VALIDATION.md)。下文 v2 段落为离线阶段记录。
+
 2026-09-29 部署 v2：顺序分区默认共用两块 IPC 映射，总容量 **36.375 MiB**；`--buffer-policy per_partition` 保留原 **79.5 MiB** 对照。两者逻辑 I/O 仍都是 79.5 MiB/前向。输入直接按编译布局写入映射，省去中间连续浮点数组；输出仍复制到独立 Tensor，避免下一任务覆盖。新增部署预检、真实输入分区测速及编译布局回归。详见 [v2 验证报告](../NPU_DEPLOYMENT_V2.md)。**本次仍为离线验证，尚未实板运行 NPU。**
 
 v2 使用协议/桥接 ABI 2，必须重新编译 `bridge.cpp`。旧 `.so` 会在创建设备前被拒绝，不自动降级。`initialize`、`verify`、`benchmark` 均可指定 `--buffer-limit-mib`（默认 128，只限制 IPC 文件容量，不是整进程内存）。
@@ -75,3 +77,13 @@ python measure.py --out NPU_BENCH.measurement.json --rss-mib 650 --reserve-mib 1
 随后按新目录对 `to_gaussians` 及其他分区做独立与组合验证。门槛固定在 `verify.py`；不因硬件误差超限而自动放宽。`SFB` 布局、SDK 精度和实际运行绑定仍待实测。全网输出验收后，整链参数为 `pipeline.py initialize ... --backend npu --partition-bundle candidate/compiled --npu-library ARM_BUILD/libmgs_npu.so --partitions ...`，或交由 `initialize/board_accept.py` 包含资源监控后启动。
 
 已有离线包路径及所有原始结果见 [本轮报告](../INITIALIZE_NPU_VALIDATION.md)。回板必须记录布局打包、SDK 写入、forward+等待、SDK 输出转换、结果解包和外层总耗时；SDK forward 不等于纯硬件周期。运行模型、渲染进程、SDK 和共享映射的合计内存受 650 MiB/128 MiB 余量监控，不能只报 Torch RSS。
+
+## 实板数值检查
+
+```sh
+python -m npu.oracle_probe --bundle PACKAGE/compiled --graphs PACKAGE/graphs --library ARM/libmgs_npu.so --partitions backbone_cnn --out NEW_PROBE
+```
+
+该入口在加载完整 Torch 模型之前核验真实输入，默认两次执行并保存误差及输出。`--diagnostic-continue` 仅用于收集数值失败，仍以非零状态退出；非有限结果/设备错误继续立即停止。`initialize` 还会在同一常驻 worker 内按分区顺序执行两轮，校验失败不发布公共 READY，不静默回退。
+
+`compile_graphs --qdtype fp32` 仅是精度诊断入口；本板实验产生的 FP32 图不符合当前已审计主机 ABI，且独立 SDK 诊断执行超时，未纳入可用部署包。不得修改清单或降低门槛绕过它。

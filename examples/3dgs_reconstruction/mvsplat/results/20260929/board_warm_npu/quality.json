@@ -1,0 +1,131 @@
+{
+  "views": {
+    "frame_000007": {
+      "fpga_vs_rgb": {
+        "psnr_db": 19.45186915469186,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.8044606524314345,
+        "mae": 0.06569594734074818,
+        "max_abs_error": 0.8664088828890931
+      },
+      "cpu_vs_rgb": {
+        "psnr_db": 19.453591105939214,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.804966477780189,
+        "mae": 0.06564371146921326,
+        "max_abs_error": 0.8665087057679307
+      },
+      "fpga_vs_cpu": {
+        "psnr_db": 54.77212983713525,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.999622451984296,
+        "mae": 0.0008478077720705338,
+        "max_abs_error": 0.09137299656867981
+      },
+      "local": {
+        "rgb_mae": 0.06569594734074818,
+        "pixel_rgb_mae_p95": 0.20484978170955878,
+        "worst_16x16_tile_rgb_mae": 0.29526388918360075,
+        "worst_16x16_tile_xy": [
+          112,
+          112
+        ]
+      },
+      "rgb_gate_passed": false,
+      "frozen_timed_speedup": 1.3697569934675553,
+      "frozen_process_speedup": 1.0399955544753614,
+      "resident_seconds": 0.8285268900003757
+    },
+    "frame_000015": {
+      "fpga_vs_rgb": {
+        "psnr_db": 20.222318256295946,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.7851344704682225,
+        "mae": 0.04667660396285903,
+        "max_abs_error": 0.9368435728783701
+      },
+      "cpu_vs_rgb": {
+        "psnr_db": 20.225457819324525,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.7856200384990651,
+        "mae": 0.04664418317328441,
+        "max_abs_error": 0.9360579203302953
+      },
+      "fpga_vs_cpu": {
+        "psnr_db": 52.35791630219622,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.9995022078361551,
+        "mae": 0.0010043550859274812,
+        "max_abs_error": 0.08963140845298767
+      },
+      "local": {
+        "rgb_mae": 0.04667660396285903,
+        "pixel_rgb_mae_p95": 0.17204526016135605,
+        "worst_16x16_tile_rgb_mae": 0.23285604730930204,
+        "worst_16x16_tile_xy": [
+          0,
+          64
+        ]
+      },
+      "rgb_gate_passed": true,
+      "frozen_timed_speedup": 1.3697864731100375,
+      "frozen_process_speedup": 1.0405020464951282,
+      "resident_seconds": 0.8265828200001124
+    },
+    "frame_000022": {
+      "fpga_vs_rgb": {
+        "psnr_db": 21.348635371575565,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.7842314982301974,
+        "mae": 0.043374023466672317,
+        "max_abs_error": 0.8993070714613971
+      },
+      "cpu_vs_rgb": {
+        "psnr_db": 21.349152989464415,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.7845367527798596,
+        "mae": 0.04335945142394596,
+        "max_abs_error": 0.8999176763436374
+      },
+      "fpga_vs_cpu": {
+        "psnr_db": 54.27899610426182,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.9995356337675044,
+        "mae": 0.0009452481747563487,
+        "max_abs_error": 0.07515618205070496
+      },
+      "local": {
+        "rgb_mae": 0.043374023466672317,
+        "pixel_rgb_mae_p95": 0.14653187870200132,
+        "worst_16x16_tile_rgb_mae": 0.15167811968747308,
+        "worst_16x16_tile_xy": [
+          0,
+          64
+        ]
+      },
+      "rgb_gate_passed": true,
+      "frozen_timed_speedup": 1.369975438061018,
+      "frozen_process_speedup": 1.0140176378730086,
+      "resident_seconds": 0.8251827700000831
+    }
+  },
+  "gates": {
+    "scope": "First video-to-render bridge, three held-out network views from one short sequence; not a multi-scene benchmark",
+    "reconstruction_vs_rgb": {
+      "minimum_psnr_db": 20.0,
+      "minimum_ssim": 0.7
+    },
+    "fpga_vs_world_covariance_sh3_reference": {
+      "minimum_psnr_db": 35.0,
+      "minimum_ssim": 0.98
+    },
+    "sh3_vs_sh4_reference": {
+      "minimum_psnr_db": 50.0,
+      "minimum_ssim": 0.999
+    },
+    "adapter": {
+      "maximum_relative_covariance_error": 1e-05,
+      "maximum_opacity_error": 2e-07
+    },
+    "board_execution": {
+      "maximum_tree_rss_mib_sampled": 650,
+      "minimum_available_mib": 128
+    },
+    "notes": "These are engineering acceptance thresholds, not paper claims. Keep all failed configurations. Show images and local errors alongside global metrics."
+  },
+  "all_rgb_passed": false,
+  "quality_scope": "three targets within two context views; targets used for PnP, not network context; no full video fusion",
+  "lpips": "not measured",
+  "power": "not measured"
+}
