@@ -21,10 +21,11 @@ def main():
                     paths.append(p)
     print(f"Python syntax: {len(paths)} files passed", flush=True)
     for rel in ("examples/3dgs_reconstruction/tests/test_interfaces.py",
-                "examples/3dgs_reconstruction/bounded/test_controls.py"):
+                "examples/3dgs_reconstruction/bounded/test_controls.py",
+                "examples/3dgs_reconstruction/tests/test_reconstruct_entry.py"):
         subprocess.run([sys.executable, str(ROOT/rel), "-v"], cwd=ROOT, check=True)
     subprocess.run([sys.executable, str(ROOT/"examples/3dgs_reconstruction/pipeline.py"), "--help"], check=True)
-    print("PASS: source, synthetic artifact contracts and resource controls. No training or board execution.")
+    print("PASS: source, artifact contracts, resource controls and MVSplat entry. No training or board execution.")
 
 
 if __name__ == "__main__":

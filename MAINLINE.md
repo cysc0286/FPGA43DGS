@@ -1,10 +1,10 @@
 # 3DGS 主线与目录入口
 
-更新：2026-09-28。最终目标是全链在悟净 30TAI Lite 上执行；电脑用于开发、构建和参考验证，不能将电脑训练记录称为板端训练成功。
+更新：2026-09-29。当前主线是板端离线视频 → 位姿 → 固定权重 MVSplat 前馈生成高斯 → CPU＋FPGA 渲染。电脑用于开发、构建和参考验证，不参与新场景的板端计算。旧 OpenSplat 训练链仅作为可回放的历史对照。主命令：`python examples/3dgs_reconstruction/pipeline.py reconstruct --video INPUT.mp4 --out NEW_RUN`。
 
 当前验收目标（2026-09-29）：板端读取离线视频、前馈生成高斯并渲染首张新视角，暂接受约一分钟，先部署完整链路再优化速度。[快速候选](examples/3dgs_reconstruction/mvsplat/FAST_VALIDATION.md) 已实板完成，单进程首图 66.68 秒、32,768 高斯、峰值 592.04 MiB；三视角 PSNR 19.45/20.22/21.35 dB，第一张未过 20 dB。功能链可用，延迟与画质同时达标尚未完成；三视角质量通过的完整 SfM 基线继续保留。NPU、GPU、逐场景训练没有进入当前生产链。多组融合与整段视频场景覆盖尚待实现。
 
-2026-09-29 新候选：固定权重 [MVSplat 板端闭环](examples/3dgs_reconstruction/mvsplat/README.md) 已在独立目录完成视频文件→板端 CPU SfM→板端 CPU 高斯前馈→冻结 CPU+FPGA 渲染，并验证三张目标视角。它是高斯生成模块的另一种实现，**没有取代 OpenSplat 训练基线**，也没有接入 NPU。32,768 高斯、30/30 帧位姿、三视角 PSNR 20.90–23.56 dB；首张 FPGA 图像 249.43 s，非实时。完整指标、失败配置和计时口径见 [验证记录](examples/3dgs_reconstruction/mvsplat/VALIDATION.md)。
+2026-09-29 主线切换：固定权重 [MVSplat 板端闭环](examples/3dgs_reconstruction/mvsplat/README.md) 已在板端完成视频文件→CPU SfM→CPU 高斯前馈→冻结 CPU+FPGA 渲染，并验证三张目标视角。它替代 OpenSplat 作为默认高斯生成方法，但不等于板端训练或 NPU 推理。质量通过的完整 SfM 基线生成 32,768 高斯、恢复 30/30 帧位姿，三视角 PSNR 20.90–23.56 dB；首张 FPGA 图像 249.43 s，非实时。完整指标、失败配置和计时口径见 [验证记录](examples/3dgs_reconstruction/mvsplat/VALIDATION.md)。
 
 ```text
 视频
@@ -26,10 +26,10 @@ RenderResult：frame.bin + frame.ppm + result.json
 |---|---|---|
 | 视频输入 | [video_input](examples/3dgs_reconstruction/modules/video_input/) | 从已有视频均匀抽帧；实时摄像头不是当前接口 |
 | 位姿估计 | [pose_estimation](examples/3dgs_reconstruction/modules/pose_estimation/) | COLMAP CPU 特征/匹配/位姿/三角化、去畸变、内参适配；输出包含稀疏点，不仅是位姿 |
-| 高斯生成 | [gaussian_generation](examples/3dgs_reconstruction/modules/gaussian_generation/) | OpenSplat CPU 优化基线的板端训练尚未核验；另有已验证的 MVSplat 固定权重板端前馈候选，二者不能混称训练 |
+| 高斯生成 | [mvsplat](examples/3dgs_reconstruction/mvsplat/) | 主线：MVSplat 固定权重板端前馈；[gaussian_generation](examples/3dgs_reconstruction/modules/gaussian_generation/) 仅保留旧 OpenSplat 训练对照，二者不能混称训练 |
 | 高斯渲染 | [rendering](examples/3dgs_reconstruction/modules/rendering/) | 校验模型/相机接口并调用已完成的 CPU＋FPGA 渲染包；不重新实现光栅化 |
 
-统一分阶段入口：[pipeline.py](examples/3dgs_reconstruction/pipeline.py)。详细字段与命令：[接口文档](examples/3dgs_reconstruction/modules/INTERFACES.md)。旧 `stages.py` / `run_cpu.py` / `bounded/run.py` 继续使用同一套模块实现，不保留第二份计算代码。
+统一入口：[pipeline.py](examples/3dgs_reconstruction/pipeline.py) 的 `reconstruct` 命令。详细字段与命令：[接口文档](examples/3dgs_reconstruction/modules/INTERFACES.md)。`video`/`pose` 分阶段命令仍由 MVSplat 完整路径使用；`gaussian`/`export`、`stages.py`、`run_cpu.py` 和 `bounded/run.py` 保留旧 OpenSplat 对照。
 
 模块独立交付使用 `pipeline.py validate --only`，整段检查保留 `--through`。
 
@@ -62,7 +62,7 @@ RenderResult：frame.bin + frame.ppm + result.json
 
 ## 后续工作顺序
 
-1. 使用四模块接口继续完成 ARM 训练的依赖、内存和输出核验，最终生产链不依赖电脑训练。
-2. 模型与相机通过现有 ABI 交给冻结渲染后端，同一模型比较 CPU/FPGA。
+1. 优化板端位姿和高斯前馈的耗时，在保持三目标画质门槛的前提下缩短首图时间；当前没有稳定一分钟达标证据。
+2. 扩展视频多组融合和场景覆盖，继续通过现有模型/相机 ABI 比较 CPU/FPGA。
 3. 后端轻量化另建候选，保留四单元冻结版；减少逻辑资源不能等同于增加 Linux 内存。
 4. 根据板端实测再选择前端 FPGA/NPU 候选。每轮保留正确性、画质、时延、内存和资源证据。

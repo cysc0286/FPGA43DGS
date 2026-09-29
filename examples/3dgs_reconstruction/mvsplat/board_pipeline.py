@@ -22,8 +22,8 @@ def save(path, value):
     path.write_text(json.dumps(value, indent=2, allow_nan=False))
 
 
-def main():
-    p = argparse.ArgumentParser(description=__doc__)
+def build_parser(*, add_help=True):
+    p = argparse.ArgumentParser(description=__doc__, add_help=add_help)
     p.add_argument("--video", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--size", type=int, default=128)
@@ -33,7 +33,12 @@ def main():
     p.add_argument("--fused", action="store_true", help="Run fast_pair preparation/inference/export in one process")
     p.add_argument("--renderer", type=Path, default=Path("/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928"))
     p.add_argument("--repeats", type=int, default=3)
-    a = p.parse_args()
+    return p
+
+
+def main(argv=None):
+    p = build_parser()
+    a = p.parse_args(argv)
     if platform.machine() not in ("aarch64", "arm64"):
         p.error("This acceptance entry must execute on the ARM board")
     if not a.video.is_file() or a.repeats < 1 or a.threads < 1 or a.focal_ratio <= 0:

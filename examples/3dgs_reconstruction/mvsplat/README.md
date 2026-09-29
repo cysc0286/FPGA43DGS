@@ -1,6 +1,6 @@
-# MVSplat 到板端渲染的独立链路
+# MVSplat 板端重建主线
 
-本目录将固定权重 MVSplat 作为第三模块“高斯生成”的候选实现。完整路径使用真实 COLMAP 产物；快速候选直接从视频估计两视图几何。两者输出相同的 `model.ply`、`FLCAM001` 相机和 `manifest.json`，接入冻结 CPU+FPGA 渲染包。
+本目录将固定权重 MVSplat 作为当前主线的高斯生成实现。完整路径使用真实 COLMAP 产物；快速候选直接从视频估计两视图几何。两者输出相同的 `model.ply`、`FLCAM001` 相机和 `manifest.json`，接入冻结 CPU+FPGA 渲染包。原 OpenSplat 分阶段训练代码保留为历史对照。
 
 当前两种板端路径均已执行成功。完整路径三目标视角质量过门槛、首图 249.43 秒；快速单进程候选首图 66.68 秒，但第一视角 19.45 dB，未过 20 dB 门槛。用户当前允许约一分钟，优先部署完整功能，速度后续优化；**一分钟与三视角质量同时达标尚未实现**。详见 [快速候选验证](FAST_VALIDATION.md) 与 [完整基线验证](VALIDATION.md)。
 
@@ -61,16 +61,16 @@ python mvsplat/infer.py --input INPUT --weights weights/re10k.ckpt --vendor vend
 python mvsplat/export.py --input INPUT --inference INFERENCE --out RENDER_INPUT
 ```
 
-板端整链入口：
+板端整链统一入口（在仓库根目录执行）：
 
 ```text
-python mvsplat/board_pipeline.py --video /path/to/video.mp4 --out NEW_RUN --size 128 --threads 2 --repeats 3
+python examples/3dgs_reconstruction/pipeline.py reconstruct --video /path/to/video.mp4 --out NEW_RUN --size 128 --threads 2 --repeats 3
 ```
 
 快速候选使用同一入口，追加以下参数：
 
 ```text
-python mvsplat/board_pipeline.py --video /path/to/video.mp4 --out NEW_FAST_RUN --size 128 --threads 2 --pose-mode fast_pair --fused --focal-ratio 0.9 --repeats 1
+python examples/3dgs_reconstruction/pipeline.py reconstruct --video /path/to/video.mp4 --out NEW_FAST_RUN --size 128 --threads 2 --pose-mode fast_pair --fused --focal-ratio 0.9 --repeats 1
 ```
 
 `--repeats` 控制渲染验证次数，不改变首次出图的计时边界。快速路径默认按视频长度选首尾参考帧与四分之一、中点、四分之三目标帧；需要至少五个不重叠索引。它仅从一对图像生成局部高斯，不包含全视频多组融合、覆盖率估计或任意长视频的完整场景建图。第一/最后帧无共同视野、纯旋转、运动物体或弱纹理可能导致失败；不要因此降低几何内点门槛。

@@ -1,5 +1,7 @@
 # 四模块文件接口 v1
 
+当前整链主入口是 `python examples/3dgs_reconstruction/pipeline.py reconstruct --video INPUT.mp4 --out NEW_RUN`。它在 ARM 上调用 MVSplat，默认完整 SfM 位姿，输出 `renderer_input/model.ply`、相机、`manifest.json`、各视角图像和 `pipeline_result.json`。`reconstruct` 使用 `--video/--out`，以下 `--run` 分阶段示例属于旧 OpenSplat 对照。MVSplat 的 `context.npz`、`input.json` 和网络中间产物见 [MVSplat 接口](../mvsplat/README.md)；它不生成本页旧训练合同中的 `splat.ply`/`training_request.json`，因此不能对其直接运行旧 `validate --through gaussian`。
+
 本次沿用既有产物格式。`contracts.py` 提供 `FrameSet`、`PoseSet`、`GaussianScene`、`RenderInput`、`RenderResult` 校验器；它们是本地文件接口，不是网络服务或新的硬件 ABI。
 
 ## 模块交接
@@ -24,7 +26,7 @@
 - 保持原有深度排序、alpha 合成、精度和提前结束规则。完整后端定义见 [冻结接口](../../../releases/3dgs_renderer_v1_20260928/INTERFACE.md)。
 - 留出图像不参与高斯优化，但参与 SfM。质量指标必须披露这一范围；插值新视角没有对应真实照片。
 
-## 分阶段运行
+## 旧 OpenSplat 分阶段运行
 
 从项目根目录执行，使用已经配置依赖的 Python；下面 `python` 在板端应指向板端环境。电脑运行仅用于参考验证。
 

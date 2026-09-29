@@ -1,17 +1,24 @@
-"""Run one module at a time using the existing portable run-directory interfaces."""
+"""Reconstruct on the ARM board with MVSplat, or run individual legacy stages."""
 import argparse
 import dataclasses
 import json
 from pathlib import Path
+import sys
 
 from modules.contracts import FrameSet, PoseSet, GaussianScene, RenderInput, RenderResult
 
 
-def main():
+def main(argv=None):
+    argv = sys.argv[1:] if argv is None else argv
+    if argv and argv[0] == "reconstruct":
+        from mvsplat.board_pipeline import main as reconstruct
+        return reconstruct(argv[1:])
     p = argparse.ArgumentParser(description=__doc__)
     commands = p.add_subparsers(dest="stage", required=True)
+    commands.add_parser("reconstruct",
+                        help="Board video-to-image path using pretrained MVSplat (default: full SfM)")
     for name in ("video", "pose", "gaussian", "export", "render", "validate"):
-        s = commands.add_parser(name)
+        s = commands.add_parser(name, help="Legacy OpenSplat stage" if name == "gaussian" else None)
         s.add_argument("--run", required=True, type=Path)
         if name == "video":
             s.add_argument("--video", required=True, type=Path)
@@ -42,7 +49,7 @@ def main():
             scope.add_argument("--only", choices=("video", "pose", "gaussian", "export", "render"),
                                help="Validate one handoff without requiring upstream artifacts")
             s.add_argument("--out", type=Path)
-    a = p.parse_args()
+    a = p.parse_args(argv)
     a.run = a.run.resolve()
     for k in ("frames", "width", "render_width", "threads", "max_features", "overlap"):
         if hasattr(a, k) and getattr(a, k) <= 0:

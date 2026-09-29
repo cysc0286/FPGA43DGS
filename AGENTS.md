@@ -1,5 +1,9 @@
 # HeteroGS Agent 工作规范
 
+### 2026-09-29 主线切换：MVSplat 替代 OpenSplat
+
+用户要求将新链路作为 GitHub 主线。`pipeline.py reconstruct` 现在调用板端 MVSplat 整链，默认选择三目标画质已通过的完整 SfM 路径；旧 `gaussian --opensplat` 和既有训练文档仅作历史对照，不应被新人当作默认部署命令。快速两视图路径仍需显式 `--pose-mode fast_pair --fused`，其第一目标画质未达标。切换入口不代表产生了新板端速度、质量、FPGA 资源或 NPU 指标；本文件后续条目记录当时的历史状态。
+
 ### 2026-09-29 当前优先级：先板端部署，首图暂接受约一分钟
 
 用户将首图可接受等待从 30 秒放宽至约一分钟，时间后续优化，先完成板端链路并准备更新仓库。MVSplat 快速两视图几何→ARM 固定权重前馈→冻结 FPGA 渲染已完成，默认单进程首图 66.68 s、峰值 592.04 MiB、32,768 高斯；PSNR 19.45/20.22/21.35 dB、SSIM 0.8045/0.7851/0.7842，第一视角未过原 20 dB 门槛。焦距对照 79.93 s、第一视角仍失败。完整 SfM 基线三视角通过、249.43 s，保留回退。不能将最快单次称为稳定一分钟达标，不能称全视频融合完成，不能降低质量门槛隐藏失败。当前 NPU/GPU/逐场景训练未用，BOOT/位流未改。代码、指标与复跑入口见 `examples/3dgs_reconstruction/mvsplat/README.md`、`examples/3dgs_reconstruction/mvsplat/FAST_VALIDATION.md`；仓库提交准备仅包含该候选与相关主线文档，不纳入其他测试、团队分工、权重或本地环境。
