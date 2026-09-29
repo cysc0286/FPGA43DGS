@@ -6,6 +6,7 @@ import shutil
 import tarfile
 from common import new_directory, save, sha
 from npu.artifacts import validate_bundle, relative_file
+from npu.protocol import PROTOCOL_VERSION, BRIDGE_ABI_VERSION
 
 
 def main(argv=None):
@@ -24,9 +25,13 @@ def main(argv=None):
         raise ValueError("Numerical-oracle input differs from exported graph input")
     out = new_directory(a.out)
     bundle = new_directory(out/"candidate")
-    for kind, manifest, source in (("compiled", compiled, a.compiled), ("graphs", graphs, a.graphs)):
+    for kind, manifest, source in (("graphs", graphs, a.graphs), ("compiled", compiled, a.compiled)):
         folder = new_directory(bundle/kind)
         manifest = dict(manifest, partitions={name:manifest["partitions"][name] for name in a.partitions})
+        if kind == "compiled":
+            manifest["origin_source_manifest_sha256"] = compiled.get(
+                "origin_source_manifest_sha256", compiled["source_manifest_sha256"])
+            manifest["source_manifest_sha256"] = sha(bundle/"graphs/manifest.json")
         for name, item in manifest["partitions"].items():
             names = [item["graph"], item["raw"]] if kind == "compiled" else [name+"/model.onnx", name+"/oracle.npz"]
             for filename in names:
@@ -43,9 +48,16 @@ def main(argv=None):
         target = bundle/"input"/name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, target)
+    save(bundle/"deployment.json", dict(schema="mvsplat_candidate_v2", partitions=a.partitions,
+        protocol_version=PROTOCOL_VERSION, bridge_abi_version=BRIDGE_ABI_VERSION,
+        default_buffer_policy="shared", external_requirements=[
+            "matching mvsplat runtime source", "official re10k checkpoint", "ARM SDK 3.36.1 and rebuilt ABI 2 bridge"]))
     files = {str(f.relative_to(bundle)).replace("\\", "/"):dict(bytes=f.stat().st_size, sha256=sha(f))
              for f in sorted(bundle.rglob("*")) if f.is_file()}
     save(bundle/"files.json", files)
+    from npu.preflight import check_candidate
+    checked = check_candidate(bundle)
+    save(out/"preflight.json", checked)
     archive = out/"mvsplat_npu_candidate.tar.gz"
     with tarfile.open(archive, "w:gz") as tar:
         for f in sorted(bundle.rglob("*")):

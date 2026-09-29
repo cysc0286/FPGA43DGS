@@ -24,6 +24,8 @@ def main():
     p.add_argument("--partition-bundle")
     p.add_argument("--partitions", nargs="+")
     p.add_argument("--npu-library")
+    p.add_argument("--buffer-policy", choices=("shared", "per_partition"), default="shared")
+    p.add_argument("--buffer-limit-mib", type=int, default=128)
     a = p.parse_args()
     if (PurePosixPath(a.run).is_absolute() or ".." in PurePosixPath(a.run).parts
             or not a.run or a.run == "."):
@@ -47,6 +49,7 @@ def main():
         args.append("--serial-prepare")
     if a.backend == "npu":
         args += ["--partition-bundle", a.partition_bundle, "--npu-library", a.npu_library,
+                 "--buffer-policy", a.buffer_policy, "--buffer-limit-mib", str(a.buffer_limit_mib),
                  "--partitions"] + a.partitions
     monitor = ["/usr/bin/python3", "mvsplat/measure.py", "--out", a.run+".measurement.json",
                "--rss-mib", "650", "--reserve-mib", "128", "--timeout", "600", "--"]

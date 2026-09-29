@@ -46,14 +46,22 @@ def validate_bundle(root, names, backend):
     return data, result
 
 
-def to_wire(array, spec):
+def to_wire(array, spec, out=None):
     if spec["layout"] == "NHWC":
         array = array.transpose(0, 2, 3, 1)
     elif spec["layout"] != "NCHW":
         raise ValueError("Unsupported layout")
     if list(array.shape) != spec["shape"] or array.dtype != np.float32 or not np.isfinite(array).all():
         raise ValueError("Input dtype/shape/finite contract failed")
-    return np.ascontiguousarray(array)
+    if out is None:
+        return np.ascontiguousarray(array)
+    if (out.shape != array.shape or out.dtype != np.float32 or
+            not out.flags.c_contiguous or not out.flags.writeable):
+        raise ValueError("Destination buffer ABI mismatch")
+    # A transposed view can be copied directly into IPC. Do not materialize a
+    # second, full-size contiguous NHWC float buffer first.
+    np.copyto(out, array, casting="no")
+    return out
 
 
 def from_wire(array, spec):

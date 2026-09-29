@@ -48,7 +48,7 @@
 
 ## NPU 边界代价与优先级
 
-全部分区逻辑输入/输出为 **83,361,792 字节 = 79.5 MiB/前向**，相同大小用于当前可复用共享缓冲。不是完整进程峰值，也不等于实测总线流量。upsampler 18 MiB、proj_feature 20 MiB、to_gaussians 30.875 MiB 占主要部分；不能只看卷积执行时间。
+本报告首版全部分区逻辑输入/输出为 **83,361,792 字节 = 79.5 MiB/前向**，相同大小用于首版逐分区可复用共享缓冲。后续 [部署 v2](NPU_DEPLOYMENT_V2.md) 将映射总容量降到 36.375 MiB，逻辑 I/O 仍为 79.5 MiB。它们都不是完整进程峰值，也不等于实测总线流量。upsampler 18 MiB、proj_feature 20 MiB、to_gaussians 30.875 MiB 占主要部分；不能只看卷积执行时间。
 
 优先验收 backbone 与 to_gaussians 的独立完整场景候选，再按实际 `pack / SDK write / forward+wait / SFB conversion / unpack / total` 选择组合。共享映射避免逐算子建进程和重载会话，但 CPU 重排及 SDK 拷贝仍存在。进一步融合需要处理多消费者依赖，不能把中间张量简单省掉。
 

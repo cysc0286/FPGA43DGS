@@ -65,13 +65,17 @@ struct MgsContext {
     }
 };
 extern "C" const char* mgs_error() {return error_text.c_str();}
+extern "C" int mgs_abi_version() {return 2;}
 extern "C" void* mgs_create(const char* json,const char* raw,size_t ib,size_t ob) {
     try {return new MgsContext(json,raw,ib,ob);} catch(const std::exception& e){error_text=e.what();return nullptr;}
 }
 extern "C" void mgs_destroy(void* ctx) {delete static_cast<MgsContext*>(ctx);}
 extern "C" int mgs_bindings(void* ctx) {return static_cast<MgsContext*>(ctx)->bindings;}
-extern "C" int mgs_forward(void* ctx,const float* in,float* out,double* times) {
+extern "C" int mgs_forward(void* ctx,const float* in,size_t ib,float* out,size_t ob,double* times) {
     try {
+        if(!ctx || !in || !out || !times) throw std::runtime_error("Null forward argument");
+        const auto& checked=*static_cast<MgsContext*>(ctx);
+        if(ib!=checked.in_bytes || ob!=checked.out_bytes) throw std::runtime_error("Forward buffer length mismatch");
         auto& c=*static_cast<MgsContext*>(ctx);const auto start=Clock::now();
         c.input.write(0,const_cast<char*>(reinterpret_cast<const char*>(in)),c.in_bytes);
         const auto submitted=Clock::now();auto values=c.session.forward({c.input});

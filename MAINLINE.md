@@ -1,5 +1,7 @@
 # 3DGS 主线与目录入口
 
+2026-09-29 NPU 部署 v2 离线验证完成：默认顺序共享 IPC 缓冲由 79.5 降到 36.375 MiB，真实输入新旧模式 Gaussian 哈希一致；新增包完整性预检、ABI 2 和逐分区 CPU/候选测速，实际 NPU/整链收益仍待回板。逻辑 I/O 仍为 79.5 MiB，不能将容量下降当成搬运量或端到端时延下降。详见 [v2 报告与效果图](examples/3dgs_reconstruction/mvsplat/NPU_DEPLOYMENT_V2.md)。
+
 2026-09-29 新增**离线候选**：视频前预热在 `mvsplat/initialize/`，视频接收及快速位姿在 `mvsplat/video_input/`，视频后的调度在 `mvsplat/warm_pipeline.py`；冷路径仍为 `reconstruct`，新候选入口是 `pipeline.py initialize`。NPU 子图导出、编译、常驻运行和核验位于 `mvsplat/npu/`。本轮用户在外，未访问板卡；7 子图编译及电脑参考回归通过不代表实板 NPU 部署成功。详见 [本轮实现与验收边界](examples/3dgs_reconstruction/mvsplat/INITIALIZE_NPU_VALIDATION.md)。
 
 术语统一：**预热时间**（initialize，视频前）和**视频输入时间**只记录；**场景准备时间**从 `VIDEO_COMPLETE` 到指定视角的首帧 `FRAME_COMPLETE`，其中 `SCENE_READY` 为中间事件；**后续渲染时间**独立统计。新的闭文件交付适配器不包含真实摄像头或上传的采集计时。上述候选的新板端场景准备时间、常驻内存和 NPU 收益均待测。

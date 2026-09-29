@@ -39,7 +39,8 @@ class WarmSession:
                 self.partitions = self.resources.enter_context(PartitionRuntime(
                     args.backend, args.partition_bundle, args.partitions, out / "partition_runtime",
                     library=args.npu_library, worker_python=args.worker_python,
-                    environment=worker_environment() if args.backend == "npu" else None))
+                    environment=worker_environment() if args.backend == "npu" else None,
+                    buffer_policy=args.buffer_policy, buffer_limit_mib=args.buffer_limit_mib))
                 self.model.attach_partitions(self.partitions)
             # Imports and package/device initialization are outside the video clock.
             import video_input.prepare

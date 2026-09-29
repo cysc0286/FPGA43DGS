@@ -1,0 +1,104 @@
+{
+  "backend": "onnx_reference",
+  "npu_executed": false,
+  "board_renderer_executed": false,
+  "scene_preparation_seconds": null,
+  "quality_gate": {
+    "minimum_psnr_db": 20.0,
+    "minimum_ssim": 0.7
+  },
+  "views": {
+    "frame_000007.png": {
+      "cpu_vs_rgb": {
+        "psnr_db": 20.195603543679216,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.8053593320650737,
+        "mae": 0.062392232837044474,
+        "max_abs_error": 0.8693591412083775
+      },
+      "hybrid_vs_rgb": {
+        "psnr_db": 20.19560249032642,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.8053589415970064,
+        "mae": 0.06239223984169023,
+        "max_abs_error": 0.8693591710106999
+      },
+      "hybrid_vs_cpu": {
+        "psnr_db": 104.72540326483993,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.9999999963018681,
+        "mae": 3.009113867709819e-07,
+        "max_abs_error": 0.0007204413414001465
+      },
+      "hybrid_vs_rgb_local_error": {
+        "rgb_mae": 0.06239223984169023,
+        "pixel_rgb_mae_p95": 0.191872917047513,
+        "worst_16x16_tile_rgb_mae": 0.2878049580198802,
+        "worst_16x16_tile_xy": [
+          112,
+          112
+        ]
+      },
+      "reconstruction_passed": true
+    },
+    "frame_000015.png": {
+      "cpu_vs_rgb": {
+        "psnr_db": 20.233212449495802,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.8364874278767016,
+        "mae": 0.042970304476605915,
+        "max_abs_error": 0.9808287974447012
+      },
+      "hybrid_vs_rgb": {
+        "psnr_db": 20.233221429326335,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.8364864210235313,
+        "mae": 0.042970212183551536,
+        "max_abs_error": 0.9808287210762501
+      },
+      "hybrid_vs_cpu": {
+        "psnr_db": 105.18737184751933,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.9999999752445694,
+        "mae": 3.573362477027331e-07,
+        "max_abs_error": 0.00045377016067504883
+      },
+      "hybrid_vs_rgb_local_error": {
+        "rgb_mae": 0.042970212183551536,
+        "pixel_rgb_mae_p95": 0.13265149945137503,
+        "worst_16x16_tile_rgb_mae": 0.22012542834523224,
+        "worst_16x16_tile_xy": [
+          0,
+          0
+        ]
+      },
+      "reconstruction_passed": true
+    },
+    "frame_000022.png": {
+      "cpu_vs_rgb": {
+        "psnr_db": 24.184353320959005,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.8465649220417372,
+        "mae": 0.03505243764350554,
+        "max_abs_error": 0.8047951150174234
+      },
+      "hybrid_vs_rgb": {
+        "psnr_db": 24.184354658052413,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.8465650490597958,
+        "mae": 0.03505246086883357,
+        "max_abs_error": 0.8047945040698145
+      },
+      "hybrid_vs_cpu": {
+        "psnr_db": 113.40274286093772,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.9999999991669571,
+        "mae": 2.8121736050934487e-07,
+        "max_abs_error": 0.0002752244472503662
+      },
+      "hybrid_vs_rgb_local_error": {
+        "rgb_mae": 0.03505246086883357,
+        "pixel_rgb_mae_p95": 0.11280356655128608,
+        "worst_16x16_tile_rgb_mae": 0.11247975080257591,
+        "worst_16x16_tile_xy": [
+          0,
+          64
+        ]
+      },
+      "reconstruction_passed": true
+    }
+  },
+  "scope": "Same independent CPU SH3 renderer; not FPGA or official CUDA output",
+  "all_views_passed": true
+}

@@ -1,0 +1,117 @@
+{
+  "complete": true,
+  "board_accessed": false,
+  "npu_executed": false,
+  "scene_preparation_seconds": null,
+  "python_syntax_files": 154,
+  "contract_tests": 55,
+  "correctness_mode": "full model ONNX CPU and real compiled-layout host checks",
+  "shared_buffer_bytes": 38141952,
+  "legacy_buffer_bytes": 83361792,
+  "logical_io_bytes_per_forward": 83361792,
+  "baseline_git_commit": "afdea119b18bf172ec419a3944c1f92250652c5b",
+  "same_gaussian_hash_across_modes_and_previous_version": "45fc3a3dcfc549e5fd9cae3401b053c7f8c8bf520b01b9e7336778ea21672e5c",
+  "package_archive": "examples/3dgs_reconstruction/runs/npu_deploy_v2_package/mvsplat_npu_candidate.tar.gz",
+  "subset_archive": "examples/3dgs_reconstruction/runs/npu_deploy_v2_subset/mvsplat_npu_candidate.tar.gz",
+  "sources": {
+    "examples/3dgs_reconstruction/mvsplat/initialize/board_accept.py": "313b4e8c62130f0b07b8ccce2721219efe97b1869b90014a8c4dccbc6e05cd4f",
+    "examples/3dgs_reconstruction/mvsplat/initialize/run.py": "a56f5064e9c337ae5fd3983ee286079fc6d68addfb8c894ef421bfd1a728c70b",
+    "examples/3dgs_reconstruction/mvsplat/initialize/session.py": "9c376f557d3d580427958ac23ea5c36454e39830a836bbc723e3dc6c8383bfc0",
+    "examples/3dgs_reconstruction/mvsplat/npu/__init__.py": "61bd4202b05c18ea82d725b9bf7d92454c83a4d04f251d65222bce786e4a05fb",
+    "examples/3dgs_reconstruction/mvsplat/npu/artifacts.py": "d7d67bd7e60f1282f9cacafac556fd4a425b1cb40169d2dba903e0ee9763877f",
+    "examples/3dgs_reconstruction/mvsplat/npu/benchmark.py": "c9fd421ef27e864cba39542d55003d2ea9b98231ea456134d3e7b495b19e376f",
+    "examples/3dgs_reconstruction/mvsplat/npu/bridge.cpp": "a702decde24ee35197e3aa108d881c6f12d5a9df076f5d64f79c599238931247",
+    "examples/3dgs_reconstruction/mvsplat/npu/buffers.py": "42ef8b8efaf6f894bf9947828f65f8d2f6bba1793f34fffd7e0694569c17617a",
+    "examples/3dgs_reconstruction/mvsplat/npu/build.py": "b3db2dc232b2290d159d26c2762e0754e27634c38f376bac6415731498a951e6",
+    "examples/3dgs_reconstruction/mvsplat/npu/catalog.py": "13279d4a84f8fec6aff8e7b4e40e2a91bed3293461ff6934e766fed0d2be825e",
+    "examples/3dgs_reconstruction/mvsplat/npu/check_images.py": "b26521233f7d51472a2e137ce307ec4851441669ecfbb12b7e8d90fb71874cac",
+    "examples/3dgs_reconstruction/mvsplat/npu/check_transport.py": "acc91d0942a98d44251ac5b61973fd0c6150c6a875dbab6bf3b76a41e776365b",
+    "examples/3dgs_reconstruction/mvsplat/npu/compile_graphs.py": "42aa4e941475f8883364b50098870b1b6d46483ae4687d92af81a99aeffe5013",
+    "examples/3dgs_reconstruction/mvsplat/npu/export_graphs.py": "45c42b3f6daedb256d4b7eb7ebd67ad51e78d8db9c5a90fda8f4222931bbd6dd",
+    "examples/3dgs_reconstruction/mvsplat/npu/package.py": "ebc1291860f03fcd1388b942b2076806992bc351fa04d036320fed61e3a238b0",
+    "examples/3dgs_reconstruction/mvsplat/npu/preflight.py": "5db96358cb63f79f0101e11c8db404c378b5583979d90789d1ce736398f57714",
+    "examples/3dgs_reconstruction/mvsplat/npu/protocol.py": "4851f9bdccbc19d4fb5c0ccbdc3260599a8cd4b7295163a9d5db23575f622d82",
+    "examples/3dgs_reconstruction/mvsplat/npu/runtime.py": "206b90654d0a906a7bc9c67bc4938421fc15cca7a653e29eb2453c423f9b45c6",
+    "examples/3dgs_reconstruction/mvsplat/npu/verify.py": "f8d25123dfec3367b016bf0ea3f7e897ed606bbedf1fa979a4d6b948c3da6b90",
+    "examples/3dgs_reconstruction/mvsplat/npu/worker.py": "521481754bafac533a0a87d27348671463558fdea3668ce496fa8557ef40cc1e",
+    "examples/3dgs_reconstruction/mvsplat/test_npu.py": "95d32ec1a4e34dd6445bbe663f7665b82cd19a8fe00c0ffce62f8e948e4d8f1d"
+  },
+  "artifacts": {
+    "shared_verification.json": {
+      "sha256": "6e55f5752536d3061a135a6d356f62ca368961d2a9f11a5c7456ff864f322b3c",
+      "bytes": 23312
+    },
+    "per_partition_verification.json": {
+      "sha256": "abed6449d98e5be4089e86e772cfbadd6e6ba9041bd3c291d2a1f6ea664a19b1",
+      "bytes": 23305
+    },
+    "benchmark.json": {
+      "sha256": "64c2d546ea1272289c052c97773421e9fd248b70837bfd35d473f9580ca127f0",
+      "bytes": 241317
+    },
+    "transport.json": {
+      "sha256": "93e2707e610b948e34b2b12e96cd9222cee9072ef1a2e601819c968645afbff9",
+      "bytes": 18276
+    },
+    "quality.json": {
+      "sha256": "8aefa555cc1ca50394a266a5dfaca45abe5324bf01b07cb89a702c1b9a9e6b1b",
+      "bytes": 3422
+    },
+    "comparison.png": {
+      "sha256": "e13d744a00450ec122f0308ab2a12e2166cd3ba90bee805e3b1acd316673b3fe",
+      "bytes": 496165
+    },
+    "package.json": {
+      "sha256": "f822c877cee0680d2d612a00b6d1698aa17227ec43b74f093fc1b4da1bc6b0c9",
+      "bytes": 580
+    },
+    "subset_package.json": {
+      "sha256": "6b11a3b29341ec33fb8849a9dbfbd810ed2742124ea166f5ca3bdadff2f5275f",
+      "bytes": 452
+    },
+    "package_preflight.json": {
+      "sha256": "0bfcbcecc644802d177fa00f4e26215041fae1c1c4808863b5a4f9e1018bcb58",
+      "bytes": 3410
+    },
+    "package_checks.json": {
+      "sha256": "ac1fcb76f9f5047b5212b9f09d32616a57804b66839323837d624b3ab79f0ab8",
+      "bytes": 2867
+    },
+    "bridge_syntax.json": {
+      "sha256": "00b580f82efebe3fd2d258ad536abab5a2b14cd8dbf45bf8bcf19d0c974c8555",
+      "bytes": 599
+    },
+    "bridge_syntax.log": {
+      "sha256": "e42e8adea4645d88ff5d1cb0488b07b110291bd61346429e7d5ddc714fb30541",
+      "bytes": 12
+    },
+    "tests.log": {
+      "sha256": "7914c5bc52c9d5104accb7d8a711dc37d433d7d099648006417c9c1001010073",
+      "bytes": 9449
+    }
+  },
+  "source_hash_scope": "sources are measured Windows working-copy bytes; sources_lf_normalized verifies Git checkouts across line ending conversion",
+  "sources_lf_normalized": {
+    "examples/3dgs_reconstruction/mvsplat/initialize/board_accept.py": "313b4e8c62130f0b07b8ccce2721219efe97b1869b90014a8c4dccbc6e05cd4f",
+    "examples/3dgs_reconstruction/mvsplat/initialize/run.py": "8f6e242c63fc35e71c37f97408e8624037cd2b17f5b09f3e299ea5136022c25f",
+    "examples/3dgs_reconstruction/mvsplat/initialize/session.py": "9c376f557d3d580427958ac23ea5c36454e39830a836bbc723e3dc6c8383bfc0",
+    "examples/3dgs_reconstruction/mvsplat/npu/__init__.py": "61bd4202b05c18ea82d725b9bf7d92454c83a4d04f251d65222bce786e4a05fb",
+    "examples/3dgs_reconstruction/mvsplat/npu/artifacts.py": "d7d67bd7e60f1282f9cacafac556fd4a425b1cb40169d2dba903e0ee9763877f",
+    "examples/3dgs_reconstruction/mvsplat/npu/benchmark.py": "c9fd421ef27e864cba39542d55003d2ea9b98231ea456134d3e7b495b19e376f",
+    "examples/3dgs_reconstruction/mvsplat/npu/bridge.cpp": "77c98686bdebf9a9bbf434449218ec20383c764c975a27ec52d8d6f969b9f5a6",
+    "examples/3dgs_reconstruction/mvsplat/npu/buffers.py": "42ef8b8efaf6f894bf9947828f65f8d2f6bba1793f34fffd7e0694569c17617a",
+    "examples/3dgs_reconstruction/mvsplat/npu/build.py": "b3db2dc232b2290d159d26c2762e0754e27634c38f376bac6415731498a951e6",
+    "examples/3dgs_reconstruction/mvsplat/npu/catalog.py": "13279d4a84f8fec6aff8e7b4e40e2a91bed3293461ff6934e766fed0d2be825e",
+    "examples/3dgs_reconstruction/mvsplat/npu/check_images.py": "b26521233f7d51472a2e137ce307ec4851441669ecfbb12b7e8d90fb71874cac",
+    "examples/3dgs_reconstruction/mvsplat/npu/check_transport.py": "acc91d0942a98d44251ac5b61973fd0c6150c6a875dbab6bf3b76a41e776365b",
+    "examples/3dgs_reconstruction/mvsplat/npu/compile_graphs.py": "42aa4e941475f8883364b50098870b1b6d46483ae4687d92af81a99aeffe5013",
+    "examples/3dgs_reconstruction/mvsplat/npu/export_graphs.py": "45c42b3f6daedb256d4b7eb7ebd67ad51e78d8db9c5a90fda8f4222931bbd6dd",
+    "examples/3dgs_reconstruction/mvsplat/npu/package.py": "ebc1291860f03fcd1388b942b2076806992bc351fa04d036320fed61e3a238b0",
+    "examples/3dgs_reconstruction/mvsplat/npu/preflight.py": "5db96358cb63f79f0101e11c8db404c378b5583979d90789d1ce736398f57714",
+    "examples/3dgs_reconstruction/mvsplat/npu/protocol.py": "4851f9bdccbc19d4fb5c0ccbdc3260599a8cd4b7295163a9d5db23575f622d82",
+    "examples/3dgs_reconstruction/mvsplat/npu/runtime.py": "206b90654d0a906a7bc9c67bc4938421fc15cca7a653e29eb2453c423f9b45c6",
+    "examples/3dgs_reconstruction/mvsplat/npu/verify.py": "f8d25123dfec3367b016bf0ea3f7e897ed606bbedf1fa979a4d6b948c3da6b90",
+    "examples/3dgs_reconstruction/mvsplat/npu/worker.py": "521481754bafac533a0a87d27348671463558fdea3668ce496fa8557ef40cc1e",
+    "examples/3dgs_reconstruction/mvsplat/test_npu.py": "95d32ec1a4e34dd6445bbe663f7665b82cd19a8fe00c0ffce62f8e948e4d8f1d"
+  }
+}

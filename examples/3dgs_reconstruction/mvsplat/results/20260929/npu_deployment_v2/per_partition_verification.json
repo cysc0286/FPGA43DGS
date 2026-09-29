@@ -1,0 +1,751 @@
+{
+  "complete": true,
+  "backend": "onnx_reference",
+  "npu_executed": false,
+  "scope": "partition/Gaussian checks; image quality and first frame not measured",
+  "tolerances": {
+    "partition": {
+      "rtol": 0.002,
+      "atol": 0.0002
+    },
+    "gaussian": {
+      "rtol": 0.005,
+      "atol": 0.001
+    }
+  },
+  "oracle_results": {
+    "backbone_cnn": {
+      "passed": true,
+      "max_abs": 5.602836608886719e-06,
+      "mean_abs": 4.552642435054488e-07,
+      "rmse": 5.968493650610063e-07
+    },
+    "regressor_residual": {
+      "passed": true,
+      "max_abs": 1.9073486328125e-06,
+      "mean_abs": 3.4917145841362185e-08,
+      "rmse": 5.952259494472508e-08
+    },
+    "depth_head": {
+      "passed": true,
+      "max_abs": 3.337860107421875e-05,
+      "mean_abs": 2.688253195937129e-06,
+      "rmse": 3.7732301879870086e-06
+    },
+    "upsampler": {
+      "passed": true,
+      "max_abs": 1.8835067749023438e-05,
+      "mean_abs": 1.1009062836404661e-07,
+      "rmse": 1.9909556897657183e-07
+    },
+    "proj_feature": {
+      "passed": true,
+      "max_abs": 1.8477439880371094e-06,
+      "mean_abs": 5.412150675504254e-08,
+      "rmse": 1.0258230557988126e-07
+    },
+    "to_gaussians": {
+      "passed": true,
+      "max_abs": 6.866455078125e-05,
+      "mean_abs": 7.263432270879966e-07,
+      "rmse": 1.4211693446248478e-06
+    },
+    "to_disparity": {
+      "passed": true,
+      "max_abs": 4.291534423828125e-06,
+      "mean_abs": 2.0383755605646314e-07,
+      "rmse": 3.7566522338660385e-07
+    }
+  },
+  "gaussian_errors": {
+    "means": {
+      "passed": true,
+      "max_abs": 0.00246429443359375,
+      "mean_abs": 1.4062224522604083e-06,
+      "rmse": 1.3190138933279685e-05
+    },
+    "covariances": {
+      "passed": true,
+      "max_abs": 0.00018787384033203125,
+      "mean_abs": 6.84472414203893e-09,
+      "rmse": 7.288288725183104e-07
+    },
+    "harmonics": {
+      "passed": true,
+      "max_abs": 7.62939453125e-06,
+      "mean_abs": 3.8029825565267825e-08,
+      "rmse": 1.828755444230849e-07
+    },
+    "opacities": {
+      "passed": true,
+      "max_abs": 3.635883331298828e-06,
+      "mean_abs": 3.3715477343321254e-07,
+      "rmse": 4.822962877725997e-07
+    }
+  },
+  "cpu": {
+    "complete": true,
+    "device": "cpu",
+    "backend": "cpu",
+    "machine": "AMD64",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "source_commit": "01f9a28edb5eb68416e7e63b01f8d90c3bdfbf01",
+    "weight_sha256": "83d0d9eaa753fa4a1f925288dc1f90b8c3297fad0ab0f6ed1f11a1c5946da25a",
+    "input_sha256": "e81a9a7b53e015bb6cf0f4123a7b6becf33a858f4fd28c58ef07c1e197f50823",
+    "threads": 2,
+    "depth_chunk": 16,
+    "parameter_count": 11955734,
+    "checkpoint_encoder_tensor_count": 471,
+    "checkpoint_non_encoder_keys": [],
+    "checkpoint_load": "memory mapped; temporary state released before inference",
+    "versions": {
+      "torch": "2.7.1+cpu",
+      "einops": "0.8.1",
+      "e3nn": "0.5.8",
+      "numpy": "2.5.2"
+    },
+    "input_shape": [
+      1,
+      2,
+      3,
+      128,
+      128
+    ],
+    "load_and_setup_seconds": 0.11262449994683266,
+    "inference_seconds": 0.5987444999627769,
+    "gaussians": 32768,
+    "sh_degree": 4,
+    "gaussian_sha256": "d30b8ec46727cc57cc3978ab7a62bab4acb1b69088da7b503d7a5261d37aef55",
+    "training_steps": 0,
+    "process_seconds": 0.8140974000561982,
+    "scope": "Warm inference and output save; fixed weights loaded before video",
+    "npu_executed": false
+  },
+  "hybrid": {
+    "complete": true,
+    "device": "cpu",
+    "backend": "onnx_reference",
+    "machine": "AMD64",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "source_commit": "01f9a28edb5eb68416e7e63b01f8d90c3bdfbf01",
+    "weight_sha256": "83d0d9eaa753fa4a1f925288dc1f90b8c3297fad0ab0f6ed1f11a1c5946da25a",
+    "input_sha256": "e81a9a7b53e015bb6cf0f4123a7b6becf33a858f4fd28c58ef07c1e197f50823",
+    "threads": 2,
+    "depth_chunk": 16,
+    "parameter_count": 11955734,
+    "checkpoint_encoder_tensor_count": 471,
+    "checkpoint_non_encoder_keys": [],
+    "checkpoint_load": "memory mapped; temporary state released before inference",
+    "versions": {
+      "torch": "2.7.1+cpu",
+      "einops": "0.8.1",
+      "e3nn": "0.5.8",
+      "numpy": "2.5.2"
+    },
+    "input_shape": [
+      1,
+      2,
+      3,
+      128,
+      128
+    ],
+    "load_and_setup_seconds": 0.0015799999237060547,
+    "inference_seconds": 0.6265501000452787,
+    "gaussians": 32768,
+    "sh_degree": 4,
+    "gaussian_sha256": "45fc3a3dcfc549e5fd9cae3401b053c7f8c8bf520b01b9e7336778ea21672e5c",
+    "training_steps": 0,
+    "process_seconds": 0.7259859999176115,
+    "scope": "Warm inference and output save; fixed weights loaded before video",
+    "npu_executed": false,
+    "partitions": {
+      "backend": "onnx_reference",
+      "npu_executed": false,
+      "selected_partitions": [
+        "backbone_cnn",
+        "regressor_residual",
+        "depth_head",
+        "upsampler",
+        "proj_feature",
+        "to_gaussians",
+        "to_disparity"
+      ],
+      "cpu_partitions": [],
+      "cpu_remainder": "camera geometry, cost-volume warping, multi-view attention, refinement UNets, Gaussian adapter",
+      "calls": [
+        {
+          "event": "COMPLETE",
+          "sequence": 7,
+          "name": "backbone_cnn",
+          "backend": "onnx_reference",
+          "npu_executed": false,
+          "worker_seconds": 0.026090299943462014,
+          "sdk_seconds": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "pack_seconds": 6.0999998822808266e-05,
+          "wait_seconds": 0.02663480001501739,
+          "unpack_seconds": 0.0002965000458061695,
+          "total_seconds": 0.026992300059646368,
+          "input_bytes": 393216,
+          "output_bytes": 1048576
+        },
+        {
+          "event": "COMPLETE",
+          "sequence": 8,
+          "name": "regressor_residual",
+          "backend": "onnx_reference",
+          "npu_executed": false,
+          "worker_seconds": 0.001530099892988801,
+          "sdk_seconds": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "pack_seconds": 0.000386199913918972,
+          "wait_seconds": 0.001735700061544776,
+          "unpack_seconds": 0.00030940002761781216,
+          "total_seconds": 0.00243130000308156,
+          "input_bytes": 2097152,
+          "output_bytes": 1048576
+        },
+        {
+          "event": "COMPLETE",
+          "sequence": 9,
+          "name": "depth_head",
+          "backend": "onnx_reference",
+          "npu_executed": false,
+          "worker_seconds": 0.010568599915131927,
+          "sdk_seconds": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "pack_seconds": 0.0001442998182028532,
+          "wait_seconds": 0.010858000023290515,
+          "unpack_seconds": 0.00038480013608932495,
+          "total_seconds": 0.011387099977582693,
+          "input_bytes": 1048576,
+          "output_bytes": 1048576
+        },
+        {
+          "event": "COMPLETE",
+          "sequence": 10,
+          "name": "upsampler",
+          "backend": "onnx_reference",
+          "npu_executed": false,
+          "worker_seconds": 0.020587400067597628,
+          "sdk_seconds": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "pack_seconds": 0.0003231000155210495,
+          "wait_seconds": 0.020944599993526936,
+          "unpack_seconds": 0.004920300096273422,
+          "total_seconds": 0.026188000105321407,
+          "input_bytes": 2097152,
+          "output_bytes": 16777216
+        },
+        {
+          "event": "COMPLETE",
+          "sequence": 11,
+          "name": "proj_feature",
+          "backend": "onnx_reference",
+          "npu_executed": false,
+          "worker_seconds": 0.016022399999201298,
+          "sdk_seconds": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "pack_seconds": 0.0031950001139193773,
+          "wait_seconds": 0.016385499853640795,
+          "unpack_seconds": 0.0012789999600499868,
+          "total_seconds": 0.02085949992761016,
+          "input_bytes": 16777216,
+          "output_bytes": 4194304
+        },
+        {
+          "event": "COMPLETE",
+          "sequence": 12,
+          "name": "to_gaussians",
+          "backend": "onnx_reference",
+          "npu_executed": false,
+          "worker_seconds": 0.1134929999243468,
+          "sdk_seconds": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "pack_seconds": 0.004881999921053648,
+          "wait_seconds": 0.11398720019496977,
+          "unpack_seconds": 0.003491399809718132,
+          "total_seconds": 0.12236059992574155,
+          "input_bytes": 21364736,
+          "output_bytes": 11010048
+        },
+        {
+          "event": "COMPLETE",
+          "sequence": 13,
+          "name": "to_disparity",
+          "backend": "onnx_reference",
+          "npu_executed": false,
+          "worker_seconds": 0.01211520005017519,
+          "sdk_seconds": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "pack_seconds": 0.0006802999414503574,
+          "wait_seconds": 0.012633100152015686,
+          "unpack_seconds": 5.539995618164539e-05,
+          "total_seconds": 0.013368800049647689,
+          "input_bytes": 4194304,
+          "output_bytes": 262144
+        }
+      ],
+      "total_partition_seconds": 0.22358760004863143,
+      "transfer_bytes": 83361792,
+      "transfer_bytes_scope": "logical partition I/O bytes; not measured DMA/DDR traffic or all memory copies",
+      "bundle_sha256": "f89115f773e5811f81a3197953a05c7c3d2a4c944daf4cc464553f193695828b",
+      "bridge_sha256": null,
+      "buffer_policy": "per_partition",
+      "shared_buffers_bytes": 83361792,
+      "legacy_buffers_bytes": 83361792,
+      "protocol_version": 2,
+      "input_packing": "direct layout copy into IPC buffer, no contiguous float temporary",
+      "transfer_scope": "shared-file IPC plus SDK copies; not proven zero-copy"
+    }
+  },
+  "repeat_same_hash": true,
+  "worker": {
+    "backend": "onnx_reference",
+    "npu_executed": false,
+    "selected_partitions": [
+      "backbone_cnn",
+      "regressor_residual",
+      "depth_head",
+      "upsampler",
+      "proj_feature",
+      "to_gaussians",
+      "to_disparity"
+    ],
+    "cpu_partitions": [],
+    "cpu_remainder": "camera geometry, cost-volume warping, multi-view attention, refinement UNets, Gaussian adapter",
+    "calls": [
+      {
+        "event": "COMPLETE",
+        "sequence": 0,
+        "name": "backbone_cnn",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.03473630012013018,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.00024279998615384102,
+        "wait_seconds": 0.03501770016737282,
+        "unpack_seconds": 0.0006569998804479837,
+        "total_seconds": 0.03591750003397465,
+        "input_bytes": 393216,
+        "output_bytes": 1048576
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 1,
+        "name": "regressor_residual",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.0021218000911176205,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.0005628000944852829,
+        "wait_seconds": 0.002557199914008379,
+        "unpack_seconds": 0.0004390999674797058,
+        "total_seconds": 0.0035590999759733677,
+        "input_bytes": 2097152,
+        "output_bytes": 1048576
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 2,
+        "name": "depth_head",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.013391400221735239,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.0004165000282227993,
+        "wait_seconds": 0.013896499993279576,
+        "unpack_seconds": 0.0005669000092893839,
+        "total_seconds": 0.01487990003079176,
+        "input_bytes": 1048576,
+        "output_bytes": 1048576
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 3,
+        "name": "upsampler",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.025593800004571676,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.0006973999552428722,
+        "wait_seconds": 0.025951800169423223,
+        "unpack_seconds": 0.007998900022357702,
+        "total_seconds": 0.0346481001470238,
+        "input_bytes": 2097152,
+        "output_bytes": 16777216
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 4,
+        "name": "proj_feature",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.018196700140833855,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.005699599860236049,
+        "wait_seconds": 0.018552400171756744,
+        "unpack_seconds": 0.0019751000218093395,
+        "total_seconds": 0.026227100053802133,
+        "input_bytes": 16777216,
+        "output_bytes": 4194304
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 5,
+        "name": "to_gaussians",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.12445530015975237,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.007352799875661731,
+        "wait_seconds": 0.1248050001449883,
+        "unpack_seconds": 0.006837599910795689,
+        "total_seconds": 0.13899539993144572,
+        "input_bytes": 21364736,
+        "output_bytes": 11010048
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 6,
+        "name": "to_disparity",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.011883400147780776,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.0014671999961137772,
+        "wait_seconds": 0.012153799878433347,
+        "unpack_seconds": 0.00010750000365078449,
+        "total_seconds": 0.013728499878197908,
+        "input_bytes": 4194304,
+        "output_bytes": 262144
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 7,
+        "name": "backbone_cnn",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.026090299943462014,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 6.0999998822808266e-05,
+        "wait_seconds": 0.02663480001501739,
+        "unpack_seconds": 0.0002965000458061695,
+        "total_seconds": 0.026992300059646368,
+        "input_bytes": 393216,
+        "output_bytes": 1048576
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 8,
+        "name": "regressor_residual",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.001530099892988801,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.000386199913918972,
+        "wait_seconds": 0.001735700061544776,
+        "unpack_seconds": 0.00030940002761781216,
+        "total_seconds": 0.00243130000308156,
+        "input_bytes": 2097152,
+        "output_bytes": 1048576
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 9,
+        "name": "depth_head",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.010568599915131927,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.0001442998182028532,
+        "wait_seconds": 0.010858000023290515,
+        "unpack_seconds": 0.00038480013608932495,
+        "total_seconds": 0.011387099977582693,
+        "input_bytes": 1048576,
+        "output_bytes": 1048576
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 10,
+        "name": "upsampler",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.020587400067597628,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.0003231000155210495,
+        "wait_seconds": 0.020944599993526936,
+        "unpack_seconds": 0.004920300096273422,
+        "total_seconds": 0.026188000105321407,
+        "input_bytes": 2097152,
+        "output_bytes": 16777216
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 11,
+        "name": "proj_feature",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.016022399999201298,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.0031950001139193773,
+        "wait_seconds": 0.016385499853640795,
+        "unpack_seconds": 0.0012789999600499868,
+        "total_seconds": 0.02085949992761016,
+        "input_bytes": 16777216,
+        "output_bytes": 4194304
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 12,
+        "name": "to_gaussians",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.1134929999243468,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.004881999921053648,
+        "wait_seconds": 0.11398720019496977,
+        "unpack_seconds": 0.003491399809718132,
+        "total_seconds": 0.12236059992574155,
+        "input_bytes": 21364736,
+        "output_bytes": 11010048
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 13,
+        "name": "to_disparity",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.01211520005017519,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.0006802999414503574,
+        "wait_seconds": 0.012633100152015686,
+        "unpack_seconds": 5.539995618164539e-05,
+        "total_seconds": 0.013368800049647689,
+        "input_bytes": 4194304,
+        "output_bytes": 262144
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 14,
+        "name": "backbone_cnn",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.024978499859571457,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 6.700004450976849e-05,
+        "wait_seconds": 0.02553799981251359,
+        "unpack_seconds": 0.00036700000055134296,
+        "total_seconds": 0.0259719998575747,
+        "input_bytes": 393216,
+        "output_bytes": 1048576
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 15,
+        "name": "regressor_residual",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.001471600029617548,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.0004483000375330448,
+        "wait_seconds": 0.0018227000255137682,
+        "unpack_seconds": 0.0003619999624788761,
+        "total_seconds": 0.002633000025525689,
+        "input_bytes": 2097152,
+        "output_bytes": 1048576
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 16,
+        "name": "depth_head",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.009539700113236904,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.0001612999476492405,
+        "wait_seconds": 0.009822500171139836,
+        "unpack_seconds": 0.0005671998951584101,
+        "total_seconds": 0.010551000013947487,
+        "input_bytes": 1048576,
+        "output_bytes": 1048576
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 17,
+        "name": "upsampler",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.013466100208461285,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.0003706999123096466,
+        "wait_seconds": 0.013933399925008416,
+        "unpack_seconds": 0.005466500064358115,
+        "total_seconds": 0.019770599901676178,
+        "input_bytes": 2097152,
+        "output_bytes": 16777216
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 18,
+        "name": "proj_feature",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.014949799980968237,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.0035412998404353857,
+        "wait_seconds": 0.01550090010277927,
+        "unpack_seconds": 0.0012886000331491232,
+        "total_seconds": 0.020330799976363778,
+        "input_bytes": 16777216,
+        "output_bytes": 4194304
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 19,
+        "name": "to_gaussians",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.10876749991439283,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.005033199908211827,
+        "wait_seconds": 0.10911020007915795,
+        "unpack_seconds": 0.003746999893337488,
+        "total_seconds": 0.11789039988070726,
+        "input_bytes": 21364736,
+        "output_bytes": 11010048
+      },
+      {
+        "event": "COMPLETE",
+        "sequence": 20,
+        "name": "to_disparity",
+        "backend": "onnx_reference",
+        "npu_executed": false,
+        "worker_seconds": 0.010318699991330504,
+        "sdk_seconds": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pack_seconds": 0.0007090999279171228,
+        "wait_seconds": 0.010603400180116296,
+        "unpack_seconds": 6.320001557469368e-05,
+        "total_seconds": 0.011375700123608112,
+        "input_bytes": 4194304,
+        "output_bytes": 262144
+      }
+    ],
+    "total_partition_seconds": 0.700066699879244,
+    "transfer_bytes": 250085376,
+    "transfer_bytes_scope": "logical partition I/O bytes; not measured DMA/DDR traffic or all memory copies",
+    "bundle_sha256": "f89115f773e5811f81a3197953a05c7c3d2a4c944daf4cc464553f193695828b",
+    "bridge_sha256": null,
+    "buffer_policy": "per_partition",
+    "shared_buffers_bytes": 83361792,
+    "legacy_buffers_bytes": 83361792,
+    "protocol_version": 2,
+    "input_packing": "direct layout copy into IPC buffer, no contiguous float temporary",
+    "transfer_scope": "shared-file IPC plus SDK copies; not proven zero-copy"
+  }
+}

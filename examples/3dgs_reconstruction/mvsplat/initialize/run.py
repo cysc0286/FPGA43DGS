@@ -26,6 +26,8 @@ def main(argv=None):
     p.add_argument("--partitions", nargs="+")
     p.add_argument("--npu-library", type=Path)
     p.add_argument("--worker-python", type=Path)
+    p.add_argument("--buffer-policy", choices=("shared", "per_partition"), default="shared")
+    p.add_argument("--buffer-limit-mib", type=int, default=128)
     a = p.parse_args(argv)
     if platform.machine().lower() not in ("aarch64", "arm64"):
         p.error("First FPGA frame acceptance requires the ARM board")

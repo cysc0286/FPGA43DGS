@@ -33,6 +33,8 @@ def main(argv=None):
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--library", type=Path)
     p.add_argument("--worker-python", type=Path)
+    p.add_argument("--buffer-policy", choices=("shared", "per_partition"), default="shared")
+    p.add_argument("--buffer-limit-mib", type=int, default=128)
     p.add_argument("--partitions", nargs="+", choices=list(PARTITIONS), required=True)
     a = p.parse_args(argv)
     out = new_directory(a.out)
@@ -48,7 +50,8 @@ def main(argv=None):
             raise ValueError("Oracle input/checkpoint differs from the verification job")
         from initialize.session import worker_environment
         with PartitionRuntime(a.backend, a.bundle, a.partitions, out / "worker", library=a.library,
-                worker_python=a.worker_python, environment=worker_environment() if a.backend == "npu" else None) as worker:
+                worker_python=a.worker_python, environment=worker_environment() if a.backend == "npu" else None,
+                buffer_policy=a.buffer_policy, buffer_limit_mib=a.buffer_limit_mib) as worker:
             try:
                 oracle_results = {}
                 for name in a.partitions:

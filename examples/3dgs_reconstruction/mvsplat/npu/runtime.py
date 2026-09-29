@@ -12,19 +12,29 @@ import numpy as np
 from common import save, sha
 from npu.artifacts import from_wire, to_wire, validate_bundle
 from npu.catalog import PARTITIONS, replace
+from npu.buffers import buffer_plan, MappedBuffers
+from npu.protocol import PROTOCOL_VERSION
 
 
 class PartitionRuntime:
     def __init__(self, backend, bundle, names, work, library=None,
-                 worker_python=None, environment=None, timeout=90):
+                 worker_python=None, environment=None, timeout=90,
+                 buffer_policy="shared", buffer_limit_mib=128):
         if backend not in ("onnx_reference", "npu"):
             raise ValueError("Expected an explicit accelerated or host validation backend")
         data, self.parts = validate_bundle(bundle, names, backend)
+        plan = buffer_plan(self.parts, buffer_policy)
+        limit_bytes = int(buffer_limit_mib*1024**2)
+        if limit_bytes <= 0 or plan["allocated_bytes"] > limit_bytes:
+            raise ValueError("IPC buffer allocation exceeds configured byte budget")
+        if backend == "npu" and (library is None or not Path(library).is_file()):
+            raise ValueError("NPU backend requires a built ARM libmgs_npu.so")
         self.input_shape = data["input_shape"]
         self.backend, self.timeout = backend, timeout
         self.work = Path(work).resolve()
         self.work.mkdir(parents=True, exist_ok=False)
         self.buffers, self.calls, self.sequence = {}, [], 0
+        self.arena = None
         self.lock = threading.Lock()
         self.responses = queue.Queue()
         self.process = None
@@ -32,19 +42,12 @@ class PartitionRuntime:
         self.closed = False
         self.log = None
         self.failed = False
-        if backend == "npu" and (library is None or not Path(library).is_file()):
-            raise ValueError("NPU backend requires a built ARM libmgs_npu.so")
         request = dict(backend=backend, bundle=str(Path(bundle).resolve()), names=list(names),
-                       library=None if library is None else str(Path(library).resolve()), buffers={})
+                       library=None if library is None else str(Path(library).resolve()),
+                       protocol_version=PROTOCOL_VERSION, buffer_plan=plan, buffer_limit_bytes=limit_bytes)
         try:
-            for name, part in self.parts.items():
-                request["buffers"][name] = {}
-                pair = []
-                for kind in ("input", "output"):
-                    path = self.work / (name+"_"+kind+".bin")
-                    pair.append(np.memmap(path, dtype=np.float32, mode="w+", shape=part[kind]["shape"]))
-                    request["buffers"][name][kind] = str(path)
-                self.buffers[name] = pair
+            self.arena = MappedBuffers(self.work, self.parts, plan, create=True, limit_bytes=limit_bytes)
+            self.buffers = self.arena.views
             save(self.work / "request.json", request)
             self.log = (self.work / "worker.log").open("wb")
             self.process = subprocess.Popen([str(worker_python or sys.executable), "-m", "npu.worker",
@@ -53,14 +56,18 @@ class PartitionRuntime:
             self.reader = threading.Thread(target=self._read, daemon=True)
             self.reader.start()
             response = self._response()
-            if response.get("event") != "READY" or response.get("backend") != backend:
+            if (response.get("event") != "READY" or response.get("backend") != backend or
+                    response.get("protocol_version") != PROTOCOL_VERSION or
+                    response.get("buffer_plan") != plan):
                 raise ValueError("Worker readiness mismatch")
             if backend == "npu" and any(response["bindings"].get(name, 0) <= 0 for name in names):
                 raise ValueError("Missing runtime NPU compute binding")
             self.readiness = response
             self.provenance = dict(bundle_sha256=sha(Path(bundle) / "manifest.json"),
                 bridge_sha256=sha(library) if library is not None else None,
-                shared_buffers_bytes=sum(x.nbytes for pair in self.buffers.values() for x in pair),
+                buffer_policy=buffer_policy, shared_buffers_bytes=plan["allocated_bytes"],
+                legacy_buffers_bytes=plan["logical_io_bytes"], protocol_version=PROTOCOL_VERSION,
+                input_packing="direct layout copy into IPC buffer, no contiguous float temporary",
                 transfer_scope="shared-file IPC plus SDK copies; not proven zero-copy")
         except BaseException:
             self.close()
@@ -94,9 +101,8 @@ class PartitionRuntime:
             part = self.parts[name]
             if list(value.shape) != part["meta"]["input_shape"]:
                 raise ValueError("Static network shape mismatch for " + name)
-            wire = to_wire(value, part["input"])
             input_buffer, output_buffer = self.buffers[name]
-            input_buffer[:] = wire
+            to_wire(value, part["input"], out=input_buffer)
             packed = time.perf_counter()
             command = dict(command="FORWARD", name=name, sequence=self.sequence)
             try:
@@ -168,9 +174,8 @@ class PartitionRuntime:
                 self.reader.join(timeout=2)
             self.process.stdin.close()
             self.process.stdout.close()
-        for pair in self.buffers.values():
-            for array in pair:
-                array._mmap.close()
+        if self.arena is not None:
+            self.arena.close()
         if self.log:
             self.log.close()
 
