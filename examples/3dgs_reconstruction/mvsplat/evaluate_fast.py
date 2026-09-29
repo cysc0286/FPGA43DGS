@@ -10,6 +10,25 @@ from common import new_directory, save, sha
 from evaluate import framebuffer, local_error, quality
 
 
+def first_frame_timing(pipeline):
+    """Normalize pre- and post-input-receipt timing records without inventing a receipt."""
+    if "first_verified_fpga_target" in pipeline:
+        return dict(
+            input_end_to_first_verified_fpga_frame_seconds=pipeline.get(
+                "input_end_to_first_verified_fpga_frame_seconds"),
+            pipeline_start_to_first_verified_fpga_frame_seconds=pipeline[
+                "pipeline_start_to_first_verified_fpga_frame_seconds"],
+            first_verified_fpga_target=pipeline["first_verified_fpga_target"],
+        )
+    return dict(
+        input_end_to_first_verified_fpga_frame_seconds=None,
+        pipeline_start_to_first_verified_fpga_frame_seconds=pipeline[
+            "video_to_first_fpga_image_seconds"],
+        first_verified_fpga_target=None,
+        legacy_timing_note="No input-end receipt was recorded by this historical run.",
+    )
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--run", type=Path, required=True)
@@ -25,9 +44,10 @@ def main():
     if meta["input_video_sha256"] != pipeline["input_video_sha256"]:
         raise ValueError("Input video hashes differ")
     gates = json.loads(Path(__file__).with_name("acceptance.json").read_text())
+    timing = first_frame_timing(pipeline)
     result = dict(video_sha256=pipeline["input_video_sha256"], pose_mode=pipeline["pose_mode"],
                   focal_ratio=pipeline["focal_ratio"], calibration=meta["calibration"],
-                  first_fpga_image_seconds=pipeline["video_to_first_fpga_image_seconds"],
+                  timing=timing,
                   gaussians=pipeline["gaussians"], stage_measurements=pipeline["stages"],
                   views={}, all_views_pass=True, scope=meta["target_scope"],
                   quality_gate=gates["reconstruction_vs_rgb"],
@@ -89,7 +109,7 @@ def main():
     canvas.save(out / "comparison.png")
     save(out / "quality_and_timing.json", result)
     print(json.dumps(dict(all_views_pass=result["all_views_pass"],
-                          first_fpga_image_seconds=result["first_fpga_image_seconds"],
+                          timing=result["timing"],
                           views={name: dict(psnr_db=value["fpga_vs_video"]["psnr_db"],
                                             ssim=value["fpga_vs_video"]["ssim_rgb_gaussian_11_sigma1p5_valid"],
                                             passed=value["passed"])

@@ -1,0 +1,19 @@
+{
+  "complete": true,
+  "stages": [
+    {
+      "name": "prepare_fast",
+      "wall_seconds": 10.363808510000126
+    },
+    {
+      "name": "infer",
+      "wall_seconds": 27.559407029999875
+    },
+    {
+      "name": "export",
+      "wall_seconds": 4.954391760000135
+    }
+  ],
+  "execution": "One process; same geometry, weights and adapter; no training",
+  "wall_seconds": 53.92613810000012
+}

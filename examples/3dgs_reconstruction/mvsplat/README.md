@@ -2,7 +2,7 @@
 
 本目录将固定权重 MVSplat 作为当前主线的高斯生成实现。完整路径使用真实 COLMAP 产物；快速候选直接从视频估计两视图几何。两者输出相同的 `model.ply`、`FLCAM001` 相机和 `manifest.json`，接入冻结 CPU+FPGA 渲染包。原 OpenSplat 分阶段训练代码保留为历史对照。
 
-当前两种板端路径均已执行成功。完整路径三目标视角质量过门槛、首图 249.43 秒；快速单进程候选首图 66.68 秒，但第一视角 19.45 dB，未过 20 dB 门槛。用户当前允许约一分钟，优先部署完整功能，速度后续优化；**一分钟与三视角质量同时达标尚未实现**。详见 [快速候选验证](FAST_VALIDATION.md) 与 [完整基线验证](VALIDATION.md)。
+当前两种板端路径均已执行成功。完整路径三目标视角质量过门槛，历史入口到首图为 249.43 秒；快速单进程候选历史入口到首图为 66.68 秒，但第一视角 19.45 dB，未过 20 dB 门槛。新增的板端“输入结束到首张图哈希核验”同环境对照为两线程 74.04 秒、四线程 71.74 秒（短 3.1%）；四线程另一次探索记录为 69.88 秒。每配置样本很少，且视频已预置于板端。**一分钟与三视角质量同时达标尚未实现**。详见 [快速候选验证](FAST_VALIDATION.md) 与 [完整基线验证](VALIDATION.md)。
 
 板端目标链：
 
@@ -70,20 +70,24 @@ python examples/3dgs_reconstruction/pipeline.py reconstruct --video /path/to/vid
 快速候选使用同一入口，追加以下参数：
 
 ```text
-python examples/3dgs_reconstruction/pipeline.py reconstruct --video /path/to/video.mp4 --out NEW_FAST_RUN --size 128 --threads 2 --pose-mode fast_pair --fused --focal-ratio 0.9 --repeats 1
+python examples/3dgs_reconstruction/pipeline.py reconstruct --video /path/to/video.mp4 --out NEW_FAST_RUN --size 128 --threads 4 --pose-mode fast_pair --fused --focal-ratio 0.9 --repeats 1
 ```
 
 `--repeats` 控制渲染验证次数，不改变首次出图的计时边界。快速路径默认按视频长度选首尾参考帧与四分之一、中点、四分之三目标帧；需要至少五个不重叠索引。它仅从一对图像生成局部高斯，不包含全视频多组融合、覆盖率估计或任意长视频的完整场景建图。第一/最后帧无共同视野、纯旋转、运动物体或弱纹理可能导致失败；不要因此降低几何内点门槛。
+
+如需采用用户约定的计时口径，在板端收到视频最后一帧、文件写入完成时记录板端 Unix 秒时间戳，并给上述入口追加 `--input-ended-at-epoch TIMESTAMP`。`pipeline_result.json` 的 `input_end_to_first_verified_fpga_frame_seconds` 以该事件为起点，以指定目标视角第一张 FPGA 帧生成并通过 SHA256 校验为终点。未传时间戳时此值缺失，历史 `video_to_first_fpga_image_seconds` 只表示旧版入口到首图，不能当作输入结束时间。新测试用预置视频模拟接收完成事件，不计视频复制/上传；当前 2 视图局部模型也不代表整段视频覆盖完成。
 
 板端已部署目录为 `/root/fpga43dgs_reconstruction/mvsplat_arm_20260929`。进入该目录后设置现有私有 CPU 环境：
 
 ```sh
 export PATH=/root/fpga43dgs_reconstruction/arm_env/bin:$PATH
 export LD_LIBRARY_PATH=/root/fpga43dgs_reconstruction/arm_env/lib
-export LD_PRELOAD=/root/fpga43dgs_reconstruction/arm_env/lib/libgomp.so.1
+export LD_PRELOAD="/root/fpga43dgs_reconstruction/arm_env/lib/libgomp.so.1 /root/fpga43dgs_reconstruction/arm_env/lib/python3.11/site-packages/torch.libs/libgomp-58a43326.so.1.0.0"
 export PYTHONPATH="$PWD/deps"
 export OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 MKL_NUM_THREADS=2
 ```
+
+复跑四线程快速候选时，同步设置 `OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 MKL_NUM_THREADS=4`，并传 `--threads 4`。最新运行记录保存解释器、显式线程数和这些白名单环境变量；预加载两个 OpenMP 库是本轮受控对照使用的设置。库路径对应当前锁定的 Python 3.11/Torch 2.7.1 环境，升级依赖后需重新核验。
 
 此配置依赖当前板上已验证的 ARM CPU Torch 2.7.1/OpenCV/pycolmap 环境和冻结渲染包。仓库中的 Python 源码不能替代 ARM 二进制依赖、FPGA BOOT 或权重。重新部署使用 `deploy.py`，先准备其要求的官方源码、权重和 ARM 离线 wheels；不要复制电脑的虚拟环境到板子。
 

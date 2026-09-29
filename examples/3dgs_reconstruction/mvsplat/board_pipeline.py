@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -33,6 +34,8 @@ def build_parser(*, add_help=True):
     p.add_argument("--fused", action="store_true", help="Run fast_pair preparation/inference/export in one process")
     p.add_argument("--renderer", type=Path, default=Path("/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928"))
     p.add_argument("--repeats", type=int, default=3)
+    p.add_argument("--input-ended-at-epoch", type=float,
+                   help="Wall-clock time recorded when the board received the final input frame")
     return p
 
 
@@ -45,6 +48,9 @@ def main(argv=None):
         p.error("Invalid input, threads or repeat count")
     if a.fused and a.pose_mode != "fast_pair":
         p.error("--fused requires --pose-mode fast_pair")
+    if a.input_ended_at_epoch is not None and (not math.isfinite(a.input_ended_at_epoch)
+            or a.input_ended_at_epoch <= 0 or a.input_ended_at_epoch > time.time()):
+        p.error("--input-ended-at-epoch must be a finite, positive past receipt time")
     a.out.mkdir(parents=True, exist_ok=False)
     source = Path(__file__).resolve().parent
     runtime = source.parent
@@ -54,6 +60,11 @@ def main(argv=None):
                   input_video_sha256=sha(a.video), video=str(a.video), size=a.size,
                   pose_mode=a.pose_mode, fused=a.fused,
                   focal_ratio=a.focal_ratio if a.pose_mode == "fast_pair" else None,
+                  input_ended_at_epoch=a.input_ended_at_epoch,
+                  execution_environment=dict(python=sys.executable, python_version=platform.python_version(),
+                      threads=a.threads, environment={k: os.environ.get(k) for k in
+                      ("LD_LIBRARY_PATH", "LD_PRELOAD", "PYTHONPATH", "OMP_NUM_THREADS",
+                       "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS")}),
                   runtime_files_sha256={str(f.relative_to(runtime)):sha(f) for f in source.glob("*.py")},
                   stages=[], renderer_runs=[])
     def stage(name, command, *, env=None, timeout=600):
@@ -112,12 +123,18 @@ def main(argv=None):
                     folder = a.out/"board"/name
                     stage(name, ["/usr/bin/python3", a.renderer/"render.py", "--model", artifacts/"renderer_input/model.ply",
                                  "--camera", artifacts/"renderer_input"/camera["file"], "--out", folder, "--backend", backend], env=render_env)
-                    if first:
-                        record["video_to_first_fpga_image_seconds"] = time.perf_counter()-start
-                        first = False
                     value = json.loads((folder/"result.json").read_text())
                     if not value["complete"] or value["frame_sha256"] != sha(folder/"frame.bin"):
                         raise ValueError("Incomplete render or framebuffer hash changed")
+                    if first and backend == "fpga":
+                        verified_at = time.time()
+                        record["first_verified_fpga_target"] = dict(camera=camera["file"], directory=name,
+                                                                     frame_sha256=value["frame_sha256"],
+                                                                     completed_at_epoch=verified_at)
+                        record["pipeline_start_to_first_verified_fpga_frame_seconds"] = time.perf_counter()-start
+                        if a.input_ended_at_epoch is not None:
+                            record["input_end_to_first_verified_fpga_frame_seconds"] = verified_at-a.input_ended_at_epoch
+                        first = False
                     record["renderer_runs"].append(dict(directory=name, camera=camera["file"], warmup=repeat == -1, **value))
         record["complete"] = True
         record["gaussians"] = metadata["gaussians"]

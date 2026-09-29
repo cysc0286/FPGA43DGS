@@ -1,0 +1,527 @@
+{
+  "video_sha256": "0a7e3c684e917dd937ae1ec6c64f770c111b939f08f020b66965c1fccf9ae86a",
+  "pose_mode": "fast_pair",
+  "focal_ratio": 0.9,
+  "calibration": {
+    "kind": "approximate",
+    "focal_ratio": 0.9,
+    "focal_px": 432.0,
+    "intrinsic": [
+      [
+        432.0,
+        0.0,
+        239.5
+      ],
+      [
+        0.0,
+        432.0,
+        179.5
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion": "assumed zero"
+  },
+  "timing": {
+    "input_end_to_first_verified_fpga_frame_seconds": 71.73525762557983,
+    "pipeline_start_to_first_verified_fpga_frame_seconds": 71.29729830999986,
+    "first_verified_fpga_target": {
+      "camera": "frame_000007.bin",
+      "directory": "frame_000007_fpga_warmup",
+      "frame_sha256": "1e47daa80f10c77cda8740403b9dca2d546acc3ab380b4f091a3b6ac38f84790",
+      "completed_at_epoch": 1773376458.659528
+    }
+  },
+  "gaussians": 32768,
+  "stage_measurements": [
+    {
+      "name": "reconstruct_fast",
+      "status": "passed",
+      "returncode": 0,
+      "command": [
+        "/root/fpga43dgs_reconstruction/arm_env/bin/python3",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/mvsplat/reconstruct_fast.py",
+        "--video",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/input_video_threads4_v4.mp4",
+        "--out",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction",
+        "--size",
+        "128",
+        "--threads",
+        "4",
+        "--focal-ratio",
+        "0.9",
+        "--weights",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/weights/re10k.ckpt",
+        "--vendor",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/vendor/MVSplat_reference"
+      ],
+      "wall_seconds": 61.16595520999999,
+      "child_cpu_seconds": 84.93648599999999,
+      "peak_process_tree_rss_mib_sampled": 582.046875,
+      "samples": 1183,
+      "child_maxrss_mib_kernel": 582.046875,
+      "min_available_mib_sampled": 266.125,
+      "sample_interval_seconds": 0.05,
+      "limits": {
+        "rss_mib": 650.0,
+        "reserve_mib": 128.0,
+        "timeout": 600.0
+      },
+      "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+    },
+    {
+      "name": "frame_000007_fpga_warmup",
+      "status": "passed",
+      "returncode": 0,
+      "command": [
+        "/usr/bin/python3",
+        "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928/render.py",
+        "--model",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/model.ply",
+        "--camera",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/frame_000007.bin",
+        "--out",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/board/frame_000007_fpga_warmup",
+        "--backend",
+        "fpga"
+      ],
+      "wall_seconds": 9.23599748999959,
+      "child_cpu_seconds": 3.788539,
+      "peak_process_tree_rss_mib_sampled": 14.21484375,
+      "samples": 179,
+      "child_maxrss_mib_kernel": 14.2421875,
+      "min_available_mib_sampled": 721.578125,
+      "sample_interval_seconds": 0.05,
+      "limits": {
+        "rss_mib": 650.0,
+        "reserve_mib": 128.0,
+        "timeout": 600.0
+      },
+      "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+    },
+    {
+      "name": "frame_000007_fpga_0",
+      "status": "passed",
+      "returncode": 0,
+      "command": [
+        "/usr/bin/python3",
+        "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928/render.py",
+        "--model",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/model.ply",
+        "--camera",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/frame_000007.bin",
+        "--out",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/board/frame_000007_fpga_0",
+        "--backend",
+        "fpga"
+      ],
+      "wall_seconds": 3.7672871199997644,
+      "child_cpu_seconds": 3.70115,
+      "peak_process_tree_rss_mib_sampled": 14.33203125,
+      "samples": 73,
+      "child_maxrss_mib_kernel": 14.453125,
+      "min_available_mib_sampled": 721.64453125,
+      "sample_interval_seconds": 0.05,
+      "limits": {
+        "rss_mib": 650.0,
+        "reserve_mib": 128.0,
+        "timeout": 600.0
+      },
+      "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+    },
+    {
+      "name": "frame_000007_cpu_dense_warmup",
+      "status": "passed",
+      "returncode": 0,
+      "command": [
+        "/usr/bin/python3",
+        "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928/render.py",
+        "--model",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/model.ply",
+        "--camera",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/frame_000007.bin",
+        "--out",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/board/frame_000007_cpu_dense_warmup",
+        "--backend",
+        "cpu_dense"
+      ],
+      "wall_seconds": 3.869233079999958,
+      "child_cpu_seconds": 4.254579,
+      "peak_process_tree_rss_mib_sampled": 14.27734375,
+      "samples": 75,
+      "child_maxrss_mib_kernel": 14.27734375,
+      "min_available_mib_sampled": 721.0859375,
+      "sample_interval_seconds": 0.05,
+      "limits": {
+        "rss_mib": 650.0,
+        "reserve_mib": 128.0,
+        "timeout": 600.0
+      },
+      "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+    },
+    {
+      "name": "frame_000007_cpu_dense_0",
+      "status": "passed",
+      "returncode": 0,
+      "command": [
+        "/usr/bin/python3",
+        "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928/render.py",
+        "--model",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/model.ply",
+        "--camera",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/frame_000007.bin",
+        "--out",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/board/frame_000007_cpu_dense_0",
+        "--backend",
+        "cpu_dense"
+      ],
+      "wall_seconds": 3.8682496400001583,
+      "child_cpu_seconds": 4.255278000000001,
+      "peak_process_tree_rss_mib_sampled": 14.22265625,
+      "samples": 75,
+      "child_maxrss_mib_kernel": 14.22265625,
+      "min_available_mib_sampled": 721.72265625,
+      "sample_interval_seconds": 0.05,
+      "limits": {
+        "rss_mib": 650.0,
+        "reserve_mib": 128.0,
+        "timeout": 600.0
+      },
+      "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+    },
+    {
+      "name": "frame_000015_fpga_warmup",
+      "status": "passed",
+      "returncode": 0,
+      "command": [
+        "/usr/bin/python3",
+        "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928/render.py",
+        "--model",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/model.ply",
+        "--camera",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/frame_000015.bin",
+        "--out",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/board/frame_000015_fpga_warmup",
+        "--backend",
+        "fpga"
+      ],
+      "wall_seconds": 3.7724468100000195,
+      "child_cpu_seconds": 3.6867769999999997,
+      "peak_process_tree_rss_mib_sampled": 14.33203125,
+      "samples": 73,
+      "child_maxrss_mib_kernel": 14.33203125,
+      "min_available_mib_sampled": 721.16015625,
+      "sample_interval_seconds": 0.05,
+      "limits": {
+        "rss_mib": 650.0,
+        "reserve_mib": 128.0,
+        "timeout": 600.0
+      },
+      "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+    },
+    {
+      "name": "frame_000015_fpga_0",
+      "status": "passed",
+      "returncode": 0,
+      "command": [
+        "/usr/bin/python3",
+        "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928/render.py",
+        "--model",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/model.ply",
+        "--camera",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/frame_000015.bin",
+        "--out",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/board/frame_000015_fpga_0",
+        "--backend",
+        "fpga"
+      ],
+      "wall_seconds": 3.7674417100001847,
+      "child_cpu_seconds": 3.681664,
+      "peak_process_tree_rss_mib_sampled": 14.2578125,
+      "samples": 73,
+      "child_maxrss_mib_kernel": 14.30859375,
+      "min_available_mib_sampled": 720.57421875,
+      "sample_interval_seconds": 0.05,
+      "limits": {
+        "rss_mib": 650.0,
+        "reserve_mib": 128.0,
+        "timeout": 600.0
+      },
+      "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+    },
+    {
+      "name": "frame_000015_cpu_dense_warmup",
+      "status": "passed",
+      "returncode": 0,
+      "command": [
+        "/usr/bin/python3",
+        "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928/render.py",
+        "--model",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/model.ply",
+        "--camera",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/frame_000015.bin",
+        "--out",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/board/frame_000015_cpu_dense_warmup",
+        "--backend",
+        "cpu_dense"
+      ],
+      "wall_seconds": 3.8696007100002134,
+      "child_cpu_seconds": 4.242885,
+      "peak_process_tree_rss_mib_sampled": 14.21875,
+      "samples": 75,
+      "child_maxrss_mib_kernel": 14.21875,
+      "min_available_mib_sampled": 720.9921875,
+      "sample_interval_seconds": 0.05,
+      "limits": {
+        "rss_mib": 650.0,
+        "reserve_mib": 128.0,
+        "timeout": 600.0
+      },
+      "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+    },
+    {
+      "name": "frame_000015_cpu_dense_0",
+      "status": "passed",
+      "returncode": 0,
+      "command": [
+        "/usr/bin/python3",
+        "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928/render.py",
+        "--model",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/model.ply",
+        "--camera",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/frame_000015.bin",
+        "--out",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/board/frame_000015_cpu_dense_0",
+        "--backend",
+        "cpu_dense"
+      ],
+      "wall_seconds": 3.8682176500001333,
+      "child_cpu_seconds": 4.246229,
+      "peak_process_tree_rss_mib_sampled": 14.14453125,
+      "samples": 75,
+      "child_maxrss_mib_kernel": 14.14453125,
+      "min_available_mib_sampled": 721.17578125,
+      "sample_interval_seconds": 0.05,
+      "limits": {
+        "rss_mib": 650.0,
+        "reserve_mib": 128.0,
+        "timeout": 600.0
+      },
+      "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+    },
+    {
+      "name": "frame_000022_fpga_warmup",
+      "status": "passed",
+      "returncode": 0,
+      "command": [
+        "/usr/bin/python3",
+        "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928/render.py",
+        "--model",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/model.ply",
+        "--camera",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/frame_000022.bin",
+        "--out",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/board/frame_000022_fpga_warmup",
+        "--backend",
+        "fpga"
+      ],
+      "wall_seconds": 3.767849159999969,
+      "child_cpu_seconds": 3.6735219999999997,
+      "peak_process_tree_rss_mib_sampled": 14.234375,
+      "samples": 73,
+      "child_maxrss_mib_kernel": 14.234375,
+      "min_available_mib_sampled": 721.05078125,
+      "sample_interval_seconds": 0.05,
+      "limits": {
+        "rss_mib": 650.0,
+        "reserve_mib": 128.0,
+        "timeout": 600.0
+      },
+      "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+    },
+    {
+      "name": "frame_000022_fpga_0",
+      "status": "passed",
+      "returncode": 0,
+      "command": [
+        "/usr/bin/python3",
+        "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928/render.py",
+        "--model",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/model.ply",
+        "--camera",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/frame_000022.bin",
+        "--out",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/board/frame_000022_fpga_0",
+        "--backend",
+        "fpga"
+      ],
+      "wall_seconds": 3.765494430000217,
+      "child_cpu_seconds": 3.6781390000000003,
+      "peak_process_tree_rss_mib_sampled": 14.26171875,
+      "samples": 73,
+      "child_maxrss_mib_kernel": 14.26171875,
+      "min_available_mib_sampled": 720.99609375,
+      "sample_interval_seconds": 0.05,
+      "limits": {
+        "rss_mib": 650.0,
+        "reserve_mib": 128.0,
+        "timeout": 600.0
+      },
+      "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+    },
+    {
+      "name": "frame_000022_cpu_dense_warmup",
+      "status": "passed",
+      "returncode": 0,
+      "command": [
+        "/usr/bin/python3",
+        "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928/render.py",
+        "--model",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/model.ply",
+        "--camera",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/frame_000022.bin",
+        "--out",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/board/frame_000022_cpu_dense_warmup",
+        "--backend",
+        "cpu_dense"
+      ],
+      "wall_seconds": 3.872105769999962,
+      "child_cpu_seconds": 4.238585,
+      "peak_process_tree_rss_mib_sampled": 14.046875,
+      "samples": 75,
+      "child_maxrss_mib_kernel": 14.046875,
+      "min_available_mib_sampled": 721.41015625,
+      "sample_interval_seconds": 0.05,
+      "limits": {
+        "rss_mib": 650.0,
+        "reserve_mib": 128.0,
+        "timeout": 600.0
+      },
+      "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+    },
+    {
+      "name": "frame_000022_cpu_dense_0",
+      "status": "passed",
+      "returncode": 0,
+      "command": [
+        "/usr/bin/python3",
+        "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928/render.py",
+        "--model",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/model.ply",
+        "--camera",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/reconstruction/renderer_input/frame_000022.bin",
+        "--out",
+        "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/full_chain_fast_threads4_v4/board/frame_000022_cpu_dense_0",
+        "--backend",
+        "cpu_dense"
+      ],
+      "wall_seconds": 3.8693974500001787,
+      "child_cpu_seconds": 4.242853,
+      "peak_process_tree_rss_mib_sampled": 14.23828125,
+      "samples": 75,
+      "child_maxrss_mib_kernel": 14.44921875,
+      "min_available_mib_sampled": 720.98046875,
+      "sample_interval_seconds": 0.05,
+      "limits": {
+        "rss_mib": 650.0,
+        "reserve_mib": 128.0,
+        "timeout": 600.0
+      },
+      "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+    }
+  ],
+  "views": {
+    "frame_000007": {
+      "fpga_vs_video": {
+        "psnr_db": 19.45186915469186,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.8044606524314266,
+        "mae": 0.06569594734074818,
+        "max_abs_error": 0.8664088828890931
+      },
+      "fpga_vs_cpu_dense": {
+        "psnr_db": 54.772129837135246,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.999622451984296,
+        "mae": 0.0008478077720705338,
+        "max_abs_error": 0.09137299656867981
+      },
+      "local_error": {
+        "rgb_mae": 0.06569594734074818,
+        "pixel_rgb_mae_p95": 0.20484978170955878,
+        "worst_16x16_tile_rgb_mae": 0.29526388918360075,
+        "worst_16x16_tile_xy": [
+          112,
+          112
+        ]
+      },
+      "fpga_timed_ms": 272.25104,
+      "cpu_dense_timed_ms": 372.51965,
+      "fpga_timed_speedup": 1.3682946812618237,
+      "passed": false
+    },
+    "frame_000015": {
+      "fpga_vs_video": {
+        "psnr_db": 20.222318256295946,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.7851344704682087,
+        "mae": 0.04667660396285903,
+        "max_abs_error": 0.9368435728783701
+      },
+      "fpga_vs_cpu_dense": {
+        "psnr_db": 52.357916302196216,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.9995022078361551,
+        "mae": 0.0010043550859274812,
+        "max_abs_error": 0.08963140845298767
+      },
+      "local_error": {
+        "rgb_mae": 0.04667660396285903,
+        "pixel_rgb_mae_p95": 0.17204526016135605,
+        "worst_16x16_tile_rgb_mae": 0.23285604730930204,
+        "worst_16x16_tile_xy": [
+          0,
+          64
+        ]
+      },
+      "fpga_timed_ms": 272.15976,
+      "cpu_dense_timed_ms": 372.7445,
+      "fpga_timed_speedup": 1.3695797644736312,
+      "passed": true
+    },
+    "frame_000022": {
+      "fpga_vs_video": {
+        "psnr_db": 21.348635371575565,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.7842314982301849,
+        "mae": 0.043374023466672317,
+        "max_abs_error": 0.8993070714613971
+      },
+      "fpga_vs_cpu_dense": {
+        "psnr_db": 54.27899610426182,
+        "ssim_rgb_gaussian_11_sigma1p5_valid": 0.9995356337675032,
+        "mae": 0.0009452481747563487,
+        "max_abs_error": 0.07515618205070496
+      },
+      "local_error": {
+        "rgb_mae": 0.043374023466672317,
+        "pixel_rgb_mae_p95": 0.14653187870200132,
+        "worst_16x16_tile_rgb_mae": 0.15167811968747308,
+        "worst_16x16_tile_xy": [
+          0,
+          64
+        ]
+      },
+      "fpga_timed_ms": 271.98025,
+      "cpu_dense_timed_ms": 372.47575,
+      "fpga_timed_speedup": 1.3694955791826795,
+      "passed": true
+    }
+  },
+  "all_views_pass": false,
+  "scope": "Targets excluded from network context; positioned with two-view landmarks and PnP, not full SfM.",
+  "quality_gate": {
+    "minimum_psnr_db": 20.0,
+    "minimum_ssim": 0.7
+  },
+  "renderer_comparison": "FPGA versus board CPU Dense; no independent SH reference in this fast-path report"
+}

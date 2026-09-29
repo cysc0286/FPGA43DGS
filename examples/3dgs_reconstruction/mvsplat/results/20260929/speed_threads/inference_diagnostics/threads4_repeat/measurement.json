@@ -1,0 +1,33 @@
+{
+  "status": "passed",
+  "returncode": 0,
+  "command": [
+    "python3",
+    "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/mvsplat/infer.py",
+    "--input",
+    "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/full_chain_fast_fused_v2/reconstruction/input",
+    "--weights",
+    "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/weights/re10k.ckpt",
+    "--vendor",
+    "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/vendor/MVSplat_reference",
+    "--out",
+    "/root/fpga43dgs_reconstruction/mvsplat_arm_20260929/startup_opt_20260929/threads4_repeat",
+    "--threads",
+    "4",
+    "--depth-chunk",
+    "16"
+  ],
+  "wall_seconds": 40.27718596,
+  "child_cpu_seconds": 70.546379,
+  "peak_process_tree_rss_mib_sampled": 542.5234375,
+  "samples": 779,
+  "child_maxrss_mib_kernel": 545.1015625,
+  "min_available_mib_sampled": 293.72265625,
+  "sample_interval_seconds": 0.05,
+  "limits": {
+    "rss_mib": 650.0,
+    "reserve_mib": 128.0,
+    "timeout": 180.0
+  },
+  "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+}
