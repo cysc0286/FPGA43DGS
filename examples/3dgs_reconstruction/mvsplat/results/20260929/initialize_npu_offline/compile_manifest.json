@@ -1,0 +1,1335 @@
+{
+  "schema": "mvsplat_compiled_v1",
+  "source_manifest_sha256": "f89115f773e5811f81a3197953a05c7c3d2a4c944daf4cc464553f193695828b",
+  "weight_sha256": "83d0d9eaa753fa4a1f925288dc1f90b8c3297fad0ab0f6ed1f11a1c5946da25a",
+  "input_shape": [
+    1,
+    2,
+    3,
+    128,
+    128
+  ],
+  "npu_executed": false,
+  "partitions": {
+    "backbone_cnn": {
+      "complete": true,
+      "stages": [
+        {
+          "stage": "parse",
+          "exit": 0,
+          "seconds": 1.5309999999590218,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-parse.exe",
+            "--net_name",
+            "backbone_cnn",
+            "--network",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_export_20260929\\backbone_cnn\\model.onnx",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\backbone_cnn",
+            "--framework",
+            "onnx",
+            "--target",
+            "zhuge",
+            "--inputs",
+            "2,128,128,3",
+            "--inputs_layout",
+            "NHWC",
+            "--inputs_dtype",
+            "FP32",
+            "--pre_method",
+            "nop",
+            "--pre_scale",
+            "1,1,1",
+            "--pre_mean",
+            "0,0,0",
+            "--channel_swap",
+            "0,1,2"
+          ],
+          "compiler_sha256": "d40d3de1ea56d180a43a31d1914aecca4b0f6ec90d72d95cac106e8bf550a1f4"
+        },
+        {
+          "stage": "optimize",
+          "exit": 0,
+          "seconds": 12.327999999979511,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-optimize.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\backbone_cnn\\backbone_cnn_parsed.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\backbone_cnn\\backbone_cnn_parsed.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\backbone_cnn",
+            "--target",
+            "zhuge"
+          ],
+          "compiler_sha256": "463020a499af7ed9e72e05bf1001cbb918d74c6c3997bc3870da2cc5b773d0f4"
+        },
+        {
+          "stage": "quantize",
+          "exit": 0,
+          "seconds": 2.6100000001024455,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-quantize.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\backbone_cnn\\backbone_cnn_optimized.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\backbone_cnn\\backbone_cnn_optimized.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\backbone_cnn",
+            "--target",
+            "zhuge",
+            "--qdtype",
+            "tf32",
+            "--no_transinput",
+            "true",
+            "--no_imagemake",
+            "true"
+          ],
+          "compiler_sha256": "10e8ed1b34b1529d2e9a28f2cd7f684405584eb96f920fd728a8e5b4a77d6ebf"
+        },
+        {
+          "stage": "adapt",
+          "exit": 0,
+          "seconds": 4.469000000040978,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-adapt.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\backbone_cnn\\backbone_cnn_quantized.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\backbone_cnn\\backbone_cnn_quantized.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\backbone_cnn",
+            "--target",
+            "zhuge"
+          ],
+          "compiler_sha256": "463020a499af7ed9e72e05bf1001cbb918d74c6c3997bc3870da2cc5b773d0f4"
+        },
+        {
+          "stage": "generate",
+          "exit": 0,
+          "seconds": 7.75,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-generate.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\backbone_cnn\\backbone_cnn_adapted.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\backbone_cnn\\backbone_cnn_adapted.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\backbone_cnn"
+          ],
+          "compiler_sha256": "ef336391e6b668f0ef58e47dde90b10bab026415fc7c3fd3d3eb5b8c683bdc21"
+        }
+      ],
+      "export": {
+        "path": "backbone.backbone",
+        "complete": true,
+        "input_shape": [
+          2,
+          3,
+          128,
+          128
+        ],
+        "output_shape": [
+          2,
+          128,
+          32,
+          32
+        ],
+        "returns_list": true,
+        "logical_layout": "NCHW",
+        "dtype": "float32",
+        "graph_sha256": "e2855af1de432468ad59cfdf5e89fcd7813a6fbb150cf63ef987db3693199295",
+        "oracle_sha256": "b3d3038c03016d37c6a38466d7298c66e141923bc116e4baa86fc8a32abe1168",
+        "parameters": 1049120,
+        "host_onnx_seconds": 0.0866878000088036,
+        "max_abs_error": 5.602836608886719e-06,
+        "mean_abs_error": 4.5526422809416545e-07,
+        "host_onnx_passed": true,
+        "tolerance": {
+          "rtol": 0.002,
+          "atol": 0.0002
+        },
+        "npu_executed": false
+      },
+      "audit": {
+        "passed": true,
+        "input": {
+          "shape": [
+            2,
+            128,
+            128,
+            3
+          ],
+          "layout": "NHWC",
+          "logical_shape": [
+            2,
+            3,
+            128,
+            128
+          ]
+        },
+        "output": {
+          "shape": [
+            2,
+            32,
+            32,
+            128
+          ],
+          "layout": "NHWC",
+          "logical_shape": [
+            2,
+            128,
+            32,
+            32
+          ]
+        },
+        "hard_ops": 73,
+        "compute": [
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode"
+        ],
+        "host_compute_ops": 0,
+        "compiler_version": "v3.36.1",
+        "graph_sha256": "05450958b06a7e1c42f5dea90ac854e4a29cc0ab2d2bf1815d0faaa5cbe5589f",
+        "raw_sha256": "4b6d5f5326bd1c4a25b55b203edbb1fea0e55033be7e755eb7197b80aaa4cdc5",
+        "npu_executed": false
+      },
+      "graph": "backbone_cnn\\backbone_cnn_ZG.json",
+      "raw": "backbone_cnn\\backbone_cnn_ZG.raw",
+      "status": "compiled_not_executed"
+    },
+    "regressor_residual": {
+      "complete": true,
+      "stages": [
+        {
+          "stage": "parse",
+          "exit": 0,
+          "seconds": 0.3600000001024455,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-parse.exe",
+            "--net_name",
+            "regressor_residual",
+            "--network",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_export_20260929\\regressor_residual\\model.onnx",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\regressor_residual",
+            "--framework",
+            "onnx",
+            "--target",
+            "zhuge",
+            "--inputs",
+            "2,32,32,256",
+            "--inputs_layout",
+            "NHWC",
+            "--inputs_dtype",
+            "FP32",
+            "--pre_method",
+            "nop",
+            "--pre_scale",
+            "1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1",
+            "--pre_mean",
+            "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+            "--channel_swap",
+            "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255"
+          ],
+          "compiler_sha256": "d40d3de1ea56d180a43a31d1914aecca4b0f6ec90d72d95cac106e8bf550a1f4"
+        },
+        {
+          "stage": "optimize",
+          "exit": 0,
+          "seconds": 2.5310000001918525,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-optimize.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\regressor_residual\\regressor_residual_parsed.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\regressor_residual\\regressor_residual_parsed.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\regressor_residual",
+            "--target",
+            "zhuge"
+          ],
+          "compiler_sha256": "463020a499af7ed9e72e05bf1001cbb918d74c6c3997bc3870da2cc5b773d0f4"
+        },
+        {
+          "stage": "quantize",
+          "exit": 0,
+          "seconds": 2.078999999910593,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-quantize.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\regressor_residual\\regressor_residual_optimized.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\regressor_residual\\regressor_residual_optimized.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\regressor_residual",
+            "--target",
+            "zhuge",
+            "--qdtype",
+            "tf32",
+            "--no_transinput",
+            "true",
+            "--no_imagemake",
+            "true"
+          ],
+          "compiler_sha256": "10e8ed1b34b1529d2e9a28f2cd7f684405584eb96f920fd728a8e5b4a77d6ebf"
+        },
+        {
+          "stage": "adapt",
+          "exit": 0,
+          "seconds": 4.030999999959022,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-adapt.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\regressor_residual\\regressor_residual_quantized.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\regressor_residual\\regressor_residual_quantized.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\regressor_residual",
+            "--target",
+            "zhuge"
+          ],
+          "compiler_sha256": "463020a499af7ed9e72e05bf1001cbb918d74c6c3997bc3870da2cc5b773d0f4"
+        },
+        {
+          "stage": "generate",
+          "exit": 0,
+          "seconds": 3.422000000020489,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-generate.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\regressor_residual\\regressor_residual_adapted.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\regressor_residual\\regressor_residual_adapted.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\regressor_residual"
+          ],
+          "compiler_sha256": "ef336391e6b668f0ef58e47dde90b10bab026415fc7c3fd3d3eb5b8c683bdc21"
+        }
+      ],
+      "export": {
+        "path": "depth_predictor.regressor_residual",
+        "complete": true,
+        "input_shape": [
+          2,
+          256,
+          32,
+          32
+        ],
+        "output_shape": [
+          2,
+          128,
+          32,
+          32
+        ],
+        "returns_list": false,
+        "logical_layout": "NCHW",
+        "dtype": "float32",
+        "graph_sha256": "b9be100a1aa2e9db7d8ca6ac6e5fe39d7c77a07e05bbc308a9d83d3b1ff08333",
+        "oracle_sha256": "3b4428c0afe8092d715ed7d12d1a3865a1da5f944d0db6f0bc0580277950afe6",
+        "parameters": 32896,
+        "host_onnx_seconds": 0.0051922001875936985,
+        "max_abs_error": 1.9073486328125e-06,
+        "mean_abs_error": 3.4917146507496e-08,
+        "host_onnx_passed": true,
+        "tolerance": {
+          "rtol": 0.002,
+          "atol": 0.0002
+        },
+        "npu_executed": false
+      },
+      "audit": {
+        "passed": true,
+        "input": {
+          "shape": [
+            2,
+            32,
+            32,
+            256
+          ],
+          "layout": "NHWC",
+          "logical_shape": [
+            2,
+            256,
+            32,
+            32
+          ]
+        },
+        "output": {
+          "shape": [
+            2,
+            32,
+            32,
+            128
+          ],
+          "layout": "NHWC",
+          "logical_shape": [
+            2,
+            128,
+            32,
+            32
+          ]
+        },
+        "hard_ops": 8,
+        "compute": [
+          "icraft::xir::Conv2dNode"
+        ],
+        "host_compute_ops": 0,
+        "compiler_version": "v3.36.1",
+        "graph_sha256": "6c0228d4b897a00ab04a3e6ecc5b4a446128bb9343c6c17b45954e4c6c56187c",
+        "raw_sha256": "d99cf4314e148e4b0cb9b00e18cce8d6be27ef0884114a1d6b922d4ace2c6d60",
+        "npu_executed": false
+      },
+      "graph": "regressor_residual\\regressor_residual_ZG.json",
+      "raw": "regressor_residual\\regressor_residual_ZG.raw",
+      "status": "compiled_not_executed"
+    },
+    "depth_head": {
+      "complete": true,
+      "stages": [
+        {
+          "stage": "parse",
+          "exit": 0,
+          "seconds": 0.34399999980814755,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-parse.exe",
+            "--net_name",
+            "depth_head",
+            "--network",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_export_20260929\\depth_head\\model.onnx",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\depth_head",
+            "--framework",
+            "onnx",
+            "--target",
+            "zhuge",
+            "--inputs",
+            "2,32,32,128",
+            "--inputs_layout",
+            "NHWC",
+            "--inputs_dtype",
+            "FP32",
+            "--pre_method",
+            "nop",
+            "--pre_scale",
+            "1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1",
+            "--pre_mean",
+            "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+            "--channel_swap",
+            "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127"
+          ],
+          "compiler_sha256": "d40d3de1ea56d180a43a31d1914aecca4b0f6ec90d72d95cac106e8bf550a1f4"
+        },
+        {
+          "stage": "optimize",
+          "exit": 0,
+          "seconds": 2.780999999959022,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-optimize.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\depth_head\\depth_head_parsed.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\depth_head\\depth_head_parsed.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\depth_head",
+            "--target",
+            "zhuge"
+          ],
+          "compiler_sha256": "463020a499af7ed9e72e05bf1001cbb918d74c6c3997bc3870da2cc5b773d0f4"
+        },
+        {
+          "stage": "quantize",
+          "exit": 0,
+          "seconds": 2.077999999979511,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-quantize.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\depth_head\\depth_head_optimized.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\depth_head\\depth_head_optimized.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\depth_head",
+            "--target",
+            "zhuge",
+            "--qdtype",
+            "tf32",
+            "--no_transinput",
+            "true",
+            "--no_imagemake",
+            "true"
+          ],
+          "compiler_sha256": "10e8ed1b34b1529d2e9a28f2cd7f684405584eb96f920fd728a8e5b4a77d6ebf"
+        },
+        {
+          "stage": "adapt",
+          "exit": 0,
+          "seconds": 3.3910000000614673,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-adapt.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\depth_head\\depth_head_quantized.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\depth_head\\depth_head_quantized.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\depth_head",
+            "--target",
+            "zhuge"
+          ],
+          "compiler_sha256": "463020a499af7ed9e72e05bf1001cbb918d74c6c3997bc3870da2cc5b773d0f4"
+        },
+        {
+          "stage": "generate",
+          "exit": 0,
+          "seconds": 5.625,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-generate.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\depth_head\\depth_head_adapted.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\depth_head\\depth_head_adapted.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\depth_head"
+          ],
+          "compiler_sha256": "ef336391e6b668f0ef58e47dde90b10bab026415fc7c3fd3d3eb5b8c683bdc21"
+        }
+      ],
+      "export": {
+        "path": "depth_predictor.depth_head_lowres",
+        "complete": true,
+        "input_shape": [
+          2,
+          128,
+          32,
+          32
+        ],
+        "output_shape": [
+          2,
+          128,
+          32,
+          32
+        ],
+        "returns_list": false,
+        "logical_layout": "NCHW",
+        "dtype": "float32",
+        "graph_sha256": "7d123d4b279279851812487b3603dc4d4c4f154bda3273c47dd8769ea8aeb245",
+        "oracle_sha256": "c25ba82a4c360fda966a339343c1f305718b1d391c48b790f10360f0d9130a01",
+        "parameters": 590208,
+        "host_onnx_seconds": 0.03344640019349754,
+        "max_abs_error": 3.337860107421875e-05,
+        "mean_abs_error": 2.6882532893068856e-06,
+        "host_onnx_passed": true,
+        "tolerance": {
+          "rtol": 0.002,
+          "atol": 0.0002
+        },
+        "npu_executed": false
+      },
+      "audit": {
+        "passed": true,
+        "input": {
+          "shape": [
+            2,
+            32,
+            32,
+            128
+          ],
+          "layout": "NHWC",
+          "logical_shape": [
+            2,
+            128,
+            32,
+            32
+          ]
+        },
+        "output": {
+          "shape": [
+            2,
+            32,
+            32,
+            128
+          ],
+          "layout": "NHWC",
+          "logical_shape": [
+            2,
+            128,
+            32,
+            32
+          ]
+        },
+        "hard_ops": 12,
+        "compute": [
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode"
+        ],
+        "host_compute_ops": 0,
+        "compiler_version": "v3.36.1",
+        "graph_sha256": "dceee72f9126c4a2241ef19361d5756d369fc47ce44f0705cdf2d59987430f51",
+        "raw_sha256": "99454088fff73e8ee14f0668c3f2aa181dd5820713f9020ca9eab6b75b8c1def",
+        "npu_executed": false
+      },
+      "graph": "depth_head\\depth_head_ZG.json",
+      "raw": "depth_head\\depth_head_ZG.raw",
+      "status": "compiled_not_executed"
+    },
+    "upsampler": {
+      "complete": true,
+      "stages": [
+        {
+          "stage": "parse",
+          "exit": 0,
+          "seconds": 0.9220000000204891,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-parse.exe",
+            "--net_name",
+            "upsampler",
+            "--network",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_export_20260929\\upsampler\\model.onnx",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\upsampler",
+            "--framework",
+            "onnx",
+            "--target",
+            "zhuge",
+            "--inputs",
+            "2,32,32,256",
+            "--inputs_layout",
+            "NHWC",
+            "--inputs_dtype",
+            "FP32",
+            "--pre_method",
+            "nop",
+            "--pre_scale",
+            "1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1",
+            "--pre_mean",
+            "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+            "--channel_swap",
+            "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255"
+          ],
+          "compiler_sha256": "d40d3de1ea56d180a43a31d1914aecca4b0f6ec90d72d95cac106e8bf550a1f4"
+        },
+        {
+          "stage": "optimize",
+          "exit": 0,
+          "seconds": 2.656999999890104,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-optimize.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\upsampler\\upsampler_parsed.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\upsampler\\upsampler_parsed.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\upsampler",
+            "--target",
+            "zhuge"
+          ],
+          "compiler_sha256": "463020a499af7ed9e72e05bf1001cbb918d74c6c3997bc3870da2cc5b773d0f4"
+        },
+        {
+          "stage": "quantize",
+          "exit": 0,
+          "seconds": 1.968000000109896,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-quantize.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\upsampler\\upsampler_optimized.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\upsampler\\upsampler_optimized.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\upsampler",
+            "--target",
+            "zhuge",
+            "--qdtype",
+            "tf32",
+            "--no_transinput",
+            "true",
+            "--no_imagemake",
+            "true"
+          ],
+          "compiler_sha256": "10e8ed1b34b1529d2e9a28f2cd7f684405584eb96f920fd728a8e5b4a77d6ebf"
+        },
+        {
+          "stage": "adapt",
+          "exit": 0,
+          "seconds": 4.062999999849126,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-adapt.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\upsampler\\upsampler_quantized.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\upsampler\\upsampler_quantized.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\upsampler",
+            "--target",
+            "zhuge"
+          ],
+          "compiler_sha256": "463020a499af7ed9e72e05bf1001cbb918d74c6c3997bc3870da2cc5b773d0f4"
+        },
+        {
+          "stage": "generate",
+          "exit": 0,
+          "seconds": 8.141000000061467,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-generate.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\upsampler\\upsampler_adapted.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\upsampler\\upsampler_adapted.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\upsampler"
+          ],
+          "compiler_sha256": "ef336391e6b668f0ef58e47dde90b10bab026415fc7c3fd3d3eb5b8c683bdc21"
+        }
+      ],
+      "export": {
+        "path": "depth_predictor.upsampler",
+        "complete": true,
+        "input_shape": [
+          2,
+          256,
+          32,
+          32
+        ],
+        "output_shape": [
+          2,
+          128,
+          128,
+          128
+        ],
+        "returns_list": false,
+        "logical_layout": "NCHW",
+        "dtype": "float32",
+        "graph_sha256": "2769cece4cac1fcc5bca6c94018d00b81398faeb9747f517bb4ba32ed5c4bfb6",
+        "oracle_sha256": "0cde3cb412bbea150cadac4e1afdb838e84877c3cacd37e00f5dd8cf6004629b",
+        "parameters": 295040,
+        "host_onnx_seconds": 0.043814599979668856,
+        "max_abs_error": 1.8835067749023438e-05,
+        "mean_abs_error": 1.100906246165323e-07,
+        "host_onnx_passed": true,
+        "tolerance": {
+          "rtol": 0.002,
+          "atol": 0.0002
+        },
+        "npu_executed": false
+      },
+      "audit": {
+        "passed": true,
+        "input": {
+          "shape": [
+            2,
+            32,
+            32,
+            256
+          ],
+          "layout": "NHWC",
+          "logical_shape": [
+            2,
+            256,
+            32,
+            32
+          ]
+        },
+        "output": {
+          "shape": [
+            2,
+            128,
+            128,
+            128
+          ],
+          "layout": "NHWC",
+          "logical_shape": [
+            2,
+            128,
+            128,
+            128
+          ]
+        },
+        "hard_ops": 9,
+        "compute": [
+          "icraft::xir::Conv2dNode"
+        ],
+        "host_compute_ops": 0,
+        "compiler_version": "v3.36.1",
+        "graph_sha256": "511748f0f3585f36e19d4c1e56f57b426eac50ded77774c338f9063a58fe9c62",
+        "raw_sha256": "a999b9a6ceb42b58a2ab813d8ad14ca4093cc8e92f1977a3dc3d421f92998714",
+        "npu_executed": false
+      },
+      "graph": "upsampler\\upsampler_ZG.json",
+      "raw": "upsampler\\upsampler_ZG.raw",
+      "status": "compiled_not_executed"
+    },
+    "proj_feature": {
+      "complete": true,
+      "stages": [
+        {
+          "stage": "parse",
+          "exit": 0,
+          "seconds": 0.2970000000204891,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-parse.exe",
+            "--net_name",
+            "proj_feature",
+            "--network",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_export_20260929\\proj_feature\\model.onnx",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\proj_feature",
+            "--framework",
+            "onnx",
+            "--target",
+            "zhuge",
+            "--inputs",
+            "2,128,128,128",
+            "--inputs_layout",
+            "NHWC",
+            "--inputs_dtype",
+            "FP32",
+            "--pre_method",
+            "nop",
+            "--pre_scale",
+            "1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1",
+            "--pre_mean",
+            "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+            "--channel_swap",
+            "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127"
+          ],
+          "compiler_sha256": "d40d3de1ea56d180a43a31d1914aecca4b0f6ec90d72d95cac106e8bf550a1f4"
+        },
+        {
+          "stage": "optimize",
+          "exit": 0,
+          "seconds": 2.719000000040978,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-optimize.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\proj_feature\\proj_feature_parsed.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\proj_feature\\proj_feature_parsed.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\proj_feature",
+            "--target",
+            "zhuge"
+          ],
+          "compiler_sha256": "463020a499af7ed9e72e05bf1001cbb918d74c6c3997bc3870da2cc5b773d0f4"
+        },
+        {
+          "stage": "quantize",
+          "exit": 0,
+          "seconds": 2.547000000020489,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-quantize.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\proj_feature\\proj_feature_optimized.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\proj_feature\\proj_feature_optimized.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\proj_feature",
+            "--target",
+            "zhuge",
+            "--qdtype",
+            "tf32",
+            "--no_transinput",
+            "true",
+            "--no_imagemake",
+            "true"
+          ],
+          "compiler_sha256": "10e8ed1b34b1529d2e9a28f2cd7f684405584eb96f920fd728a8e5b4a77d6ebf"
+        },
+        {
+          "stage": "adapt",
+          "exit": 0,
+          "seconds": 4.233999999938533,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-adapt.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\proj_feature\\proj_feature_quantized.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\proj_feature\\proj_feature_quantized.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\proj_feature",
+            "--target",
+            "zhuge"
+          ],
+          "compiler_sha256": "463020a499af7ed9e72e05bf1001cbb918d74c6c3997bc3870da2cc5b773d0f4"
+        },
+        {
+          "stage": "generate",
+          "exit": 0,
+          "seconds": 5.827999999979511,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-generate.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\proj_feature\\proj_feature_adapted.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\proj_feature\\proj_feature_adapted.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\proj_feature"
+          ],
+          "compiler_sha256": "ef336391e6b668f0ef58e47dde90b10bab026415fc7c3fd3d3eb5b8c683bdc21"
+        }
+      ],
+      "export": {
+        "path": "depth_predictor.proj_feature",
+        "complete": true,
+        "input_shape": [
+          2,
+          128,
+          128,
+          128
+        ],
+        "output_shape": [
+          2,
+          32,
+          128,
+          128
+        ],
+        "returns_list": false,
+        "logical_layout": "NCHW",
+        "dtype": "float32",
+        "graph_sha256": "b10e7c220107a972de27c972ee99d9b46648549c69f660f6cef69b89c5fcf0d0",
+        "oracle_sha256": "ceb0f9ca5e8d0dec5cf89bb771dc5406e67724b4ba97e69dd23da342b68e371e",
+        "parameters": 36896,
+        "host_onnx_seconds": 0.051039099926128983,
+        "max_abs_error": 1.8477439880371094e-06,
+        "mean_abs_error": 5.412150727579501e-08,
+        "host_onnx_passed": true,
+        "tolerance": {
+          "rtol": 0.002,
+          "atol": 0.0002
+        },
+        "npu_executed": false
+      },
+      "audit": {
+        "passed": true,
+        "input": {
+          "shape": [
+            2,
+            128,
+            128,
+            128
+          ],
+          "layout": "NHWC",
+          "logical_shape": [
+            2,
+            128,
+            128,
+            128
+          ]
+        },
+        "output": {
+          "shape": [
+            2,
+            128,
+            128,
+            32
+          ],
+          "layout": "NHWC",
+          "logical_shape": [
+            2,
+            32,
+            128,
+            128
+          ]
+        },
+        "hard_ops": 7,
+        "compute": [
+          "icraft::xir::Conv2dNode"
+        ],
+        "host_compute_ops": 0,
+        "compiler_version": "v3.36.1",
+        "graph_sha256": "049a3e601c481f89865b6d905f0acd7a37c2eb19019d35477cd47a8a41434b72",
+        "raw_sha256": "e408ec9a36ceb71b04e7420585c1dd863d123135df9ca7470abf114565c8ee5d",
+        "npu_executed": false
+      },
+      "graph": "proj_feature\\proj_feature_ZG.json",
+      "raw": "proj_feature\\proj_feature_ZG.raw",
+      "status": "compiled_not_executed"
+    },
+    "to_gaussians": {
+      "complete": true,
+      "stages": [
+        {
+          "stage": "parse",
+          "exit": 0,
+          "seconds": 0.5150000001303852,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-parse.exe",
+            "--net_name",
+            "to_gaussians",
+            "--network",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_export_20260929\\to_gaussians\\model.onnx",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_gaussians",
+            "--framework",
+            "onnx",
+            "--target",
+            "zhuge",
+            "--inputs",
+            "2,128,128,163",
+            "--inputs_layout",
+            "NHWC",
+            "--inputs_dtype",
+            "FP32",
+            "--pre_method",
+            "nop",
+            "--pre_scale",
+            "1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1",
+            "--pre_mean",
+            "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+            "--channel_swap",
+            "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162"
+          ],
+          "compiler_sha256": "d40d3de1ea56d180a43a31d1914aecca4b0f6ec90d72d95cac106e8bf550a1f4"
+        },
+        {
+          "stage": "optimize",
+          "exit": 0,
+          "seconds": 2.531999999890104,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-optimize.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_gaussians\\to_gaussians_parsed.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_gaussians\\to_gaussians_parsed.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_gaussians",
+            "--target",
+            "zhuge"
+          ],
+          "compiler_sha256": "463020a499af7ed9e72e05bf1001cbb918d74c6c3997bc3870da2cc5b773d0f4"
+        },
+        {
+          "stage": "quantize",
+          "exit": 0,
+          "seconds": 2.077999999979511,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-quantize.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_gaussians\\to_gaussians_optimized.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_gaussians\\to_gaussians_optimized.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_gaussians",
+            "--target",
+            "zhuge",
+            "--qdtype",
+            "tf32",
+            "--no_transinput",
+            "true",
+            "--no_imagemake",
+            "true"
+          ],
+          "compiler_sha256": "10e8ed1b34b1529d2e9a28f2cd7f684405584eb96f920fd728a8e5b4a77d6ebf"
+        },
+        {
+          "stage": "adapt",
+          "exit": 0,
+          "seconds": 5.030999999959022,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-adapt.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_gaussians\\to_gaussians_quantized.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_gaussians\\to_gaussians_quantized.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_gaussians",
+            "--target",
+            "zhuge"
+          ],
+          "compiler_sha256": "463020a499af7ed9e72e05bf1001cbb918d74c6c3997bc3870da2cc5b773d0f4"
+        },
+        {
+          "stage": "generate",
+          "exit": 0,
+          "seconds": 27.70299999997951,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-generate.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_gaussians\\to_gaussians_adapted.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_gaussians\\to_gaussians_adapted.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_gaussians"
+          ],
+          "compiler_sha256": "ef336391e6b668f0ef58e47dde90b10bab026415fc7c3fd3d3eb5b8c683bdc21"
+        }
+      ],
+      "export": {
+        "path": "depth_predictor.to_gaussians",
+        "complete": true,
+        "input_shape": [
+          2,
+          163,
+          128,
+          128
+        ],
+        "output_shape": [
+          2,
+          84,
+          128,
+          128
+        ],
+        "returns_list": false,
+        "logical_layout": "NCHW",
+        "dtype": "float32",
+        "graph_sha256": "f1529fafd96bd1f94bcf14f683782f3f9abe264cad1d92d70aaaa9a60e50bb7b",
+        "oracle_sha256": "ed732da8f33d81235c7877afca4244df6973d41c1a3205a0112bdb4164a3f574",
+        "parameters": 373716,
+        "host_onnx_seconds": 0.36337999999523163,
+        "max_abs_error": 6.866455078125e-05,
+        "mean_abs_error": 7.263432166837447e-07,
+        "host_onnx_passed": true,
+        "tolerance": {
+          "rtol": 0.002,
+          "atol": 0.0002
+        },
+        "npu_executed": false
+      },
+      "audit": {
+        "passed": true,
+        "input": {
+          "shape": [
+            2,
+            128,
+            128,
+            163
+          ],
+          "layout": "NHWC",
+          "logical_shape": [
+            2,
+            163,
+            128,
+            128
+          ]
+        },
+        "output": {
+          "shape": [
+            2,
+            128,
+            128,
+            84
+          ],
+          "layout": "NHWC",
+          "logical_shape": [
+            2,
+            84,
+            128,
+            128
+          ]
+        },
+        "hard_ops": 11,
+        "compute": [
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode"
+        ],
+        "host_compute_ops": 0,
+        "compiler_version": "v3.36.1",
+        "graph_sha256": "6908aa62ab4560aafee0fea6218b61c597fca440371e8f9163704b523f5e05fd",
+        "raw_sha256": "460bd28f4aafb7dd86b14fb76884947d4652ad0e8aecfa5a9c55878a69995963",
+        "npu_executed": false
+      },
+      "graph": "to_gaussians\\to_gaussians_ZG.json",
+      "raw": "to_gaussians\\to_gaussians_ZG.raw",
+      "status": "compiled_not_executed"
+    },
+    "to_disparity": {
+      "complete": true,
+      "stages": [
+        {
+          "stage": "parse",
+          "exit": 0,
+          "seconds": 0.34399999980814755,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-parse.exe",
+            "--net_name",
+            "to_disparity",
+            "--network",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_export_20260929\\to_disparity\\model.onnx",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_disparity",
+            "--framework",
+            "onnx",
+            "--target",
+            "zhuge",
+            "--inputs",
+            "2,128,128,32",
+            "--inputs_layout",
+            "NHWC",
+            "--inputs_dtype",
+            "FP32",
+            "--pre_method",
+            "nop",
+            "--pre_scale",
+            "1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1",
+            "--pre_mean",
+            "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+            "--channel_swap",
+            "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31"
+          ],
+          "compiler_sha256": "d40d3de1ea56d180a43a31d1914aecca4b0f6ec90d72d95cac106e8bf550a1f4"
+        },
+        {
+          "stage": "optimize",
+          "exit": 0,
+          "seconds": 2.5,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-optimize.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_disparity\\to_disparity_parsed.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_disparity\\to_disparity_parsed.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_disparity",
+            "--target",
+            "zhuge"
+          ],
+          "compiler_sha256": "463020a499af7ed9e72e05bf1001cbb918d74c6c3997bc3870da2cc5b773d0f4"
+        },
+        {
+          "stage": "quantize",
+          "exit": 0,
+          "seconds": 2.030999999959022,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-quantize.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_disparity\\to_disparity_optimized.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_disparity\\to_disparity_optimized.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_disparity",
+            "--target",
+            "zhuge",
+            "--qdtype",
+            "tf32",
+            "--no_transinput",
+            "true",
+            "--no_imagemake",
+            "true"
+          ],
+          "compiler_sha256": "10e8ed1b34b1529d2e9a28f2cd7f684405584eb96f920fd728a8e5b4a77d6ebf"
+        },
+        {
+          "stage": "adapt",
+          "exit": 0,
+          "seconds": 3.25,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-adapt.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_disparity\\to_disparity_quantized.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_disparity\\to_disparity_quantized.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_disparity",
+            "--target",
+            "zhuge"
+          ],
+          "compiler_sha256": "463020a499af7ed9e72e05bf1001cbb918d74c6c3997bc3870da2cc5b773d0f4"
+        },
+        {
+          "stage": "generate",
+          "exit": 0,
+          "seconds": 5.5,
+          "command": [
+            "D:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\bin\\icraft-generate.exe",
+            "--json",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_disparity\\to_disparity_adapted.json",
+            "--raw",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_disparity\\to_disparity_adapted.raw",
+            "--jr_path",
+            "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\runs\\mvsplat_npu_compile_v3_20260929\\to_disparity"
+          ],
+          "compiler_sha256": "ef336391e6b668f0ef58e47dde90b10bab026415fc7c3fd3d3eb5b8c683bdc21"
+        }
+      ],
+      "export": {
+        "path": "depth_predictor.to_disparity",
+        "complete": true,
+        "input_shape": [
+          2,
+          32,
+          128,
+          128
+        ],
+        "output_shape": [
+          2,
+          2,
+          128,
+          128
+        ],
+        "returns_list": false,
+        "logical_layout": "NCHW",
+        "dtype": "float32",
+        "graph_sha256": "2db2bd7ea0b269acdfce3a485f395c059a6aa469eb4c57ba7691ecfcb7108fcb",
+        "oracle_sha256": "c013c4705bf79419328b18093832face8ffbc7fe40c3e3494c9260a8a5b590b3",
+        "parameters": 19650,
+        "host_onnx_seconds": 0.04395739990286529,
+        "max_abs_error": 4.291534423828125e-06,
+        "mean_abs_error": 2.038375725987862e-07,
+        "host_onnx_passed": true,
+        "tolerance": {
+          "rtol": 0.002,
+          "atol": 0.0002
+        },
+        "npu_executed": false
+      },
+      "audit": {
+        "passed": true,
+        "input": {
+          "shape": [
+            2,
+            128,
+            128,
+            32
+          ],
+          "layout": "NHWC",
+          "logical_shape": [
+            2,
+            32,
+            128,
+            128
+          ]
+        },
+        "output": {
+          "shape": [
+            2,
+            128,
+            128,
+            2
+          ],
+          "layout": "NHWC",
+          "logical_shape": [
+            2,
+            2,
+            128,
+            128
+          ]
+        },
+        "hard_ops": 7,
+        "compute": [
+          "icraft::xir::Conv2dNode",
+          "icraft::xir::Conv2dNode"
+        ],
+        "host_compute_ops": 0,
+        "compiler_version": "v3.36.1",
+        "graph_sha256": "5967c1a8f876f5eb874b77ce9d23c9f69fd902d0b0ed8f4a82bd378808f47ea0",
+        "raw_sha256": "46a776597d4169428ba988a565a1dae8f61e77b933c6dd71b2390f84767bed00",
+        "npu_executed": false
+      },
+      "graph": "to_disparity\\to_disparity_ZG.json",
+      "raw": "to_disparity\\to_disparity_ZG.raw",
+      "status": "compiled_not_executed"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+test_early_stop_rejects_threshold_crossing_contribution (test_bridge.BridgeTests.test_early_stop_rejects_threshold_crossing_contribution) ... ok
+test_indefinite_covariance_rejected (test_bridge.BridgeTests.test_indefinite_covariance_rejected) ... ok
+test_pixel_center_and_camera_roundtrip (test_bridge.BridgeTests.test_pixel_center_and_camera_roundtrip) ... ok
+test_sh_axes_match_renderer_sign_and_order (test_bridge.BridgeTests.test_sh_axes_match_renderer_sign_and_order) ... ok
+test_world_covariance_with_nontrivial_camera_rotation (test_bridge.BridgeTests.test_world_covariance_with_nontrivial_camera_rotation) ... ok
+test_invalid_indices_or_no_target_fail (test_fast.FrameSelectionTests.test_invalid_indices_or_no_target_fail) ... ok
+test_length_and_explicit_negative_indices (test_fast.FrameSelectionTests.test_length_and_explicit_negative_indices) ... ok
+test_original_sequence_is_preserved (test_fast.FrameSelectionTests.test_original_sequence_is_preserved) ... ok
+test_legacy_timing_is_explicitly_not_input_end_timing (test_fast.TimingContractTests.test_legacy_timing_is_explicitly_not_input_end_timing) ... ok
+test_new_receipt_uses_verified_frame_endpoint (test_fast.TimingContractTests.test_new_receipt_uses_verified_frame_endpoint) ... ok
+test_clock_uses_monotonic_and_cannot_be_overridden (test_initialize.EventLogTests.test_clock_uses_monotonic_and_cannot_be_overridden) ... ok
+test_main_clock_excludes_preheat_and_video_input (test_initialize.EventLogTests.test_main_clock_excludes_preheat_and_video_input) ... ok
+test_missing_or_repeated_event_fails (test_initialize.EventLogTests.test_missing_or_repeated_event_fails) ... ok
+test_preexisting_file_receipt_is_not_video_capture_duration (test_initialize.EventLogTests.test_preexisting_file_receipt_is_not_video_capture_duration) ... ok
+test_duplicate_context_is_rejected (test_initialize.OverlapTests.test_duplicate_context_is_rejected) ... ok
+test_failed_pose_never_publishes_successful_scene (test_initialize.OverlapTests.test_failed_pose_never_publishes_successful_scene) ... ok
+test_inference_stays_main_thread_and_overlaps_pose_work (test_initialize.OverlapTests.test_inference_stays_main_thread_and_overlaps_pose_work) ... ok
+test_no_context_failure_does_not_deadlock (test_initialize.OverlapTests.test_no_context_failure_does_not_deadlock) ... ok
+test_artifact_cannot_escape_bundle (test_npu.NpuContractTests.test_artifact_cannot_escape_bundle) ... ok
+test_compiled_layout_needs_semantics_not_just_same_bytes (test_npu.NpuContractTests.test_compiled_layout_needs_semantics_not_just_same_bytes) ... ok
+test_invalid_dtype_and_shape_fail (test_npu.NpuContractTests.test_invalid_dtype_and_shape_fail) ... ok
+test_layout_roundtrip_and_result_owns_memory (test_npu.NpuContractTests.test_layout_roundtrip_and_result_owns_memory) ... ok
+test_worker_rejects_cpu_claiming_npu (test_npu.NpuContractTests.test_worker_rejects_cpu_claiming_npu) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 0.049s
+
+OK

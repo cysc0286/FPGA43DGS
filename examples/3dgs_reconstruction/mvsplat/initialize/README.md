@@ -1,0 +1,59 @@
+# 视频前预热与常驻渲染候选
+
+状态：2026-09-29 离线实现。用户在外，实板测试延后。本轮电脑验证见 [结果](../INITIALIZE_NPU_VALIDATION.md)。旧 `pipeline.py reconstruct` 保留冷启动对照；冻结 `releases/3dgs_renderer_v1_20260928` 未改。
+
+## 结构与状态
+
+```text
+initialize/session.py
+  固定权重 + 依赖导入 + 可选 NPU 会话 + FPGA 设备 + 投影服务
+         ↓ READY
+video_input/receipt.py：接收已经关闭的视频文件
+         ↓ VIDEO_COMPLETE（场景准备计时起点）
+video_input/prepare.py：解码 → 上下文对与基础位姿
+         ├─ 主线程：已加载的 MVSplat 前向
+         └─ 工作线程：其余目标相机 PnP
+warm_pipeline.py：汇合 → 高斯导出/校验 → 常驻场景装入
+         ↓ SCENE_READY（中间事件）
+常驻投影 → Tile 分组/排序 → 常驻 FPGA 渲染 → 帧校验
+         ↓ FRAME_COMPLETE（场景准备计时终点）
+```
+
+`run.py` 是应用入口；`session.py` 仅构建预热资源；`model_runtime.py` 保存模型并提供可重复调用的推理接口。`video_input` 不加载模型，`warm_pipeline` 不重新构造权重/设备。`prepare_fast.py` 是兼容入口，原命令和导入仍可使用。
+
+预热、输入耗时只记录。`events.json` 使用同一进程的 monotonic 时钟相减，epoch 用于对照日志；严格按四事件顺序原子写入。`scene_preparation_seconds` 包含准备与首次渲染，`gaussian_scene_seconds` 和 `first_render_seconds` 是可相加的辅助项。`READY→VIDEO_COMPLETE` 可能包含等待用户交付文件，字段故意命名 `ready_to_receipt_seconds_record_only`。真实视频采集没有接入，输入耗时为未测；文件接收后的哈希核验已计入场景准备。
+
+当前预热加载权重、依赖及会话，不执行虚构视频推理；后端算子第一次执行的惰性开销仍计入场景准备。CLI 验收一次视频；运行时类可复用，但多视频服务循环尚未做板端验收。
+
+## 渲染驻留的确切范围
+
+`attributes_resident.cpp` 引用冻结投影源文件，通过 `LOAD` 原子替换完整 Gaussian rows，通过 `PROJECT` 改相机。场景只加载一次，后续投影复用数据。`render_resident.cpp` 保留 FPGA SDK 设备句柄和互斥锁，按有序命令处理帧。
+
+静态高斯驻留在 ARM 进程，**不是所有场景常驻 FPGA BRAM**。视角相关投影仍重算；分组/排序仍调用冻结程序；渲染每次的任务列表和工作区仍有准备/分配成本。没有新增双缓冲算法，原冻结渲染核内部调度保持原样。本轮不能声称交互帧率已优化成功。
+
+## 板端恢复后的命令
+
+先核实旧中断任务状态，不能因没有收到结果就再次同时启动。随后在隔离候选目录构建，不覆盖冻结包：
+
+```sh
+sh mvsplat/initialize/build_resident.sh /root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928
+```
+
+本机已准备 `board_accept.py` 包含既有 ARM 环境、进程树 RSS 650 MiB / 系统预留 128 MiB / 600 秒监控及取回证据。回到板端测试阶段后，从 `mvsplat` 目录运行：
+
+```text
+python -m initialize.board_accept --board-root /root/fpga43dgs_reconstruction/NEW_CANDIDATE --run warm_cpu_serial --out ../runs/NEW_ACCEPTANCE --threads 2 --prepare-threads 1 --serial-prepare
+```
+
+再用新 run/out 去掉 `--serial-prepare` 做重叠对照。主线程执行 Torch，单工作线程执行准备；默认 2+1 线程。重叠模式拒绝超出 CPU 核数的显式线程预算，不再让四线程 Torch 与四线程 OpenCV 叠加。独立 NPU worker 的线程/SDK 内存仍需额外实测。
+
+省略 `--video` 的板端 `pipeline.py initialize` 会先打印 READY，再从 stdin 接收一个已完成的视频路径；预置文件模式在 READY 后立即交付文件。运行环境须沿用 `board_accept.py`，不要漏掉该板所需的私有库设置。
+
+网络断开会保存原运行错误及“结果未知”，证据收集错误不会覆盖原错误；不会自动重跑。监控终止进程不等于已证明设备能无损恢复，后续先检查 SDK/设备状态。
+
+## 验收顺序
+
+1. 冷路径与预热串行：同线程、同输入、相同位姿与输出合同，核对哈希/画质；分别记录预热和场景准备。
+2. 预热串行与 PnP/推理重叠：不能只看重叠秒数，要比较首帧总时延、峰值内存及最小系统余量。
+3. 同一驻留场景连续改变相机，回到原相机检查帧哈希；排除旧场景、旧帧缓存和任务串号。
+4. 再接入已通过独立数值验证的 NPU 子图。CPU/NPU/FPGA 共存、SDK 地址资源和真实 SFB 布局均需在板上检查。

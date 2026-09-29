@@ -1,5 +1,6 @@
 """Offline source and interface checks; never connects to a board or installs firmware."""
 import ast
+import argparse
 import os
 from pathlib import Path
 import subprocess
@@ -10,6 +11,10 @@ SKIP = {".git", ".venv", ".venv_mvsplat", "vendor", "build", "evidence", "runs",
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mvsplat", action="store_true",
+                        help="Also run video, lifecycle and NPU ABI tests (requirements-mvsplat-checks.txt)")
+    args = parser.parse_args()
     paths = []
     for folder in ("examples/3dgs_reconstruction", "examples/3dgs_flicker_hw", "tools"):
         for parent, dirs, files in os.walk(ROOT/folder):
@@ -25,7 +30,12 @@ def main():
                 "examples/3dgs_reconstruction/tests/test_reconstruct_entry.py"):
         subprocess.run([sys.executable, str(ROOT/rel), "-v"], cwd=ROOT, check=True)
     subprocess.run([sys.executable, str(ROOT/"examples/3dgs_reconstruction/pipeline.py"), "--help"], check=True)
-    print("PASS: source, artifact contracts, resource controls and MVSplat entry. No training or board execution.")
+    if args.mvsplat:
+        subprocess.run([sys.executable, "-m", "unittest", "discover", "-v", "-p", "test_*.py"],
+                       cwd=ROOT/"examples/3dgs_reconstruction/mvsplat", check=True)
+        subprocess.run([sys.executable, str(ROOT/"examples/3dgs_reconstruction/pipeline.py"),
+                        "initialize", "--help"], check=True)
+    print("PASS: offline source and selected contracts. No training, NPU execution or board access.")
 
 
 if __name__ == "__main__":

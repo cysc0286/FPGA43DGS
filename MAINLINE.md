@@ -1,5 +1,9 @@
 # 3DGS 主线与目录入口
 
+2026-09-29 新增**离线候选**：视频前预热在 `mvsplat/initialize/`，视频接收及快速位姿在 `mvsplat/video_input/`，视频后的调度在 `mvsplat/warm_pipeline.py`；冷路径仍为 `reconstruct`，新候选入口是 `pipeline.py initialize`。NPU 子图导出、编译、常驻运行和核验位于 `mvsplat/npu/`。本轮用户在外，未访问板卡；7 子图编译及电脑参考回归通过不代表实板 NPU 部署成功。详见 [本轮实现与验收边界](examples/3dgs_reconstruction/mvsplat/INITIALIZE_NPU_VALIDATION.md)。
+
+术语统一：**预热时间**（initialize，视频前）和**视频输入时间**只记录；**场景准备时间**从 `VIDEO_COMPLETE` 到指定视角的首帧 `FRAME_COMPLETE`，其中 `SCENE_READY` 为中间事件；**后续渲染时间**独立统计。新的闭文件交付适配器不包含真实摄像头或上传的采集计时。上述候选的新板端场景准备时间、常驻内存和 NPU 收益均待测。
+
 更新：2026-09-29。当前主线是板端离线视频 → 位姿 → 固定权重 MVSplat 前馈生成高斯 → CPU＋FPGA 渲染。电脑用于开发、构建和参考验证，不参与新场景的板端计算。旧 OpenSplat 训练链仅作为可回放的历史对照。主命令：`python examples/3dgs_reconstruction/pipeline.py reconstruct --video INPUT.mp4 --out NEW_RUN`。
 
 当前验收计时（2026-09-29 更新）：从**视频输入结束**开始，到板端完成高斯生成并用该模型完成**预先指定视角的一帧渲染**结束。以帧输出完成并通过哈希/完整性检查为终点，不等待人工打开图像。约一分钟是这个计时的期望目标。最新已加入起止事件：同一视频先复制并同步到板端，记录接收完成事件后启动，两线程 74.04 秒、同环境四线程 71.74 秒，均结束于第 7 帧 FPGA 图像哈希核验；每组仅一次完整运行，不含视频上传。第 7 帧仍未达到 20 dB，约一分钟与三视角画质同时通过尚未实现。场景覆盖与跨帧组融合独立验收，当前两视图模型只覆盖局部共同视野。[快速候选](examples/3dgs_reconstruction/mvsplat/FAST_VALIDATION.md) 的历史 66.68 秒和完整 SfM 位姿基线的 249.43 秒未记录接收完成事件，不能与新口径混报。NPU、GPU、逐场景训练没有进入当前生产链。

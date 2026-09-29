@@ -13,10 +13,15 @@ def main(argv=None):
     if argv and argv[0] == "reconstruct":
         from mvsplat.board_pipeline import main as reconstruct
         return reconstruct(argv[1:])
+    if argv and argv[0] == "initialize":
+        sys.path.insert(0, str(Path(__file__).resolve().parent / "mvsplat"))
+        from initialize.run import main as initialize
+        return initialize(argv[1:])
     p = argparse.ArgumentParser(description=__doc__)
     commands = p.add_subparsers(dest="stage", required=True)
     commands.add_parser("reconstruct",
                         help="Board video-to-image path using pretrained MVSplat (default: full SfM)")
+    commands.add_parser("initialize", help="Warm MVSplat before video and run one fast-pair scene")
     for name in ("video", "pose", "gaussian", "export", "render", "validate"):
         s = commands.add_parser(name, help="Legacy OpenSplat stage" if name == "gaussian" else None)
         s.add_argument("--run", required=True, type=Path)

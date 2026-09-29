@@ -1,0 +1,4 @@
+warning: in the working copy of 'MAINLINE.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/3dgs_reconstruction/mvsplat/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/3dgs_reconstruction/mvsplat/deploy.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/3dgs_reconstruction/pipeline.py', LF will be replaced by CRLF the next time Git touches it

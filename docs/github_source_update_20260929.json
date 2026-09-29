@@ -1,0 +1,43 @@
+{
+  "verified_source_tree": "c5d5eb21d6ee66b31fac4d1d6d28db5732d302db",
+  "scope": "Clean Git source archive; local software checks and C++ build only",
+  "tests": {
+    "interfaces": 16,
+    "resource_controls": 8,
+    "main_entry": 3,
+    "mvsplat_and_npu_contracts": 23,
+    "total": 50
+  },
+  "native_projection": {
+    "compiled": true,
+    "executed": true,
+    "model_loads": 1,
+    "projections": 3,
+    "all_outputs_match_frozen": true,
+    "candidate_source_sha256": "3a455228bf3f312f9bc9e31c1136c1fbfa64dfdf50b756b88da58c7f388d2dcf"
+  },
+  "npu_bridge": {
+    "sdk_header_check_passed": true,
+    "arm_link_verified": false,
+    "source_sha256": "8ea7f403b3dcdc5023ff785e27f99a89a82b4430af481018e4e6fcab6f2f81ea"
+  },
+  "icraft": {
+    "version": "3.36.1",
+    "dtype": "tf32",
+    "compiled_partitions": 7,
+    "compute_placement_verified": true,
+    "npu_executed": false,
+    "measurement": "Previously saved compiler artifacts rechecked; not recompiled during Git publication"
+  },
+  "board_accessed": false,
+  "new_board_timing_measured": false,
+  "excluded": [
+    "adder_smoke",
+    "three-person assignment documents",
+    "SDK",
+    "model weights",
+    "Python environments",
+    "BOOT/bitstreams",
+    "large raw run artifacts"
+  ]
+}

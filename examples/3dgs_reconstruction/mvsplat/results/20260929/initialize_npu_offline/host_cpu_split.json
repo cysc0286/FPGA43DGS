@@ -1,0 +1,20 @@
+{
+  "complete": true,
+  "board_executed": false,
+  "comparisons": {
+    "context_identical": true,
+    "views_identical": true,
+    "geometry_identical": true,
+    "gaussian_identical": true
+  },
+  "scheduling": {
+    "context_ready_seconds": 1.452999999979511,
+    "inference_begin_seconds": 1.452999999979511,
+    "poses_complete_seconds": 1.922000000020489,
+    "inference_end_seconds": 3.952999999979511,
+    "combined_seconds": 3.952999999979511,
+    "overlap_seconds": 0.4690000000409782
+  },
+  "preheat_seconds_record_only": 8.354670600034297,
+  "scope": "host video/pose/inference/export regression; no first-frame timing or quality measurement"
+}

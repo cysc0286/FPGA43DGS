@@ -1,0 +1,5 @@
+# Offline contract checks only; no Torch, model checkpoint or ICraft SDK needed.
+-r requirements-core.txt
+scipy>=1.15,<2
+Pillow>=10,<13
+opencv-python-headless>=4.8,<5

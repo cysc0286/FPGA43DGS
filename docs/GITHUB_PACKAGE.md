@@ -1,5 +1,17 @@
 # 核心源码交付（2026-09-28）
 
+## 2026-09-29 预热与 NPU 候选更新
+
+新增 `mvsplat/initialize`、`video_input`、`warm_pipeline.py` 和 `npu` 完整候选源码、构建入口、核验工具、状态合同及小型结果。`reconstruct` 冷路径保留；`initialize` 在视频前加载固定权重和运行环境。计时按 `VIDEO_COMPLETE→FRAME_COMPLETE`，预热与采集耗时仅记录。
+
+从下载的源码目录安装 `requirements-mvsplat-checks.txt` 并运行 `python tools/check_core.py --mvsplat`，可验证全部 50 项离线软件合同，无需 Torch、模型、ICraft 或板卡。C++ 检查在 Windows x64 Visual Studio Developer shell 可直接使用 PATH 中的 `cl.exe`；本机自定义环境脚本仅作可选兼容，不是下载后的隐含依赖。
+
+编译范围务必区分：7 个 NPU 子图已完成 ICraft 3.36.1 TF32 五阶段编译；常驻投影 C++ 已在电脑构建并执行比较；NPU bridge 已通过 SDK 头文件语法检查。**新 ARM bridge 链接、NPU 真机数值、与 FPGA 共存及预热整链速度仍待板端验证**。本次源码发布不把这些待测项标为完整硬件编译/运行通过。详见 [本轮记录](../examples/3dgs_reconstruction/mvsplat/INITIALIZE_NPU_VALIDATION.md)。
+
+本次仍不包含官方权重、工具链 SDK、BOOT/位流、87.96 MB NPU 本地候选包及本机 Python 环境。新代码目录和必要源码包含在 Git 中；外部依赖及命令写在对应 README。加法器 smoke test 和三人分工文档继续不提交。
+
+提交前已从 Git 暂存树导出干净源码目录，50 项检查通过；同一目录下重新构建常驻投影并通过一次加载/三次投影的逐字节对照，NPU bridge 的 SDK 语法检查也通过。测试使用声明的外部 Python/MSVC/SDK 依赖，不依赖源码目录中的私有环境脚本。精确源码树、检查数量和编译边界见 [发布核验记录](github_source_update_20260929.json)。
+
 这是按模块组织的核心源码交付。当前主线为视频 → ARM 位姿估计 → MVSplat 固定权重前馈 → CPU＋FPGA 渲染。入口为 `python examples/3dgs_reconstruction/pipeline.py reconstruct --video INPUT.mp4 --out NEW_RUN`。2026-09-29 的实板精简结果已随仓库保存；前馈 NPU 高斯预测仍未部署。OpenSplat 训练仅保留历史对照。
 
 ## 下载后先做什么

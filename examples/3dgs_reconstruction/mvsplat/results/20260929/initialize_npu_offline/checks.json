@@ -1,0 +1,61 @@
+[
+  {
+    "name": "mvsplat_contracts",
+    "exit": 0,
+    "command": [
+      "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\.venv_mvsplat\\Scripts\\python.exe",
+      "-m",
+      "unittest",
+      "discover",
+      "-v",
+      "-p",
+      "test_*.py"
+    ]
+  },
+  {
+    "name": "module_contracts",
+    "exit": 0,
+    "command": [
+      "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\.venv_mvsplat\\Scripts\\python.exe",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-v"
+    ]
+  },
+  {
+    "name": "compileall",
+    "exit": 0,
+    "command": [
+      "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\.venv_mvsplat\\Scripts\\python.exe",
+      "-m",
+      "compileall",
+      "-q",
+      "initialize",
+      "npu",
+      "video_input",
+      "warm_pipeline.py"
+    ]
+  },
+  {
+    "name": "cli_help",
+    "exit": 0,
+    "command": [
+      "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\.venv_mvsplat\\Scripts\\python.exe",
+      "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\pipeline.py",
+      "initialize",
+      "--help"
+    ]
+  },
+  {
+    "name": "diff_check",
+    "exit": 0,
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ]
+  }
+]

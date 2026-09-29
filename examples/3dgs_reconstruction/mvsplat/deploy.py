@@ -23,9 +23,11 @@ def main():
         p.error("Use an isolated reconstruction directory")
     out = new_directory(a.out)
     files = {}
-    for subfolder, suffixes in (("mvsplat", (".py", ".json")), ("modules", (".py",))):
+    for subfolder, suffixes in (("mvsplat", (".py", ".json", ".cpp", ".sh")),
+                                ("modules", (".py",))):
         for f in sorted((ROOT/subfolder).rglob("*")):
-            if f.is_file() and f.suffix in suffixes and "__pycache__" not in f.parts:
+            if (f.is_file() and f.suffix in suffixes and not
+                    set(f.relative_to(ROOT).parts) & {"__pycache__", "results", "runs", "evidence", "build"}):
                 files[str(f.relative_to(ROOT)).replace("\\", "/")] = f
     files["pipeline.py"] = ROOT/"pipeline.py"
     for f in sorted((ROOT/"vendor/MVSplat_reference").rglob("*")):

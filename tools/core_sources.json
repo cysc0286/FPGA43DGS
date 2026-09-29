@@ -1,7 +1,7 @@
 {
   "files": [
     ".gitignore", ".gitattributes", "README.md", "AGENTS.md", "MAINLINE.md",
-    "FLICKER_REPRODUCTION.md", "requirements-core.txt",
+    "FLICKER_REPRODUCTION.md", "requirements-core.txt", "requirements-mvsplat-checks.txt",
     "archive/basic_demos_20260928/README.md",
     "archive/basic_demos_20260928/manifest.json",
     "archive/basic_demos_20260928/migration_changes.json",

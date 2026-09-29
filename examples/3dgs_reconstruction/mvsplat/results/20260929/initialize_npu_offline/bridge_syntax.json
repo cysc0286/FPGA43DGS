@@ -1,0 +1,18 @@
+{
+  "exit_code": 0,
+  "command": [
+    "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\vendor\\msvc\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+    "/nologo",
+    "/std:c++17",
+    "/Zc:__cplusplus",
+    "/EHsc",
+    "/MD",
+    "/utf-8",
+    "/Zs",
+    "/ID:\\ADProjects\\FPGA43DGS\\npu_3dgs\\.vendor\\icraft-3.36.1\\include",
+    "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_reconstruction\\mvsplat\\npu\\bridge.cpp"
+  ],
+  "source_sha256": "8ea7f403b3dcdc5023ff785e27f99a89a82b4430af481018e4e6fcab6f2f81ea",
+  "syntax_only": true,
+  "npu_executed": false
+}

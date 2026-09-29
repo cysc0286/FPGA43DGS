@@ -5,8 +5,29 @@
 ## 主线结构
 
 ```text
-视频输入 → ARM 位姿估计 → ARM MVSplat 前馈生成高斯 → CPU＋FPGA 渲染
+视频前 initialize 预热 → READY
+  → video_input 接收完整视频 → VIDEO_COMPLETE
+  → 抽帧/位姿 → MVSplat 前馈（已验证 ARM CPU；可选 NPU 子图待实板）
+  → Gaussian 导出与装入 → SCENE_READY
+  → CPU 投影/排序＋FPGA 渲染 → FRAME_COMPLETE
 ```
+
+源码已加入预热、视频准备、常驻场景和 MVSplat NPU 分区候选，目录入口如下。板端已验收的是原冷路径；新候选的本机回归及 ICraft 编译结果见 [验证报告](examples/3dgs_reconstruction/mvsplat/INITIALIZE_NPU_VALIDATION.md)，不能把编译成功当作板端 NPU 加速成功。
+
+```text
+examples/3dgs_reconstruction/
+├── pipeline.py                         # 统一 CLI：reconstruct / initialize
+├── modules/                            # 四模块接口与既有分阶段入口
+└── mvsplat/
+    ├── initialize/                     # 视频前权重/设备预热、常驻渲染候选
+    ├── video_input/                    # 文件接收、抽帧、两视图与目标位姿
+    ├── warm_pipeline.py                # 视频后推理/PnP 调度、导出、首帧
+    ├── npu/                            # 导出、编译、运行、核验与离线打包
+    ├── infer.py / export.py            # 冷推理参考与 Gaussian 格式转换
+    └── results/20260929/               # 小型指标、构建记录与效果图
+```
+
+预热时间和视频输入时间仅记录。**场景准备时间**从 `VIDEO_COMPLETE` 到首张指定视角的 `FRAME_COMPLETE`，包含首次渲染；`SCENE_READY` 是中间点。
 
 | 模块 | 核心目录 | 当前状态 |
 |---|---|---|
@@ -15,7 +36,8 @@
 | 高斯生成 | `examples/3dgs_reconstruction/mvsplat` | 主线使用固定权重 MVSplat，在 ARM CPU 前馈生成高斯；OpenSplat 训练仅保留历史对照 |
 | 渲染调用 | `examples/3dgs_reconstruction/modules/rendering` | 校验接口并调用已有冻结渲染器 |
 | 实际渲染后端 | `examples/3dgs_flicker_hw` | CPU 投影/SH/分组排序，FPGA 筛选/求值/合成；四单元基线已留存 |
-| NPU 候选 | `examples/3dgs_reconstruction/npu_frontend` | 匹配正确性已做局部实测；当前 MVSplat 链路未使用 NPU |
+| MVSplat NPU 候选 | `examples/3dgs_reconstruction/mvsplat/npu` | 7 个真实子图通过 ICraft 编译；常驻接口及 CPU ONNX 整网回归通过，实机 NPU 待测 |
+| 旧匹配 NPU 对照 | `examples/3dgs_reconstruction/npu_frontend` | 匹配正确性已有局部实测，不是当前 MVSplat 网络加速实现 |
 
 统一入口为 [pipeline.py](examples/3dgs_reconstruction/pipeline.py)。板端默认主线：
 
@@ -38,6 +60,15 @@ python examples/3dgs_reconstruction/pipeline.py --help
 ```
 
 默认检查使用自动生成的合成接口文件，验证16项接口、8项资源控制和3项主入口兼容行为；不连接板卡、不训练、不烧录。完整安装边界、固定第三方版本和重新打包命令见 [源码交付说明](docs/GITHUB_PACKAGE.md)，本次核验见 [CORE_VALIDATION.md](docs/CORE_VALIDATION.md)。
+
+检查新增预热、视频与 NPU 数据合同（共 50 项软件测试，无需权重或 SDK）：
+
+```text
+python -m pip install -r requirements-mvsplat-checks.txt
+python tools/check_core.py --mvsplat
+```
+
+实际模型编译/运行另需作者权重与匹配 ICraft SDK。Windows C++ 检查可在 x64 Visual Studio Developer shell 中执行；无需本仓库作者的私有 `vendor/export_env.bat`。Linux/ARM 构建入口及运行命令见 [预热](examples/3dgs_reconstruction/mvsplat/initialize/README.md) 和 [NPU](examples/3dgs_reconstruction/mvsplat/npu/README.md)。
 
 ## 结果与边界
 

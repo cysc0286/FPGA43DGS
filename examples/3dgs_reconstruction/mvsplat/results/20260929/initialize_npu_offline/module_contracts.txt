@@ -1,0 +1,24 @@
+test_cli_default_still_checks_upstream_artifacts (test_interfaces.Interfaces.test_cli_default_still_checks_upstream_artifacts) ... ok
+test_cli_pose_handoff_without_video (test_interfaces.Interfaces.test_cli_pose_handoff_without_video) ... ok
+test_cli_renderer_handoff_without_reconstruction (test_interfaces.Interfaces.test_cli_renderer_handoff_without_reconstruction) ... ok
+test_cli_validate_scope_and_result_requirements (test_interfaces.Interfaces.test_cli_validate_scope_and_result_requirements) ... ok
+test_pose_artifact_is_independent_of_video_and_database (test_interfaces.Interfaces.test_pose_artifact_is_independent_of_video_and_database) ... ok
+test_registered_reference_interfaces (test_interfaces.Interfaces.test_registered_reference_interfaces) ... ok
+test_reject_camera_path_escape (test_interfaces.Interfaces.test_reject_camera_path_escape) ... ok
+test_reject_duplicate_frame_indices (test_interfaces.Interfaces.test_reject_duplicate_frame_indices) ... ok
+test_reject_incomplete_framebuffer (test_interfaces.Interfaces.test_reject_incomplete_framebuffer) ... ok
+test_reject_missing_image (test_interfaces.Interfaces.test_reject_missing_image) ... ok
+test_reject_model_corruption (test_interfaces.Interfaces.test_reject_model_corruption) ... ok
+test_reject_noncentered_intrinsics (test_interfaces.Interfaces.test_reject_noncentered_intrinsics) ... ok
+test_reject_reflected_camera (test_interfaces.Interfaces.test_reject_reflected_camera) ... ok
+test_reject_wrong_ply_layout_even_with_updated_hash (test_interfaces.Interfaces.test_reject_wrong_ply_layout_even_with_updated_hash) ... ok
+test_render_plan_uses_frozen_package (test_interfaces.Interfaces.test_render_plan_uses_frozen_package) ... ok
+test_training_command_preserves_cpu_contract (test_interfaces.Interfaces.test_training_command_preserves_cpu_contract) ... ok
+test_defaults_to_quality_validated_pose_path (test_reconstruct_entry.ReconstructEntry.test_defaults_to_quality_validated_pose_path) ... ok
+test_forwards_board_options (test_reconstruct_entry.ReconstructEntry.test_forwards_board_options) ... ok
+test_legacy_bundle_does_not_require_mvsplat (test_reconstruct_entry.ReconstructEntry.test_legacy_bundle_does_not_require_mvsplat) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.973s
+
+OK

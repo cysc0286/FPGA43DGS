@@ -1,0 +1,19 @@
+{
+  "complete": true,
+  "board_uploaded": false,
+  "npu_executed": false,
+  "partitions": [
+    "backbone_cnn",
+    "regressor_residual",
+    "depth_head",
+    "upsampler",
+    "proj_feature",
+    "to_gaussians",
+    "to_disparity"
+  ],
+  "archive_sha256": "9243ff7ca43c52d92b4acb66e6eacb8d4b4286979cd769138e5b34855a047f59",
+  "archive_bytes": 87957030,
+  "files": 37,
+  "weight_sha256": "83d0d9eaa753fa4a1f925288dc1f90b8c3297fad0ab0f6ed1f11a1c5946da25a",
+  "note": "Requires matching runtime code, official checkpoint and ARM bridge; no SDK binaries included"
+}
