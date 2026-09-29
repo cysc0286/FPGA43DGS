@@ -13,7 +13,9 @@
     "source_archive_sha256": "55b9dd485902313366c304d435cc32b5ad3000efaf1274aa26d53cee5a6da9fe",
     "license": "MIT; see MVSplat-LICENSE.txt",
     "local_path": "examples/3dgs_reconstruction/vendor/MVSplat_reference",
-    "deployment_status": "source acquired only; weights and NPU deployment not included"
+    "deployment_status": "ARM CPU forward inference verified on 2026-09-29 with pinned re10k.ckpt; NPU deployment not included",
+    "weights_sha256": "83d0d9eaa753fa4a1f925288dc1f90b8c3297fad0ab0f6ed1f11a1c5946da25a",
+    "weights_distribution": "Not included in this repository; obtain from the author's README"
   },
   "GraphDECO": {
     "repository": "https://github.com/graphdeco-inria/gaussian-splatting",

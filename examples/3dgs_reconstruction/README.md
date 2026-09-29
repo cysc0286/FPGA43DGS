@@ -1,5 +1,9 @@
 # 视频帧到 3DGS：纯 CPU 参考链
 
+当前部署重点是 [MVSplat 板端前馈与快速候选](mvsplat/README.md)：从离线视频到 FPGA 图像均已在板端执行，暂以约一分钟首图为目标。快速单进程首图 66.68 秒，但首个视角画质门槛未过；完整 SfM 质量基线与 OpenSplat 训练参考都保留，详见 [快速版本对照](mvsplat/FAST_VALIDATION.md)。
+
+新增独立 [MVSplat 固定权重板端闭环](mvsplat/README.md)：视频文件、COLMAP 位姿、预训练网络高斯生成、冻结 FPGA 渲染均在悟净 30TAI Lite 上实测，见 [验收数据和效果图](mvsplat/VALIDATION.md)。下文记录的是原 OpenSplat CPU 优化基线，不应把其中“板端训练未移植”的结论套到 MVSplat 前馈上。
+
 ## 2026-09-28 模块整理
 
 当前入口：[四模块接口](modules/INTERFACES.md)、[分阶段执行器](pipeline.py)、[项目主线](../../MAINLINE.md)。

@@ -2,6 +2,10 @@
 
 更新：2026-09-28。最终目标是全链在悟净 30TAI Lite 上执行；电脑用于开发、构建和参考验证，不能将电脑训练记录称为板端训练成功。
 
+当前验收目标（2026-09-29）：板端读取离线视频、前馈生成高斯并渲染首张新视角，暂接受约一分钟，先部署完整链路再优化速度。[快速候选](examples/3dgs_reconstruction/mvsplat/FAST_VALIDATION.md) 已实板完成，单进程首图 66.68 秒、32,768 高斯、峰值 592.04 MiB；三视角 PSNR 19.45/20.22/21.35 dB，第一张未过 20 dB。功能链可用，延迟与画质同时达标尚未完成；三视角质量通过的完整 SfM 基线继续保留。NPU、GPU、逐场景训练没有进入当前生产链。多组融合与整段视频场景覆盖尚待实现。
+
+2026-09-29 新候选：固定权重 [MVSplat 板端闭环](examples/3dgs_reconstruction/mvsplat/README.md) 已在独立目录完成视频文件→板端 CPU SfM→板端 CPU 高斯前馈→冻结 CPU+FPGA 渲染，并验证三张目标视角。它是高斯生成模块的另一种实现，**没有取代 OpenSplat 训练基线**，也没有接入 NPU。32,768 高斯、30/30 帧位姿、三视角 PSNR 20.90–23.56 dB；首张 FPGA 图像 249.43 s，非实时。完整指标、失败配置和计时口径见 [验证记录](examples/3dgs_reconstruction/mvsplat/VALIDATION.md)。
+
 ```text
 视频
   ↓ video_input
@@ -22,7 +26,7 @@ RenderResult：frame.bin + frame.ppm + result.json
 |---|---|---|
 | 视频输入 | [video_input](examples/3dgs_reconstruction/modules/video_input/) | 从已有视频均匀抽帧；实时摄像头不是当前接口 |
 | 位姿估计 | [pose_estimation](examples/3dgs_reconstruction/modules/pose_estimation/) | COLMAP CPU 特征/匹配/位姿/三角化、去畸变、内参适配；输出包含稀疏点，不仅是位姿 |
-| 高斯生成 | [gaussian_generation](examples/3dgs_reconstruction/modules/gaussian_generation/) | OpenSplat CPU 优化、资源控制、PLY/相机导出；板端训练成功尚未核验，电脑参考与板端结果分开记录 |
+| 高斯生成 | [gaussian_generation](examples/3dgs_reconstruction/modules/gaussian_generation/) | OpenSplat CPU 优化基线的板端训练尚未核验；另有已验证的 MVSplat 固定权重板端前馈候选，二者不能混称训练 |
 | 高斯渲染 | [rendering](examples/3dgs_reconstruction/modules/rendering/) | 校验模型/相机接口并调用已完成的 CPU＋FPGA 渲染包；不重新实现光栅化 |
 
 统一分阶段入口：[pipeline.py](examples/3dgs_reconstruction/pipeline.py)。详细字段与命令：[接口文档](examples/3dgs_reconstruction/modules/INTERFACES.md)。旧 `stages.py` / `run_cpu.py` / `bounded/run.py` 继续使用同一套模块实现，不保留第二份计算代码。

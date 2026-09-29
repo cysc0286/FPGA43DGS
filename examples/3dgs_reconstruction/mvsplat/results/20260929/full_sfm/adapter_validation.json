@@ -1,0 +1,14 @@
+{
+  "world_covariance_relative_frobenius_max": 4.772922202526322e-07,
+  "covariance_eigenvalues_clamped": 0,
+  "opacity_max_abs_error": 1.2258608197979193e-08,
+  "means_bitwise_preserved": true,
+  "sh0_to_sh3_bitwise_preserved": true,
+  "source_sh_degree": 4,
+  "exported_sh_degree": 3,
+  "sh4_coefficient_max_abs": 0.0005251124384813011,
+  "complete": true,
+  "gaussians": 32768,
+  "cameras": 5,
+  "seconds": 2.4986598899995442
+}

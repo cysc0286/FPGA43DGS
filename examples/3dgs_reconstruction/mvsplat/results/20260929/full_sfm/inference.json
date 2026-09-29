@@ -1,0 +1,38 @@
+{
+  "complete": true,
+  "device": "cpu",
+  "machine": "aarch64",
+  "platform": "Linux-5.4.52-aarch64-with-glibc2.31",
+  "source_commit": "01f9a28edb5eb68416e7e63b01f8d90c3bdfbf01",
+  "weight_sha256": "83d0d9eaa753fa4a1f925288dc1f90b8c3297fad0ab0f6ed1f11a1c5946da25a",
+  "input_sha256": "e0990538dd3588161e5169d08cdea03fac2a4ac26af6a3c239eae9a9a401c5e3",
+  "threads": 2,
+  "depth_chunk": 16,
+  "parameter_count": 11955734,
+  "checkpoint_encoder_tensor_count": 471,
+  "checkpoint_non_encoder_keys": [],
+  "checkpoint_load": "memory mapped; temporary state released before inference",
+  "versions": {
+    "torch": "2.7.1",
+    "einops": "0.8.1",
+    "e3nn": "0.5.8",
+    "numpy": "2.2.6"
+  },
+  "input_shape": [
+    1,
+    2,
+    3,
+    128,
+    128
+  ],
+  "load_and_setup_seconds": 28.197533480000857,
+  "inference_seconds": 22.1400131900009,
+  "inference_cpu_seconds": 40.68999999999999,
+  "gaussians": 32768,
+  "sh_degree": 4,
+  "gaussian_sha256": "4ee68b1ca56e425c3bd03bd13113b5f6f637659bef8866d41dc9284c0102b89d",
+  "training_steps": 0,
+  "peak_process_rss_mib_sampled": 529.09375,
+  "process_seconds": 50.66498395999952,
+  "scope": "Single cold CPU inference including output save separately from load; no NPU, GPU or per-scene training"
+}

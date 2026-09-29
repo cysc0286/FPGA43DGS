@@ -1,0 +1,9 @@
+{
+  "scope": "First video-to-render bridge, three held-out network views from one short sequence; not a multi-scene benchmark",
+  "reconstruction_vs_rgb": {"minimum_psnr_db": 20.0, "minimum_ssim": 0.7},
+  "fpga_vs_world_covariance_sh3_reference": {"minimum_psnr_db": 35.0, "minimum_ssim": 0.98},
+  "sh3_vs_sh4_reference": {"minimum_psnr_db": 50.0, "minimum_ssim": 0.999},
+  "adapter": {"maximum_relative_covariance_error": 0.00001, "maximum_opacity_error": 0.0000002},
+  "board_execution": {"maximum_tree_rss_mib_sampled": 650, "minimum_available_mib": 128},
+  "notes": "These are engineering acceptance thresholds, not paper claims. Keep all failed configurations. Show images and local errors alongside global metrics."
+}
