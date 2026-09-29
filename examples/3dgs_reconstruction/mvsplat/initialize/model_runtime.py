@@ -1,6 +1,8 @@
 """Keep the locked MVSplat encoder loaded across video jobs."""
 import gc
+import hashlib
 import importlib.metadata
+import io
 import json
 import os
 from pathlib import Path
@@ -8,7 +10,7 @@ import platform
 import sys
 import time
 
-from common import FULL_WEIGHT_SHA256, SOURCE_COMMIT, load_gaussians, save, sha
+from common import FULL_WEIGHT_SHA256, SOURCE_COMMIT, load_gaussians, save, sha, validate_gaussians
 
 
 class ModelRuntime:
@@ -59,6 +61,33 @@ class ModelRuntime:
         self.config = cfg
         self.load_seconds = time.perf_counter() - started
         self.partition_runtime = None
+        self._pending_gaussians = None
+        self._pending_archive = None
+
+    def take_gaussians(self, expected_sha256):
+        pending = self._pending_gaussians
+        if pending is None or pending[0] != expected_sha256:
+            raise ValueError("No validated in-memory Gaussians for this inference")
+        self._pending_gaussians = None
+        return pending[1]
+
+    def persist_gaussians(self, record, gaussians):
+        """Finish the deferred artifact audit after the first frame is available."""
+        pending = self._pending_archive
+        if pending is None or pending[2] != record["gaussian_sha256"]:
+            raise ValueError("No matching deferred Gaussian archive")
+        out, payload, digest = pending
+        started = time.perf_counter()
+        (out/"gaussians.npz").write_bytes(payload)
+        if sha(out/"gaussians.npz") != digest:
+            raise ValueError("Deferred Gaussian archive hash mismatch")
+        restored = load_gaussians(out/"gaussians.npz")
+        if any(not self.np.array_equal(restored[key], gaussians[key]) for key in restored):
+            raise ValueError("Deferred Gaussian archive differs from rendered parameters")
+        self._pending_archive = None
+        record["archive_verified"] = True
+        record["deferred_archive_seconds"] = time.perf_counter()-started
+        save(out/"inference.json", record)
 
     def attach_partitions(self, partitions):
         if self.partition_runtime is not None:
@@ -67,7 +96,10 @@ class ModelRuntime:
         self.partition_runtime = partitions
         gc.collect()
 
-    def infer(self, input_dir, out, context_sha256):
+    def infer(self, input_dir, out, context_sha256, defer_archive=False):
+        if getattr(self, "_pending_archive", None) is not None:
+            raise ValueError("Previous Gaussian archive audit is pending")
+        self._pending_gaussians = None
         input_dir, out = Path(input_dir), Path(out)
         if sha(input_dir / "context.npz") != context_sha256:
             raise ValueError("Context hash mismatch")
@@ -114,10 +146,21 @@ class ModelRuntime:
                 record["inference_seconds"] = time.perf_counter() - t
             result = {key: getattr(gaussians, key)[0].detach().cpu().numpy() for key in
                       ("means", "covariances", "harmonics", "opacities")}
-            self.np.savez(out / "gaussians.npz", **result)
-            load_gaussians(out / "gaussians.npz")
+            validate_gaussians(result)
+            if defer_archive:
+                stream = io.BytesIO()
+                self.np.savez(stream, **result)
+                payload = stream.getvalue()
+                digest = hashlib.sha256(payload).hexdigest()
+                self._pending_archive = (out, payload, digest)
+            else:
+                self.np.savez(out / "gaussians.npz", **result)
+                load_gaussians(out / "gaussians.npz")
+                digest = sha(out / "gaussians.npz")
             record.update(complete=True, gaussians=len(result["means"]), sh_degree=4,
-                          gaussian_sha256=sha(out / "gaussians.npz"), training_steps=0)
+                          gaussian_sha256=digest, training_steps=0,
+                          archive_verified=not defer_archive)
+            self._pending_gaussians = (record["gaussian_sha256"], result)
             del gaussians, context, result
             gc.collect()
         except Exception as exc:
@@ -125,7 +168,8 @@ class ModelRuntime:
             raise
         finally:
             record["process_seconds"] = time.perf_counter() - started
-            record["scope"] = "Warm inference and output save; fixed weights loaded before video"
+            record["scope"] = ("Warm inference and validated memory output; archive audit follows first frame"
+                if defer_archive else "Warm inference and output save; fixed weights loaded before video")
             record["npu_executed"] = False
             if self.partition_runtime is not None:
                 record["partitions"] = self.partition_runtime.report(call_start)

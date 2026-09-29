@@ -58,7 +58,7 @@ def main(argv=None):
     p.add_argument("--compiler", type=Path, default=Path(__file__).resolve().parents[4] / "npu_3dgs/.vendor/icraft-3.36.1/bin")
     p.add_argument("--partitions", nargs="+")
     p.add_argument("--timeout", type=int, default=240)
-    p.add_argument("--qdtype", choices=("tf32", "fp32"), default="tf32")
+    p.add_argument("--qdtype", choices=("tf32", "fp16", "bf16", "fp32"), default="tf32")
     a = p.parse_args(argv)
     meta = json.loads((a.graphs / "manifest.json").read_text())
     out = new_directory(a.out.resolve())

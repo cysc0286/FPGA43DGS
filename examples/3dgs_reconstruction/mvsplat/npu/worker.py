@@ -26,6 +26,7 @@ def main():
     _, parts = validate_bundle(request["bundle"], request["names"], backend)
     sessions, buffers, sequence = {}, {}, 0
     library, device_lock, arena = None, None, None
+    detailed_forward = None
     def reply(value):
         protocol.write(json.dumps(value, allow_nan=False)+"\n")
     try:
@@ -50,6 +51,16 @@ def main():
             library.mgs_forward.argtypes = [ct.c_void_p, ct.c_void_p, ct.c_size_t,
                                             ct.c_void_p, ct.c_size_t, ct.POINTER(ct.c_double)]
             library.mgs_forward.restype = ct.c_int
+            # New bridge builds expose five independently measured buckets,
+            # while ABI-2 libraries retain the historical three-bucket call.
+            try:
+                detailed_forward = library.mgs_forward_detailed
+            except AttributeError:
+                detailed_forward = None
+            if detailed_forward is not None:
+                detailed_forward.argtypes = [ct.c_void_p, ct.c_void_p, ct.c_size_t,
+                                             ct.c_void_p, ct.c_size_t, ct.POINTER(ct.c_double)]
+                detailed_forward.restype = ct.c_int
         else:
             import onnxruntime as ort
         bindings = {}
@@ -75,23 +86,32 @@ def main():
             name = command["name"]
             input_buffer, output_buffer = buffers[name]
             started = time.perf_counter()
+            prepare_started = time.perf_counter()
             if not np.isfinite(input_buffer).all():
                 raise ValueError("Nonfinite input")
+            input_prepare_seconds = time.perf_counter()-prepare_started
             stages = [0., 0., 0.]
+            stage_names = ["input_write", "execute_wait", "output_convert"]
             if library:
-                measured = (ct.c_double*3)()
-                rc = library.mgs_forward(sessions[name], input_buffer.ctypes.data, input_buffer.nbytes,
-                                         output_buffer.ctypes.data, output_buffer.nbytes, measured)
+                width = 5 if detailed_forward is not None else 3
+                measured = (ct.c_double*width)()
+                forward = detailed_forward or library.mgs_forward
+                rc = forward(sessions[name], input_buffer.ctypes.data, input_buffer.nbytes,
+                             output_buffer.ctypes.data, output_buffer.nbytes, measured)
                 if rc:
                     raise RuntimeError(library.mgs_error().decode())
                 stages = list(measured)
+                if detailed_forward is not None:
+                    stage_names = ["input_write", "forward_submit", "wait", "output_convert", "sdk_total"]
             else:
                 output_buffer[:] = sessions[name].run(None, {"features": input_buffer})[0]
             if not np.isfinite(output_buffer).all():
                 raise ValueError("Nonfinite output")
             reply(dict(event="COMPLETE", sequence=sequence, name=name,
                 backend=backend, npu_executed=library is not None,
-                worker_seconds=time.perf_counter()-started, sdk_seconds=stages))
+                worker_seconds=time.perf_counter()-started,
+                input_prepare_seconds=input_prepare_seconds,
+                sdk_stage_names=stage_names, sdk_seconds=stages))
             sequence += 1
     except Exception as exc:
         reply(dict(event="ERROR", error=type(exc).__name__+": "+str(exc)))

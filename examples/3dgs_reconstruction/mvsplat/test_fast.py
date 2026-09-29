@@ -1,5 +1,12 @@
 """Frame selection contracts for arbitrary-length fast video inputs."""
+from pathlib import Path
+import sys
 import unittest
+
+# ``unittest discover`` is normally launched from the parent reconstruction
+# directory.  Put this module's directory first so the local ``evaluate``
+# adapter is not confused with the parent package's similarly named module.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from evaluate_fast import first_frame_timing
 from prepare_fast import frame_indices

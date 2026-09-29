@@ -38,9 +38,10 @@ def main(argv=None):
             for index, camera in enumerate(cameras + cameras[:1]):
                 directory = "resident_"+str(index)
                 start = time.monotonic()
-                record = runtime.render(model, scene/camera, out/directory)
+                record = runtime.render_camera((scene/camera).read_bytes(), out/directory)
                 result["resident"].append(dict(record, camera=camera, directory=directory,
-                    command_to_frame_seconds=time.monotonic()-start))
+                    command_to_frame_seconds=time.monotonic()-start,
+                    ppm_sha256=sha(out/directory/"frame.ppm")))
         result["returned_view_same_hash"] = (result["resident"][0]["frame_sha256"] ==
                                               result["resident"][-1]["frame_sha256"])
         # Both frozen backends have identical process/package startup boundaries.
@@ -55,10 +56,12 @@ def main(argv=None):
                         check=True, env=env, stdout=log, stderr=subprocess.STDOUT, timeout=240)
                 record = json.loads((out/directory/"result.json").read_text())
                 result["frozen"].append(dict(record, camera=camera, directory=directory,
-                    process_wall_seconds=time.monotonic()-start))
+                    process_wall_seconds=time.monotonic()-start,
+                    ppm_sha256=sha(out/directory/"frame.ppm")))
         result["matches_frozen_fpga"] = all(
-            r["frame_sha256"] == next(f["frame_sha256"] for f in result["frozen"]
-                if f["camera"] == r["camera"] and f["backend"] == "fpga") for r in result["resident"])
+            all(r[key] == next(f[key] for f in result["frozen"]
+                if f["camera"] == r["camera"] and f["backend"] == "fpga")
+                for key in ("frame_sha256", "ppm_sha256")) for r in result["resident"])
         result["complete"] = result["returned_view_same_hash"] and result["matches_frozen_fpga"]
         if not result["complete"]:
             raise ValueError("Resident output differs after view change or from frozen FPGA")

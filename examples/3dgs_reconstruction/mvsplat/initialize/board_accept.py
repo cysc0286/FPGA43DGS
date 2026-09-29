@@ -79,7 +79,9 @@ def main():
                 sftp = client.open_sftp()
                 try:
                     for name in ("events.json", "warm_result.json", "input/input.json",
-                             "inference/inference.json", "renderer_input/manifest.json",
+                             "input/input.initial.json", "renderer_input/manifest.json",
+                             "renderer_input/adapter_validation.json",
+                             "inference/inference.json",
                              "board/frame_000007_fpga/result.json", "board/frame_000007_fpga/frame.bin",
                                  "board/frame_000007_fpga/frame.ppm", "renderer.log"):
                         target = a.out / name

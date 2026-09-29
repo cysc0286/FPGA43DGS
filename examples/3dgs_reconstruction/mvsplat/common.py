@@ -29,6 +29,11 @@ def load_gaussians(path):
     import numpy as np
     with np.load(path, allow_pickle=False) as f:
         result = {key: f[key] for key in ("means", "covariances", "harmonics", "opacities")}
+    return validate_gaussians(result)
+
+
+def validate_gaussians(result):
+    import numpy as np
     n = len(result["means"])
     expected = {"means": (n, 3), "covariances": (n, 3, 3), "harmonics": (n, 3, 25), "opacities": (n,)}
     if not 0 < n <= 1000000:

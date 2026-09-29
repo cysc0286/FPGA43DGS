@@ -1,0 +1,168 @@
+{
+  "complete": true,
+  "mode": "warm_fast_pair",
+  "backend": "cpu",
+  "result_scope": "one target frame; not full video coverage",
+  "initialize": {
+    "preheat_seconds_record_only": 45.36913381999693,
+    "model_load_seconds_record_only": 27.03780456000095,
+    "backend": "cpu",
+    "threads": {
+      "inference": 3,
+      "preparation": 1
+    },
+    "warm_scope": "weights, Python dependencies, selected compiled sessions, FPGA device/runtime",
+    "kernel_first_use_warmed": false,
+    "scene_cache": "Gaussian rows loaded once; projection remains per view",
+    "rss_mib_at_ready": 428.625
+  },
+  "video_receipt": {
+    "path": "/root/fpga43dgs_reconstruction/initialize_candidate_20260929/input/nyu_snippet_curl.mp4",
+    "sha256": "0a7e3c684e917dd937ae1ec6c64f770c111b939f08f020b66965c1fccf9ae86a",
+    "bytes": 4900963,
+    "verify_seconds": 0.22979922999729752,
+    "video_input_seconds_record_only": null
+  },
+  "frame": {
+    "complete": true,
+    "backend": "fpga",
+    "camera_sha256": "44d265dca6e1d68355412e70a6f57219dac3aaa4c9ac74acc336529458c219ce",
+    "package": "3dgs_renderer_v1_20260928",
+    "resident_scene": {
+      "rows_sha256": "62c919bc3aeb7b453fcbc6b8dfbc269c9134281591c39bfa95a2dad3a1a9c232",
+      "gaussians": 32768,
+      "load_seconds": 0.04079521000312525,
+      "residence": "CPU Gaussian rows from validated memory"
+    },
+    "attributes_ms": 49.4673299981514,
+    "group_sort_ms": 28.327990003162995,
+    "render_ms": 46.34289999739849,
+    "scene_sha256": "16758c403ed9d779e217a0d851431149ed434edb369d333c12b9ed2842b38a6f",
+    "frame_sha256": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+    "rgb_sha256": "78b7c462fb7e1b9306b2a8ec443b8e9615d072fbf09b46341cbe2d6008edf631",
+    "frame_pack_ms": 44.11746000187122,
+    "total_ms": 176.3441299990518
+  },
+  "inference": {
+    "complete": true,
+    "device": "cpu",
+    "backend": "cpu",
+    "machine": "aarch64",
+    "platform": "Linux-5.4.52-aarch64-with-glibc2.31",
+    "source_commit": "01f9a28edb5eb68416e7e63b01f8d90c3bdfbf01",
+    "weight_sha256": "83d0d9eaa753fa4a1f925288dc1f90b8c3297fad0ab0f6ed1f11a1c5946da25a",
+    "input_sha256": "8f01469ed479d249550121b6bb12b920b7e1af8063a2eaf25ccf2c721df21d87",
+    "threads": 3,
+    "depth_chunk": 16,
+    "parameter_count": 11955734,
+    "checkpoint_encoder_tensor_count": 471,
+    "checkpoint_non_encoder_keys": [],
+    "checkpoint_load": "memory mapped; temporary state released before inference",
+    "versions": {
+      "torch": "2.7.1",
+      "einops": "0.8.1",
+      "e3nn": "0.5.8",
+      "numpy": "2.2.6"
+    },
+    "input_shape": [
+      1,
+      2,
+      3,
+      128,
+      128
+    ],
+    "load_and_setup_seconds": 0.13373462999879848,
+    "inference_seconds": 16.655498160002026,
+    "gaussians": 32768,
+    "sh_degree": 4,
+    "gaussian_sha256": "3564f8d10a49ccb46c8c06acc03e32be0619a8e65babee6aa147abdcfc4a2319",
+    "training_steps": 0,
+    "archive_verified": true,
+    "process_seconds": 17.599616640000022,
+    "scope": "Warm inference and validated memory output; archive audit follows first frame",
+    "npu_executed": false,
+    "deferred_archive_seconds": 0.2945722099975683
+  },
+  "scheduling": {
+    "context_ready_seconds": 5.830014710001706,
+    "inference_begin_seconds": 5.830208500003209,
+    "first_target_ready_seconds": 7.023613630000909,
+    "poses_complete_seconds": 9.282519520002097,
+    "inference_end_seconds": 23.43844798000282,
+    "gaussian_row_conversion_seconds": 2.538495310000144,
+    "renderer_scene_load_seconds": 0.04079521000312525,
+    "combined_seconds": 26.475520010000764,
+    "overlap_seconds": 3.452311019998888,
+    "video_prepare_stages": {
+      "decode_seconds": 3.554241779998847,
+      "context_sift_seconds": 1.558906289999868,
+      "context_matching_seconds": 0.3911941000005754,
+      "context_pose_seconds": 0.21146267000221997,
+      "context_total_seconds": 2.163846499999636,
+      "target_7_sift_seconds": 0.6995861100003822,
+      "target_7_matching_seconds": 0.34768586000063806,
+      "target_7_pnp_seconds": 0.04122768000161159,
+      "target_7_total_seconds": 1.089842809997208,
+      "target_15_sift_seconds": 0.7251676100022451,
+      "target_15_matching_seconds": 0.3544000900001265,
+      "target_15_pnp_seconds": 0.006291509998845868,
+      "target_15_total_seconds": 1.0871940700017149,
+      "target_22_sift_seconds": 0.7051244799986307,
+      "target_22_matching_seconds": 0.35617265999826486,
+      "target_22_pnp_seconds": 0.0063547799982188735,
+      "target_22_total_seconds": 1.069020819999423,
+      "remaining_target_pose_seconds": 2.156214890001138,
+      "remaining_target_pnp_seconds": 0.012646289997064741
+    },
+    "video_prepare_total_seconds": 9.271606930000416
+  },
+  "renderer_input": "warm_archive_overlap3_v2/renderer_input",
+  "first_target_fast_path": true,
+  "events": [
+    {
+      "event": "READY",
+      "epoch": 1773398804.1287198,
+      "monotonic": 26318.99837158,
+      "backend": "cpu",
+      "weight_sha256": "83d0d9eaa753fa4a1f925288dc1f90b8c3297fad0ab0f6ed1f11a1c5946da25a",
+      "video_processed": false
+    },
+    {
+      "event": "VIDEO_COMPLETE",
+      "epoch": 1773398804.137093,
+      "monotonic": 26319.00674427,
+      "path": "/root/fpga43dgs_reconstruction/initialize_candidate_20260929/input/nyu_snippet_curl.mp4",
+      "bytes": 4900963,
+      "receipt_scope": "closed local file handed to pipeline; acquisition not measured"
+    },
+    {
+      "event": "SCENE_READY",
+      "epoch": 1773398830.6599019,
+      "monotonic": 26345.52955056,
+      "gaussian_sha256": "3564f8d10a49ccb46c8c06acc03e32be0619a8e65babee6aa147abdcfc4a2319",
+      "rows_sha256": "62c919bc3aeb7b453fcbc6b8dfbc269c9134281591c39bfa95a2dad3a1a9c232",
+      "camera": "frame_000007.bin",
+      "resident_scene": {
+        "rows_sha256": "62c919bc3aeb7b453fcbc6b8dfbc269c9134281591c39bfa95a2dad3a1a9c232",
+        "gaussians": 32768,
+        "load_seconds": 0.04079521000312525,
+        "residence": "CPU Gaussian rows from validated memory"
+      },
+      "scope": "validated in-memory first-target scene; PLY audit follows"
+    },
+    {
+      "event": "FRAME_COMPLETE",
+      "epoch": 1773398830.8441997,
+      "monotonic": 26345.71385112,
+      "frame_sha256": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+      "camera": "frame_000007.bin"
+    }
+  ],
+  "timing": {
+    "complete": true,
+    "ready_to_receipt_seconds_record_only": 0.008372689997486304,
+    "gaussian_scene_seconds": 26.522806290002336,
+    "first_render_seconds": 0.18430055999851902,
+    "scene_preparation_seconds": 26.707106850000855
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "scope": "isolated blocked FP32 output; not production",
+  "readout": "sfb",
+  "audit": {
+    "input": {
+      "_type_key": "icraft::xir::TensorType",
+      "element_dtype": "@fp(32)",
+      "layout": "@layout(NHWC)",
+      "merged_distrs": [],
+      "shape": [
+        2,
+        128,
+        128,
+        3
+      ]
+    },
+    "output": {
+      "_type_key": "icraft::xir::TensorType",
+      "element_dtype": {
+        "_type_key": "icraft::xir::QuantizedType",
+        "expressed_dtype": "@fp(32)",
+        "scale": "@scales([axis=-1])",
+        "storage_dtype": "@fp(32)",
+        "zero_points": []
+      },
+      "layout": "@layout(NCHWc16)",
+      "merged_distrs": [
+        "@merged_distr([1, 4]^ZERO:{v:[0, 64)})"
+      ],
+      "shape": [
+        2,
+        4,
+        64,
+        64,
+        16
+      ]
+    },
+    "sha256": {
+      "graph.json": "4c9b7c622003a3fd7d6f18002a55f14a8bc7181d6e49d721c39cd6a7dd6c81b4",
+      "params.raw": "1105132a5d52dda4c0a161ad881b3c1c7fef7aef75fb7e09d37dbe14e607745f",
+      "oracle.npz": "3e8901258e3f2bfc7497b086295da7ed00eccd7c5e7c9ebd9e3f0ad7d204504e"
+    }
+  },
+  "samples": [
+    {
+      "passed": false,
+      "max_abs": 1.0455582150682436e+34,
+      "mean_abs": 6.739053059156006e+32,
+      "rmse": 2.654423467031654e+33,
+      "sdk_seconds": [
+        0.00033824,
+        0.00128477,
+        0.00035907,
+        0.04904295,
+        0.05102503
+      ]
+    },
+    {
+      "passed": false,
+      "max_abs": 1.0455582150682436e+34,
+      "mean_abs": 6.739053059156006e+32,
+      "rmse": 2.654423467031654e+33,
+      "sdk_seconds": [
+        0.00026286,
+        0.00095687,
+        5.59e-06,
+        0.02535995,
+        0.02658527
+      ]
+    }
+  ],
+  "passed": false
+}

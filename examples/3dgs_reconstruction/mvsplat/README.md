@@ -1,5 +1,8 @@
 # MVSplat 板端重建主线
 
+代码分层、状态合同和当前验收边界见 [ARCHITECTURE.md](ARCHITECTURE.md)。默认主线是
+`initialize → video_input → MVSplat 前向 → Gaussian ABI → 常驻 CPU+FPGA 渲染`；诊断脚本和历史实验不作为默认入口。
+
 最新实板结果（2026-09-29）：`pipeline.py initialize` 默认视频前预热、四线程串行，三次场景准备平均 **27.88 秒**；`--threads 3 --overlap-prepare` 保留重叠实验。连续换视角约 0.83 秒，和冻结 FPGA 输出一致。首目标画质尚未过 20 dB；真实 NPU 分区数值校验失败，因此仍选 CPU 前馈＋FPGA 渲染。[完整报告与效果图](BOARD_WARM_NPU_VALIDATION.md)。原 `reconstruct` 冷启动及完整 SfM 质量回退保留。
 
 新增预热/常驻与 NPU 候选（2026-09-29）：[initialize 使用说明](initialize/README.md)、[NPU 导出和接入](npu/README.md)、[本轮离线验证](INITIALIZE_NPU_VALIDATION.md)。当前用户在外，新增代码没有实板验收。下文已验证的冷路径继续保留；不要把子图编译成功写成整网 NPU 已部署。

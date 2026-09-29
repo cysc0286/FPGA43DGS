@@ -2,6 +2,8 @@
 
 当前默认链路使用 [MVSplat 板端前馈](mvsplat/README.md)：从离线视频到 FPGA 图像均已在板端执行。主入口为 `python pipeline.py reconstruct --video INPUT.mp4 --out NEW_RUN`，默认完整 SfM 路径。该配置三视角画质达标，但首图 249.43 秒；快速单进程首图 66.68 秒，首个视角画质未过门槛，需显式选择。原 OpenSplat 训练路径保留为历史对照，详见 [快速版本对照](mvsplat/FAST_VALIDATION.md)。
 
+当前代码结构和 `READY → VIDEO_COMPLETE → SCENE_READY → FRAME_COMPLETE` 状态合同见 [MVSplat 主线结构](mvsplat/ARCHITECTURE.md)。主线的后端仍是经过数值核验的 CPU＋FPGA；NPU 诊断代码只在独立 `mvsplat/npu/` 范围内运行，未通过数值门禁时不会进入生产链。
+
 视频文件、COLMAP 位姿、MVSplat 预训练网络高斯生成、冻结 FPGA 渲染均在悟净 30TAI Lite 上实测，见 [验收数据和效果图](mvsplat/VALIDATION.md)。下文从“2026-09-28 模块整理”起记录原 OpenSplat CPU 优化基线，不应把其中“板端训练未移植”的结论套到 MVSplat 前馈上。
 
 ## 2026-09-28 模块整理

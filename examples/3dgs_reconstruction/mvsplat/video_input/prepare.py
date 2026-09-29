@@ -60,17 +60,24 @@ def decode_selected(video, context, targets, width, threads):
     return frames, count, fps, context, targets
 
 
-def estimate_pair(first, second, intrinsic, min_inliers):
+def estimate_pair(first, second, intrinsic, min_inliers, timing=None):
+    started = time.perf_counter()
     sift = cv2.SIFT_create(nfeatures=2048)
     k0, d0 = sift.detectAndCompute(cv2.cvtColor(first, cv2.COLOR_BGR2GRAY), None)
     k1, d1 = sift.detectAndCompute(cv2.cvtColor(second, cv2.COLOR_BGR2GRAY), None)
     if d0 is None or d1 is None:
         raise ValueError("No SIFT descriptors in context frames")
+    if timing is not None:
+        timing["context_sift_seconds"] = time.perf_counter()-started
+    matching_started = time.perf_counter()
     matches = mutual_ratio_matches(d0, d1)
+    if timing is not None:
+        timing["context_matching_seconds"] = time.perf_counter()-matching_started
     if len(matches) < min_inliers:
         raise ValueError(f"Only {len(matches)} mutual matches")
     p0 = np.float64([k0[m.queryIdx].pt for m in matches])
     p1 = np.float64([k1[m.trainIdx].pt for m in matches])
+    pose_started = time.perf_counter()
     essential, mask = cv2.findEssentialMat(p0, p1, intrinsic, cv2.RANSAC,
                                           prob=0.999, threshold=1.0)
     if essential is None:
@@ -103,20 +110,31 @@ def estimate_pair(first, second, intrinsic, min_inliers):
                        median_depth_before_normalization=median_depth,
                        translation_scale=scale, baseline_after_normalization=float(np.linalg.norm(camera1[:3, 3])),
                        median_context_disparity_px=float(np.median(np.linalg.norm(p0-p1, axis=1))))
+    if timing is not None:
+        timing["context_pose_seconds"] = time.perf_counter()-pose_started
+        timing["context_total_seconds"] = time.perf_counter()-started
     return camera1, landmark_by_keypoint, k0, d0, diagnostics
 
 
-def estimate_target(frame, keypoints0, descriptors0, landmarks, intrinsic, min_inliers):
+def estimate_target(frame, keypoints0, descriptors0, landmarks, intrinsic, min_inliers,
+                    timing=None, label="target"):
+    started = time.perf_counter()
     sift = cv2.SIFT_create(nfeatures=2048)
     keys, descriptors = sift.detectAndCompute(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), None)
     if descriptors is None:
         raise ValueError("No target descriptors")
+    if timing is not None:
+        timing[f"{label}_sift_seconds"] = time.perf_counter()-started
+    matching_started = time.perf_counter()
     matches = [m for m in mutual_ratio_matches(descriptors0, descriptors)
                if m.queryIdx in landmarks]
+    if timing is not None:
+        timing[f"{label}_matching_seconds"] = time.perf_counter()-matching_started
     if len(matches) < min_inliers:
         raise ValueError(f"Only {len(matches)} landmark-to-target matches")
     world = np.float64([landmarks[m.queryIdx] for m in matches])
     pixels = np.float64([keys[m.trainIdx].pt for m in matches])
+    pnp_started = time.perf_counter()
     ok, rvec, tvec, inliers = cv2.solvePnPRansac(world, pixels, intrinsic, None,
                                                  iterationsCount=500, reprojectionError=4.,
                                                  confidence=0.999, flags=cv2.SOLVEPNP_EPNP)
@@ -126,6 +144,9 @@ def estimate_target(frame, keypoints0, descriptors0, landmarks, intrinsic, min_i
                          None, rvec, tvec)
     projected, _ = cv2.projectPoints(world[inliers[:, 0]], rvec, tvec, intrinsic, None)
     error = np.linalg.norm(projected.reshape(-1, 2)-pixels[inliers[:, 0]], axis=1)
+    if timing is not None:
+        timing[f"{label}_pnp_seconds"] = time.perf_counter()-pnp_started
+        timing[f"{label}_total_seconds"] = time.perf_counter()-started
     camera = np.eye(4)
     rotation = cv2.Rodrigues(rvec)[0]
     camera[:3, :3] = rotation.T
@@ -134,7 +155,7 @@ def estimate_target(frame, keypoints0, descriptors0, landmarks, intrinsic, min_i
                         pnp_inliers=len(inliers), median_reprojection_px=float(np.median(error)))
 
 
-def main(argv=None, on_context_ready=None):
+def main(argv=None, on_context_ready=None, on_first_target_ready=None):
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--video", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
@@ -152,16 +173,19 @@ def main(argv=None, on_context_ready=None):
             or not np.isfinite(a.focal_ratio) or a.focal_ratio <= 0 or a.min_inliers < 8):
         p.error("Invalid image size, width, threads or focal ratio")
     started = time.perf_counter()
+    timing = {}
+    decode_started = time.perf_counter()
     cv2.setNumThreads(a.threads)
     frames, count, fps, context, targets = decode_selected(
         a.video, a.context, a.targets, a.width, a.threads)
+    timing["decode_seconds"] = time.perf_counter()-decode_started
     h, w = frames[context[0]].shape[:2]
     if any(frame.shape[:2] != (h, w) for frame in frames.values()):
         raise ValueError("Video frame dimensions changed")
     focal = a.focal_ratio * w
     intrinsic = np.array([[focal, 0, (w-1)/2], [0, focal, (h-1)/2], [0, 0, 1]], np.float64)
     camera1, landmarks, keys0, descriptors0, pair_info = estimate_pair(
-        frames[context[0]], frames[context[1]], intrinsic, a.min_inliers)
+        frames[context[0]], frames[context[1]], intrinsic, a.min_inliers, timing)
     poses = {context[0]: np.eye(4), context[1]: camera1}
     out = new_directory(a.out)
     (out / "images").mkdir()
@@ -191,9 +215,13 @@ def main(argv=None, on_context_ready=None):
     if on_context_ready is not None:
         on_context_ready(out, context_hash)
     targets_info = {}
-    for i in targets:
+    first_target = targets[0]
+    deferred_targets = targets[1:]
+    first_target_published = False
+    for position, i in enumerate(targets):
         poses[i], targets_info[str(i)] = estimate_target(
-            frames[i], keys0, descriptors0, landmarks, intrinsic, a.min_inliers)
+            frames[i], keys0, descriptors0, landmarks, intrinsic, a.min_inliers,
+            timing, label=f"target_{i}")
         name = f"frame_{i:06d}.png"
         image = cv2.warpAffine(frames[i], affine, (a.size, a.size), flags=cv2.INTER_LINEAR)
         if not cv2.imwrite(str(out / "images" / name), image):
@@ -202,6 +230,26 @@ def main(argv=None, on_context_ready=None):
                           intrinsics_normalized=k.tolist(), width=a.size, height=a.size,
                           affine_source_to_output=affine.tolist(),
                           prepared_sha256=sha(out / "images" / name)))
+        if position == 0:
+            initial_meta = dict(schema="mvsplat_context_v1", pose_source="two_view_sift_essential_pnp",
+                input_video=str(a.video.resolve()), input_video_sha256=sha(a.video),
+                source_frames=count, fps=fps, context_indices=context, target_indices=[first_target],
+                deferred_target_indices=deferred_targets,
+                calibration=dict(kind="approximate", focal_ratio=a.focal_ratio,
+                                 focal_px=focal, intrinsic=intrinsic.tolist(), distortion="assumed zero"),
+                geometry=dict(pair=pair_info, targets={str(first_target): targets_info[str(first_target)]}),
+                views=list(views), context_sha256=context_hash, near=1, far=100,
+                normalization=dict(median_triangulated_depth=10., scale=pair_info["translation_scale"]),
+                target_scope="Initial snapshot contains the first target only; deferred targets remain in input.json.",
+                timing=dict(timing), seconds=time.perf_counter()-started)
+            save(out / "input.initial.json", initial_meta)
+            first_target_published = True
+            if on_first_target_ready is not None:
+                on_first_target_ready(out, context_hash, first_target)
+    timing["remaining_target_pose_seconds"] = sum(
+        timing.get(f"target_{i}_total_seconds", 0.) for i in deferred_targets)
+    timing["remaining_target_pnp_seconds"] = sum(
+        timing.get(f"target_{i}_pnp_seconds", 0.) for i in deferred_targets)
     save(out / "input.json", dict(schema="mvsplat_context_v1", pose_source="two_view_sift_essential_pnp",
          input_video=str(a.video.resolve()), input_video_sha256=sha(a.video),
          source_frames=count, fps=fps, context_indices=context, target_indices=targets,
@@ -211,6 +259,7 @@ def main(argv=None, on_context_ready=None):
           context_sha256=context_hash, near=1, far=100,
          normalization=dict(median_triangulated_depth=10., scale=pair_info["translation_scale"]),
          target_scope="Targets excluded from network context; positioned with two-view landmarks and PnP, not full SfM.",
+         timing=timing, initial_target_published=first_target_published,
          seconds=time.perf_counter()-started))
     print(json.dumps(dict(prepared=str(out), seconds=time.perf_counter()-started,
                           context=context, targets=targets, geometry=pair_info)))

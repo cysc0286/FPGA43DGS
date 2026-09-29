@@ -4,12 +4,37 @@ import unittest
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from export import camera_bytes, factor_covariances, recover_covariances
+from export import (camera_bytes, factor_covariances,
+                    recover_covariances, _matrix_to_quaternion_wxyz)
 from prepare import centered_affine
 from reference import real_sh_basis, render
 
 
 class BridgeTests(unittest.TestCase):
+    def test_vectorized_quaternion_matches_scipy(self):
+        rng = np.random.default_rng(23)
+        matrices = Rotation.random(512, random_state=rng).as_matrix()
+        actual = _matrix_to_quaternion_wxyz(matrices)
+        expected = Rotation.from_matrix(matrices).as_quat()[:, [3, 0, 1, 2]]
+        # Quaternion signs describe the same rotation.  Compare the sign
+        # aligned values and then the reconstructed rotation matrices.
+        signs = np.where(np.sum(actual * expected, axis=1, keepdims=True) < 0., -1., 1.)
+        np.testing.assert_allclose(actual, expected * signs, rtol=1e-12, atol=1e-12)
+        restored = Rotation.from_quat(actual[:, [1, 2, 3, 0]]).as_matrix()
+        np.testing.assert_allclose(restored, matrices, rtol=1e-12, atol=1e-12)
+
+    def test_legacy_quaternion_backend_is_a_bitwise_rows_control(self):
+        rng = np.random.default_rng(29)
+        rotations = Rotation.random(256, random_state=rng).as_matrix()
+        scales = np.exp(rng.uniform(-8, 2, (256, 3)))
+        covariances = (rotations * scales[:, None, :] ** 2) @ rotations.swapaxes(-1, -2)
+        fast_logs, fast_q, fast_clamps = factor_covariances(covariances)
+        ref_logs, ref_q, ref_clamps = factor_covariances(covariances, quaternion_backend="scipy")
+        np.testing.assert_array_equal(fast_logs, ref_logs)
+        self.assertEqual(fast_clamps, ref_clamps)
+        fast_cov = recover_covariances(fast_logs, fast_q)
+        ref_cov = recover_covariances(ref_logs, ref_q)
+        np.testing.assert_allclose(fast_cov, ref_cov, rtol=1e-6, atol=1e-8)
     def test_world_covariance_with_nontrivial_camera_rotation(self):
         rng = np.random.default_rng(19)
         local_rotation = Rotation.random(100, random_state=rng).as_matrix()

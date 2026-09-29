@@ -1,0 +1,150 @@
+{
+  "scope": "known-input single-session NPU correctness; not model speed",
+  "cases": {
+    "identity": [
+      {
+        "passed": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "exact": true,
+        "seconds": 0.0016684999991412042,
+        "sdk_stage_names": [
+          "input_write",
+          "forward_submit",
+          "wait",
+          "output_convert",
+          "sdk_total"
+        ],
+        "sdk_seconds": [
+          9.276e-05,
+          0.00045238,
+          5.78e-06,
+          0.00074325,
+          0.00129417
+        ],
+        "npu_executed": true
+      },
+      {
+        "passed": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "exact": true,
+        "seconds": 0.0012234799996804213,
+        "sdk_stage_names": [
+          "input_write",
+          "forward_submit",
+          "wait",
+          "output_convert",
+          "sdk_total"
+        ],
+        "sdk_seconds": [
+          8.751e-05,
+          0.00038081,
+          5.17e-06,
+          0.00060773,
+          0.00108122
+        ],
+        "npu_executed": true
+      }
+    ],
+    "dyadic": [
+      {
+        "passed": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "exact": true,
+        "seconds": 0.001166319998446852,
+        "sdk_stage_names": [
+          "input_write",
+          "forward_submit",
+          "wait",
+          "output_convert",
+          "sdk_total"
+        ],
+        "sdk_seconds": [
+          4.64e-05,
+          0.00036419,
+          4.96e-06,
+          0.00056926,
+          0.00098481
+        ],
+        "npu_executed": true
+      },
+      {
+        "passed": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "exact": true,
+        "seconds": 0.001221659998918767,
+        "sdk_stage_names": [
+          "input_write",
+          "forward_submit",
+          "wait",
+          "output_convert",
+          "sdk_total"
+        ],
+        "sdk_seconds": [
+          8.52e-05,
+          0.00038095,
+          4.61e-06,
+          0.0006051,
+          0.00107586
+        ],
+        "npu_executed": true
+      }
+    ],
+    "fractional": [
+      {
+        "passed": true,
+        "max_abs": 0.00016766786575317383,
+        "mean_abs": 4.6486824430758134e-05,
+        "rmse": 5.945061422793567e-05,
+        "exact": false,
+        "seconds": 0.0011472599999251543,
+        "sdk_stage_names": [
+          "input_write",
+          "forward_submit",
+          "wait",
+          "output_convert",
+          "sdk_total"
+        ],
+        "sdk_seconds": [
+          4.711e-05,
+          0.00035775,
+          6.61e-06,
+          0.0005658,
+          0.00097727
+        ],
+        "npu_executed": true
+      },
+      {
+        "passed": true,
+        "max_abs": 0.00016766786575317383,
+        "mean_abs": 4.6486824430758134e-05,
+        "rmse": 5.945061422793567e-05,
+        "exact": false,
+        "seconds": 0.0012035799991281237,
+        "sdk_stage_names": [
+          "input_write",
+          "forward_submit",
+          "wait",
+          "output_convert",
+          "sdk_total"
+        ],
+        "sdk_seconds": [
+          8.733e-05,
+          0.00037974,
+          4.72e-06,
+          0.00059521,
+          0.001067
+        ],
+        "npu_executed": true
+      }
+    ]
+  },
+  "passed": true
+}

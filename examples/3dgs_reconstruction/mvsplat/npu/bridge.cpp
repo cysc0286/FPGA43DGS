@@ -71,21 +71,46 @@ extern "C" void* mgs_create(const char* json,const char* raw,size_t ib,size_t ob
 }
 extern "C" void mgs_destroy(void* ctx) {delete static_cast<MgsContext*>(ctx);}
 extern "C" int mgs_bindings(void* ctx) {return static_cast<MgsContext*>(ctx)->bindings;}
-extern "C" int mgs_forward(void* ctx,const float* in,size_t ib,float* out,size_t ob,double* times) {
+static int forward_impl(void* ctx,const float* in,size_t ib,float* out,size_t ob,
+                        double* detailed) {
     try {
-        if(!ctx || !in || !out || !times) throw std::runtime_error("Null forward argument");
+        if(!ctx || !in || !out || !detailed) throw std::runtime_error("Null forward argument");
         const auto& checked=*static_cast<MgsContext*>(ctx);
         if(ib!=checked.in_bytes || ob!=checked.out_bytes) throw std::runtime_error("Forward buffer length mismatch");
         auto& c=*static_cast<MgsContext*>(ctx);const auto start=Clock::now();
         c.input.write(0,const_cast<char*>(reinterpret_cast<const char*>(in)),c.in_bytes);
-        const auto submitted=Clock::now();auto values=c.session.forward({c.input});
+        const auto input_done=Clock::now();
+        auto values=c.session.forward({c.input});
+        const auto submitted=Clock::now();
         if(values.size()!=1 || !values[0].waitForReady(std::chrono::seconds(30))) throw std::runtime_error("NPU output timeout");
-        const auto computed=Clock::now();std::ostringstream stream(std::ios::out|std::ios::binary);
+        const auto wait_done=Clock::now();
+        std::ostringstream stream(std::ios::out|std::ios::binary);
         values[0].dump(stream,"SFB");const auto bytes=stream.str();
         if(bytes.size()!=c.out_bytes) throw std::runtime_error("SFB output length mismatch");
         std::memcpy(out,bytes.data(),bytes.size());const auto finished=Clock::now();
-        times[0]=std::chrono::duration<double>(submitted-start).count();
-        times[1]=std::chrono::duration<double>(computed-submitted).count();
-        times[2]=std::chrono::duration<double>(finished-computed).count();return 0;
+        detailed[0]=std::chrono::duration<double>(input_done-start).count();
+        detailed[1]=std::chrono::duration<double>(submitted-input_done).count();
+        detailed[2]=std::chrono::duration<double>(wait_done-submitted).count();
+        detailed[3]=std::chrono::duration<double>(finished-wait_done).count();
+        detailed[4]=std::chrono::duration<double>(finished-start).count();
+        return 0;
     } catch(const std::exception& e) {error_text=e.what();return 1;}
+}
+// ABI 2 remains the production compatibility entry point. Its middle bucket
+// preserves the historical execute+wait meaning used by old workers.
+extern "C" int mgs_forward(void* ctx,const float* in,size_t ib,float* out,size_t ob,double* times) {
+    double detailed[5]={0.,0.,0.,0.,0.};
+    const int rc=forward_impl(ctx,in,ib,out,ob,detailed);
+    if (!rc) {
+        times[0]=detailed[0];
+        times[1]=detailed[1]+detailed[2];
+        times[2]=detailed[3];
+    }
+    return rc;
+}
+// Optional ABI-2 extension. This symbol is detected by the worker at runtime,
+// so an older board library can still serve the three-bucket contract.
+extern "C" int mgs_forward_detailed(void* ctx,const float* in,size_t ib,float* out,
+                                     size_t ob,double* times) {
+    return forward_impl(ctx,in,ib,out,ob,times);
 }
