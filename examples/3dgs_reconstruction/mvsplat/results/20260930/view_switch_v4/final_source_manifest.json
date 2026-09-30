@@ -1,0 +1,68 @@
+{
+  "rendering/live_renderer.cpp": {
+    "local": "428d7f53e351420fa432990776a16920849c9e3627f66aed2ac5e06199bf7b1d",
+    "board": "428d7f53e351420fa432990776a16920849c9e3627f66aed2ac5e06199bf7b1d",
+    "match": true,
+    "sha256_lf_normalized": "428d7f53e351420fa432990776a16920849c9e3627f66aed2ac5e06199bf7b1d"
+  },
+  "rendering/depth_sort.hpp": {
+    "local": "5afed43f2ccc248255d5aa0d8857bd6c5c131cab98f5ce92c2d52ea567d67004",
+    "board": "5afed43f2ccc248255d5aa0d8857bd6c5c131cab98f5ce92c2d52ea567d67004",
+    "match": true,
+    "sha256_lf_normalized": "5afed43f2ccc248255d5aa0d8857bd6c5c131cab98f5ce92c2d52ea567d67004"
+  },
+  "rendering/tile_lists.hpp": {
+    "local": "422e55586d52538c94eb67a791d684441aacf0d417e301831a32d55ca683e0bb",
+    "board": "422e55586d52538c94eb67a791d684441aacf0d417e301831a32d55ca683e0bb",
+    "match": true,
+    "sha256_lf_normalized": "422e55586d52538c94eb67a791d684441aacf0d417e301831a32d55ca683e0bb"
+  },
+  "rendering/cached_projection.hpp": {
+    "local": "090327ceca10af96e79863f1f4e15a5ee4610ce106a0eae48078551c971000bc",
+    "board": "090327ceca10af96e79863f1f4e15a5ee4610ce106a0eae48078551c971000bc",
+    "match": true,
+    "sha256_lf_normalized": "090327ceca10af96e79863f1f4e15a5ee4610ce106a0eae48078551c971000bc"
+  },
+  "rendering/build.sh": {
+    "local": "63df6710cb647016bce5764785067540378a7cbc9ca0aa669a7a658a7abe891f",
+    "board": "63df6710cb647016bce5764785067540378a7cbc9ca0aa669a7a658a7abe891f",
+    "match": true,
+    "sha256_lf_normalized": "63df6710cb647016bce5764785067540378a7cbc9ca0aa669a7a658a7abe891f"
+  },
+  "rendering/runtime.py": {
+    "local": "0bd8fbcbd1300c36c66ba9b741b09cef15d6c47735ebc7456dbde6658860abb0",
+    "board": "0bd8fbcbd1300c36c66ba9b741b09cef15d6c47735ebc7456dbde6658860abb0",
+    "match": true,
+    "sha256_lf_normalized": "0bd8fbcbd1300c36c66ba9b741b09cef15d6c47735ebc7456dbde6658860abb0"
+  },
+  "rendering/compare_builds.py": {
+    "local": "7bb7dce53ef7bf2e44ec61d7b6a442aceac2d64743eb2d042d88c87d8de7daf0",
+    "board": "7bb7dce53ef7bf2e44ec61d7b6a442aceac2d64743eb2d042d88c87d8de7daf0",
+    "match": true,
+    "sha256_lf_normalized": "7bb7dce53ef7bf2e44ec61d7b6a442aceac2d64743eb2d042d88c87d8de7daf0"
+  },
+  "rendering/verify.py": {
+    "local": "18f44f0bf33606b5e4c31dbc509573c47fe306eac1c2a0c65ef3ed7df45b753e",
+    "board": "18f44f0bf33606b5e4c31dbc509573c47fe306eac1c2a0c65ef3ed7df45b753e",
+    "match": true,
+    "sha256_lf_normalized": "18f44f0bf33606b5e4c31dbc509573c47fe306eac1c2a0c65ef3ed7df45b753e"
+  },
+  "rendering/benchmark.py": {
+    "local": "784ff38d5199b3286a75d58b772a2f1b1d967a2b6ae75657aff1fc4570f2c339",
+    "board": "784ff38d5199b3286a75d58b772a2f1b1d967a2b6ae75657aff1fc4570f2c339",
+    "match": true,
+    "sha256_lf_normalized": "784ff38d5199b3286a75d58b772a2f1b1d967a2b6ae75657aff1fc4570f2c339"
+  },
+  "rendering/tests/depth_sort_test.cpp": {
+    "local": "3f4e86bc4743af529606669ca5d8b7045395d3c155cc4a378be2b44629ef6a13",
+    "board": "3f4e86bc4743af529606669ca5d8b7045395d3c155cc4a378be2b44629ef6a13",
+    "match": true,
+    "sha256_lf_normalized": "3f4e86bc4743af529606669ca5d8b7045395d3c155cc4a378be2b44629ef6a13"
+  },
+  "rendering/tests/tile_lists_test.cpp": {
+    "local": "d120fd22bddc978832704bbb0324cde4bcc0796beda9b23b8e26190d9158433d",
+    "board": "d120fd22bddc978832704bbb0324cde4bcc0796beda9b23b8e26190d9158433d",
+    "match": true,
+    "sha256_lf_normalized": "d120fd22bddc978832704bbb0324cde4bcc0796beda9b23b8e26190d9158433d"
+  }
+}

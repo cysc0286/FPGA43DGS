@@ -1,5 +1,13 @@
 # 3DGS 主线与目录入口
 
+当前换视角主线：`mvsplat/rendering` 的 C++ 三趟排序与四核 Tile 列表生成，
+同轮旧程序 48.632→**45.212 ms**，P95 46.263 ms，三视角输出逐位不变。
+128×128、32,768 点、60 帧；已加载场景的新相机到完整 RGB 返回，不是视频
+准备时间。默认 `radix_bits=11, parallel_tiles=True`；旧程序显式用 8/False。
+本轮 FPGA 位流、前端与 NPU 未修改。
+[完整换视角验证](examples/3dgs_reconstruction/mvsplat/rendering/VIEW_SWITCH_VALIDATION.md)。
+下文保留前序结果与路径，不将历史数据当作当前速度。
+
 2026-09-30 查表硬件增量已完成上板：同一 A53 原生二进制，完整点集换视角
 50.294→**49.059 ms**（P95 50.204 ms）；硬件周期 5.570→5.215 百万，
 减少 6.37%，三视角 raw/RGB 不变。200 MHz 未改变，四路并行仍保留。

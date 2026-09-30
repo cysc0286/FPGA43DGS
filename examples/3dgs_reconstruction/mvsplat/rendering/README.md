@@ -1,5 +1,10 @@
 # Live camera-to-frame renderer
 
+2026-09-30: the measured default is now three-pass depth radix plus four-core
+Tile list construction. On the unchanged FPGA, 32,768 Gaussians at 128×128,
+paired view-switch latency falls from 48.632 to **45.212 ms** (7.03%; P95
+46.263 ms). Pixels are unchanged. See [view-switch validation](VIEW_SWITCH_VALIDATION.md).
+
 The scene is prepared before interactive rendering. LiveRenderer.load_scene()
 or load_rows() installs a scene; render_camera() accepts the existing 136-byte
 camera and returns a complete RGB framebuffer. LiveFrame.archive() is explicit
@@ -13,6 +18,10 @@ file, Python pixel loop, or image archive is on this path.
   persistent DMA buffers and native RGB conversion.
 - cached_projection.hpp: one-time covariance/opacity preparation and per-view
   projection. Screen projection, depth and SH color still change per camera.
+- depth_sort.hpp: stable positive-FP32 radix sort, preserving all depth bits.
+- tile_lists.hpp: contiguous sorted work blocks, private Tile counts, ordered
+  prefix offsets and parallel writes to disjoint list segments.
+- tests/: native differential checks for sorting and Tile list ownership/order.
 - pipeline_adapter.py: compatibility with the warm video-to-first-frame path.
   This adapter still counts raw-frame archival before FRAME_COMPLETE; its time
   must not be presented as the lower archive-free interactive latency.
@@ -40,6 +49,11 @@ binary path. `COMPILER_VALIDATION.md` reports the paired ARM measurements,
 including negative FMA/prepacking results. Optional `LiveRenderer` arguments
 `compact_payload` and `depth_layout` default to false; no unproven layout gain
 is silently enabled.
+
+Rebuild the native binary when updating the Python runtime: its tested defaults
+are now `radix_bits=11, parallel_tiles=True`. To call a preserved older binary,
+pass `radix_bits=8, parallel_tiles=False`; both new flags are then omitted.
+The experimental depth layout also requires `parallel_tiles=False`.
 
 For video preparation, append --live-renderer /absolute/path/live_renderer to
 the existing initialize command. Optional --render-max-gaussians 16384 is

@@ -13,10 +13,13 @@ namespace projection {
 #undef main
 }
 #include "cached_projection.hpp"
+#include "depth_sort.hpp"
+#include "tile_lists.hpp"
 
 using DeviceBuffer=decltype(std::declval<icraft::xrt::ZG330Device>().defaultMemRegion().malloc(64,0,64));
 struct FrameStats {
     double project_ms=0,sort_ms=0,engine_ms=0,pack_ms=0,upload_ms=0,wait_ms=0,read_ms=0;
+    double collect_ms=0,radix_ms=0,scatter_ms=0;
     uint64_t input_bytes=0,output_bytes=0,cycles=0;
 };
 
@@ -118,12 +121,12 @@ struct EngineWorkspace {
 struct LiveScene {
     std::vector<float> rows;
     std::vector<PreparedGaussian> prepared;
-    std::vector<uint32_t> selected,remap,cursors;
+    std::vector<uint32_t> selected,remap,cursors,tile_workspace;
     std::vector<projection::Attribute> attrs;
     std::vector<uint64_t> keys,scratch;
     Scene scene{};
-    unsigned count=0,budget=0,threads=1;
-    bool cached=true,comparison_sort=false,uniform_preview=false,depth_layout=false;
+    unsigned count=0,budget=0,threads=1,radix_bits=8;
+    bool cached=true,comparison_sort=false,uniform_preview=false,depth_layout=false,parallel_tiles=false;
 
     void install(std::vector<float> next,unsigned n) {
         std::vector<PreparedGaussian> properties(n);
@@ -182,23 +185,18 @@ struct LiveScene {
             }
             uint32_t depth;std::memcpy(&depth,&a.q[9],4);
             keys.push_back((uint64_t(depth)<<32)|i);
-            for(unsigned y=a.min_y;y<a.max_y;++y)for(unsigned x=a.min_x;x<a.max_x;++x)++cursors[y*nx+x];
+            if(!parallel_tiles)
+                for(unsigned y=a.min_y;y<a.max_y;++y)for(unsigned x=a.min_x;x<a.max_x;++x)++cursors[y*nx+x];
         }
+        auto collected=Clock::now();stats.collect_ms=elapsed(begin,collected)/1000;
         if(comparison_sort)std::sort(keys.begin(),keys.end());
-        else {
-            // Positive FP32 depth preserves bit order. Four stable byte passes
-            // preserve original Gaussian ID ties because input IDs are ascending.
-            scratch.resize(keys.size());
-            for(unsigned pass=0;pass<4;++pass) {
-                std::array<uint32_t,256> counts{};
-                const unsigned shift=32+8*pass;
-                for(uint64_t key:keys)++counts[(key>>shift)&255];
-                uint32_t offset=0;
-                for(auto& count:counts){uint32_t n=count;count=offset;offset+=n;}
-                for(uint64_t key:keys)scratch[counts[(key>>shift)&255]++]=key;
-                keys.swap(scratch);
-            }
-        }
+        else if(radix_bits==11)sort_positive_depth<11>(keys,scratch);
+        else if(radix_bits==16)sort_positive_depth<16>(keys,scratch);
+        else sort_positive_depth<8>(keys,scratch);
+        auto sorted=Clock::now();stats.radix_ms=elapsed(collected,sorted)/1000;
+        if(parallel_tiles) {
+            parallel_tile_lists(keys,attrs,remap,nx,ny,threads,s.ranges,s.ids,tile_workspace);
+        }else {
         uint64_t total=0;
         for(unsigned t=0;t<s.tiles;++t) {
             const unsigned size=cursors[t];
@@ -217,7 +215,9 @@ struct LiveScene {
             for(unsigned y=a.min_y;y<a.max_y;++y)for(unsigned x=a.min_x;x<a.max_x;++x)
                 s.ids[cursors[y*nx+x]++]=mapped;
         }
+        }
         s.active=s.gs.size();s.entries=s.ids.size();
+        stats.scatter_ms=elapsed(sorted,Clock::now())/1000;
         stats.sort_ms=elapsed(begin,Clock::now())/1000;
     }
 };
@@ -232,15 +232,21 @@ int main(int argc,char** argv) {
             else if(a=="--comparison-sort")model.comparison_sort=true;
             else if(a=="--uniform-preview")model.uniform_preview=true;
             else if(a=="--depth-layout")model.depth_layout=true;
+            else if(a=="--parallel-tiles")model.parallel_tiles=true;
             else if(a=="--compact-payload")compact_payload=true;
             else if(a=="--cpu")cpu=true;
-            else if((a=="--threads"||a=="--max-gaussians"||a=="--batch")&&i+1<argc) {
+            else if((a=="--threads"||a=="--max-gaussians"||a=="--batch"||a=="--radix-bits")&&i+1<argc) {
                 unsigned v=std::stoul(argv[++i]);
-                if(a=="--threads")model.threads=v;else if(a=="--batch")batch=v;else model.budget=v;
+                if(a=="--threads")model.threads=v;else if(a=="--batch")batch=v;
+                else if(a=="--radix-bits")model.radix_bits=v;else model.budget=v;
             }else throw std::runtime_error("unsupported live renderer option");
         }
         if(!model.threads||model.threads>4||!batch||batch>32||model.budget>1000000)
             throw std::runtime_error("live renderer bounds");
+        if(model.radix_bits!=8&&model.radix_bits!=11&&model.radix_bits!=16)
+            throw std::runtime_error("radix bits must be 8, 11 or 16");
+        if(model.parallel_tiles&&model.depth_layout)
+            throw std::runtime_error("parallel Tile lists require source-order Gaussian storage");
         if(model.uniform_preview&&(!model.cached||!model.budget))
             throw std::runtime_error("uniform preview requires cached projection and an explicit budget");
         omp_set_dynamic(0);selected_mode=2;Board::resident=true;
@@ -294,6 +300,8 @@ int main(int argc,char** argv) {
                     std::cout<<std::setprecision(12)<<"FRAME {\"width\":"<<camera.w<<",\"height\":"<<camera.h
                         <<",\"rgb_bytes\":"<<rgb.size()<<",\"raw_bytes\":"<<rawbytes
                         <<",\"project_ms\":"<<stats.project_ms<<",\"sort_ms\":"<<stats.sort_ms
+                        <<",\"collect_ms\":"<<stats.collect_ms<<",\"radix_ms\":"<<stats.radix_ms
+                        <<",\"scatter_ms\":"<<stats.scatter_ms
                         <<",\"engine_ms\":"<<stats.engine_ms<<",\"pack_ms\":"<<stats.pack_ms
                         <<",\"native_ms\":"<<elapsed(begin,Clock::now())/1000
                         <<",\"upload_ms\":"<<stats.upload_ms<<",\"wait_ms\":"<<stats.wait_ms

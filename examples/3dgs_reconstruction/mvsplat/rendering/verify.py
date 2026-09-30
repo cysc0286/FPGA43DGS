@@ -18,6 +18,8 @@ def main():
     p.add_argument("--binary",type=Path,required=True)
     p.add_argument("--renderer",type=Path,required=True)
     p.add_argument("--out",type=Path,required=True)
+    p.add_argument("--radix-bits",type=int,choices=(8,11,16),default=11)
+    p.add_argument("--serial-tiles",action="store_false",dest="parallel_tiles",default=True)
     a=p.parse_args()
     a.out.mkdir(parents=True,exist_ok=False)
     data=(a.scene/"model.ply").read_bytes()
@@ -34,7 +36,8 @@ def main():
     for cached in (False,True):
         outputs=[]
         with LiveRenderer(a.binary,render_environment(),a.out/("cached_%s.log"%cached),
-                          threads=4,cached=cached) as runtime:
+                          threads=4,cached=cached,radix_bits=a.radix_bits,
+                          parallel_tiles=a.parallel_tiles) as runtime:
             runtime.load_rows(rows)
             for name,cam in cameras:
                 f=runtime.render_camera(cam,include_raw=True)

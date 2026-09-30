@@ -1,0 +1,286 @@
+PASS parallel Tile lists 48 cases, including buffer reuse
+compiler_profile=a53 flags=-mcpu=cortex-a53 -ffp-contract=off -fno-math-errno -fno-trapping-math
+In file included from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/string.h:4,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:10,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:4,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:6,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-utils/logging.h:436:13: warning: type qualifiers ignored on function return type [-Wignored-qualifiers]
+  436 |   UTILS_DLL const int errorCode() const;
+      |             ^~~~~
+In file included from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/string.h:5,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:10,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:4,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:6,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/object.h: In copy constructor 'icraft::xir::Object::Object(const icraft::xir::Object&)':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/object.h:17:24: warning: unused parameter 'other' [-Wunused-parameter]
+   17 |   Object(const Object& other) {}
+      |          ~~~~~~~~~~~~~~^~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/object.h: In member function 'icraft::xir::Object& icraft::xir::Object::operator=(const icraft::xir::Object&)':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/object.h:20:35: warning: unused parameter 'other' [-Wunused-parameter]
+   20 |   Object& operator=(const Object& other) noexcept { return *this; }
+      |                     ~~~~~~~~~~~~~~^~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/object.h: In member function 'icraft::xir::Object& icraft::xir::Object::operator=(icraft::xir::Object&&)':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/object.h:23:30: warning: unused parameter 'other' [-Wunused-parameter]
+   23 |   Object& operator=(Object&& other) noexcept { return *this; }
+      |                     ~~~~~~~~~^~~~~
+In file included from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:10,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:4,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:6,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/string.h: In function 'bool icraft::xir::operator>=(const char*, const icraft::xir::String&)':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/string.h:278:37: warning: unused parameter 'lhs' [-Wunused-parameter]
+  278 |  inline bool operator>=(const char* lhs, const String& rhs) { return rhs.compare(rhs) <= 0; }
+      |                         ~~~~~~~~~~~~^~~
+In file included from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data_type.h:3,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data.h:5,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:12,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:4,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:6,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data_type_attr.h: At global scope:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data_type_attr.h:144:11: warning: type qualifiers ignored on function return type [-Wignored-qualifiers]
+  144 |   XIR_DLL const float operator[](int64_t index) const;
+      |           ^~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data_type_attr.h:235:11: warning: type qualifiers ignored on function return type [-Wignored-qualifiers]
+  235 |   XIR_DLL const size_t size() const;
+      |           ^~~~~
+In file included from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data.h:5,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:12,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:4,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:6,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data_type.h: In member function 'virtual void icraft::xir::DataTypeNode::accept(icraft::xir::AttrVisitor&)':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data_type.h:11:36: warning: unused parameter 'visitor' [-Wunused-parameter]
+   11 |   virtual void accept(AttrVisitor& visitor) override {}
+      |                       ~~~~~~~~~~~~~^~~~~~~
+In file included from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data.h:5,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:12,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:4,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:6,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data_type.h: In member function 'virtual void icraft::xir::BoolTypeNode::accept(icraft::xir::AttrVisitor&)':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data_type.h:185:36: warning: unused parameter 'visitor' [-Wunused-parameter]
+  185 |   virtual void accept(AttrVisitor& visitor) override {};
+      |                       ~~~~~~~~~~~~~^~~~~~~
+In file included from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data.h:6,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:12,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:4,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:6,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/mem_type.h: In member function 'virtual uint64_t icraft::xir::MemTypeNode::getStorageBits(uint64_t) const':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/mem_type.h:17:44: warning: unused parameter 'bits' [-Wunused-parameter]
+   17 |   virtual uint64_t getStorageBits(uint64_t bits) const { return 0; };
+      |                                   ~~~~~~~~~^~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/mem_type.h: In member function 'virtual void icraft::xir::MemTypeNode::accept(icraft::xir::AttrVisitor&)':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/mem_type.h:19:36: warning: unused parameter 'visitor' [-Wunused-parameter]
+   19 |   virtual void accept(AttrVisitor& visitor) override {}
+      |                       ~~~~~~~~~~~~~^~~~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/mem_type.h: In member function 'virtual void icraft::xir::HostMemNode::accept(icraft::xir::AttrVisitor&)':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/mem_type.h:35:36: warning: unused parameter 'visitor' [-Wunused-parameter]
+   35 |   virtual void accept(AttrVisitor& visitor) override {};
+      |                       ~~~~~~~~~~~~~^~~~~~~
+In file included from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:14,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:4,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:6,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/compile_target.h: In member function 'virtual void icraft::xir::CompileTargetNode::accept(icraft::xir::AttrVisitor&)':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/compile_target.h:11:36: warning: unused parameter 'visitor' [-Wunused-parameter]
+   11 |   virtual void accept(AttrVisitor& visitor) override {}
+      |                       ~~~~~~~~~~~~~^~~~~~~
+In file included from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:4,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:6,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h: In member function 'virtual void icraft::xrt::MemManagerNode::accept(icraft::xir::AttrVisitor&)':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:155:36: warning: unused parameter 'visitor' [-Wunused-parameter]
+  155 |   virtual void accept(AttrVisitor& visitor) override {};
+      |                       ~~~~~~~~~~~~~^~~~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h: In member function 'virtual void icraft::xrt::MemRegionNode::accept(icraft::xir::AttrVisitor&)':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:205:37: warning: unused parameter 'visitor' [-Wunused-parameter]
+  205 |    virtual void accept(AttrVisitor& visitor) override {}
+      |                        ~~~~~~~~~~~~~^~~~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h: In member function 'virtual void icraft::xrt::RegRegionNode::accept(icraft::xir::AttrVisitor&)':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:492:36: warning: unused parameter 'visitor' [-Wunused-parameter]
+  492 |   virtual void accept(AttrVisitor& visitor) override {}
+      |                       ~~~~~~~~~~~~~^~~~~~~
+In file included from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:6,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h: In member function 'virtual void icraft::xrt::MMUMapTableNode::accept(icraft::xir::AttrVisitor&)':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:22:36: warning: unused parameter 'visitor' [-Wunused-parameter]
+   22 |   virtual void accept(AttrVisitor& visitor) override {};
+      |                       ~~~~~~~~~~~~~^~~~~~~
+In file included from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp: In lambda function:
+/root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:101:5: warning: this 'for' clause does not guard... [-Wmisleading-indentation]
+  101 |     for(int k=0;k<3;k++)put16(h,10+2*k,tohalf(s.bg[k]));v.push_back(h);
+      |     ^~~
+/root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:101:57: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the 'for'
+  101 |     for(int k=0;k<3;k++)put16(h,10+2*k,tohalf(s.bg[k]));v.push_back(h);
+      |                                                         ^
+/root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp: In function 'int render_once(int, char**)':
+/root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:128:6: warning: this 'if' clause does not guard... [-Wmisleading-indentation]
+  128 |      if(!std::isfinite(out.r)||!std::isfinite(out.g)||!std::isfinite(out.b)||!std::isfinite(out.t))throw std::runtime_error("Nonfinite hardware pixel");pixels[y*s.w+x]=out;}
+      |      ^~
+/root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:128:153: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the 'if'
+  128 |      if(!std::isfinite(out.r)||!std::isfinite(out.g)||!std::isfinite(out.b)||!std::isfinite(out.t))throw std::runtime_error("Nonfinite hardware pixel");pixels[y*s.w+x]=out;}
+      |                                                                                                                                                         ^~~~~~
+/root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:133:3: warning: this 'if' clause does not guard... [-Wmisleading-indentation]
+  133 |   if(!previous.empty()&&std::memcmp(previous.data(),pixels.data(),pixels.size()*sizeof(Pixel)))throw std::runtime_error("Repeat drift");previous=pixels;
+      |   ^~
+/root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:133:137: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the 'if'
+  133 |   if(!previous.empty()&&std::memcmp(previous.data(),pixels.data(),pixels.size()*sizeof(Pixel)))throw std::runtime_error("Repeat drift");previous=pixels;
+      |                                                                                                                                         ^~~~~~~~
+/root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:140:2: warning: this 'if' clause does not guard... [-Wmisleading-indentation]
+  140 |  if(!out||!timing||!trace)throw std::runtime_error("Write results failed");return 0;
+      |  ^~
+/root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:140:76: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the 'if'
+  140 |  if(!out||!timing||!trace)throw std::runtime_error("Write results failed");return 0;
+      |                                                                            ^~~~~~
+In file included from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:12:
+/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928/src/cpu/attributes.cpp: In function 'int projection::unused_projection_main(int, char**)':
+/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928/src/cpu/attributes.cpp:209:5: warning: this 'if' clause does not guard... [-Wmisleading-indentation]
+  209 |     if(!out)throw std::runtime_error("attribute output write");out.close();
+      |     ^~
+/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928/src/cpu/attributes.cpp:209:64: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the 'if'
+  209 |     if(!out)throw std::runtime_error("attribute output write");out.close();
+      |                                                                ^~~
+In file included from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:4,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/layout.h:4,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data_type.h:2,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data.h:5,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:12,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:4,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:6,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/type_trait.h: In instantiation of 'std::string icraft::xir::TypeName() [with E = icraft::xir::ObjectRef; std::string = std::__cxx11::basic_string<char>]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/reflection.h:27:108:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/type_trait.h:72:8: warning: unused variable 'i' [-Wunused-variable]
+   72 |    int i = 0;
+      |        ^
+In file included from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/string.h:5,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:10,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:4,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:6,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/object.h: In instantiation of 'bool icraft::xir::ObjectPtr< <template-parameter-1-1> >::operator!=(std::nullptr_t) const [with T = icraft::xir::Object; std::nullptr_t = std::nullptr_t]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/object.h:259:14:   required from 'const ObjectType* icraft::xir::ObjectRef::as() const [with ObjectType = icraft::xir::StringNode]'
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/string.h:334:42:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/object.h:168:34: warning: unused parameter 'null' [-Wunused-parameter]
+  168 |   bool operator!=(std::nullptr_t null) const { return data_ != nullptr; }
+      |                   ~~~~~~~~~~~~~~~^~~~
+In file included from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data.h:2,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:12,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:4,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:6,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/array.h: In instantiation of 'void icraft::xir::Array<T>::assign(IterType, IterType) [with IterType = const icraft::xir::CompileTarget*; T = icraft::xir::CompileTarget]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/array.h:771:4:   required from 'icraft::xir::Array<T>::Array(std::initializer_list<_Tp>) [with T = icraft::xir::CompileTarget]'
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:122:62:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/array.h:1235:56: warning: comparison of integer expressions of different signedness: 'size_t' {aka 'long unsigned int'} and 'int64_t' {aka 'long int'} [-Wsign-compare]
+ 1235 |    if (p != nullptr && data_.unique() && p->capacity() >= cap) {
+In file included from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/layout.h:4,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data_type.h:2,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/data.h:5,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:12,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:4,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:6,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h: In instantiation of 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::parentReduceAccept(icraft::xir::Node*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xrt::MemManagerNode; BaseNode = icraft::xir::Node]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:72:16:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:72:41: warning: parameter 'other' set but not used [-Wunused-but-set-parameter]
+   72 |   virtual bool parentReduceAccept(Node* other, const ReduceVisitor& reduce) const override {
+      |                                   ~~~~~~^~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h: In instantiation of 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::parentReduceAccept(icraft::xir::Node*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::CompileTargetNode; BaseNode = icraft::xir::Node]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:72:16:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:72:41: warning: parameter 'other' set but not used [-Wunused-but-set-parameter]
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h: In instantiation of 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::parentReduceAccept(icraft::xir::Node*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::DataNode; BaseNode = icraft::xir::Node]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:72:16:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:72:41: warning: parameter 'other' set but not used [-Wunused-but-set-parameter]
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h: In instantiation of 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::parentReduceAccept(icraft::xir::Node*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::MemTypeNode; BaseNode = icraft::xir::Node]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:72:16:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:72:41: warning: parameter 'other' set but not used [-Wunused-but-set-parameter]
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h: In instantiation of 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::parentReduceAccept(icraft::xir::Node*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::DataTypeNode; BaseNode = icraft::xir::Node]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:72:16:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:72:41: warning: parameter 'other' set but not used [-Wunused-but-set-parameter]
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h: In instantiation of 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::reduceAccept(ConcreteNode*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xrt::DefaultMemManagerNode; BaseNode = icraft::xrt::MemManagerNode]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:68:60:   required from 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::reduceAccept(icraft::xir::Node*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xrt::DefaultMemManagerNode; BaseNode = icraft::xrt::MemManagerNode]'
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:59:16:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:35: warning: unused parameter 'other' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                     ~~~~~~~~~~~~~~^~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:63: warning: unused parameter 'reduce' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                                          ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h: In instantiation of 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::reduceAccept(ConcreteNode*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xrt::MemManagerNode; BaseNode = icraft::xir::Node]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:86:27:   required from 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::parentReduceAccept(icraft::xir::Node*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xrt::DefaultMemManagerNode; BaseNode = icraft::xrt::MemManagerNode]'
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:72:16:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:35: warning: unused parameter 'other' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                     ~~~~~~~~~~~~~~^~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:63: warning: unused parameter 'reduce' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                                          ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h: In instantiation of 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::reduceAccept(ConcreteNode*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::CompileTargetNode; BaseNode = icraft::xir::Node]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:86:27:   required from 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::parentReduceAccept(icraft::xir::Node*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::ZhugeTargetNode; BaseNode = icraft::xir::CompileTargetNode]'
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:72:16:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:35: warning: unused parameter 'other' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                     ~~~~~~~~~~~~~~^~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:63: warning: unused parameter 'reduce' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                                          ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h: In instantiation of 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::reduceAccept(ConcreteNode*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::FPGATargetNode; BaseNode = icraft::xir::CompileTargetNode]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:68:60:   required from 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::reduceAccept(icraft::xir::Node*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::FPGATargetNode; BaseNode = icraft::xir::CompileTargetNode]'
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:59:16:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:35: warning: unused parameter 'other' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                     ~~~~~~~~~~~~~~^~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:63: warning: unused parameter 'reduce' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                                          ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h: In instantiation of 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::reduceAccept(ConcreteNode*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::HostMemNode; BaseNode = icraft::xir::MemTypeNode]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:68:60:   required from 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::reduceAccept(icraft::xir::Node*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::HostMemNode; BaseNode = icraft::xir::MemTypeNode]'
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:59:16:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:35: warning: unused parameter 'other' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                     ~~~~~~~~~~~~~~^~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:63: warning: unused parameter 'reduce' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                                          ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h: In instantiation of 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::reduceAccept(ConcreteNode*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::MemTypeNode; BaseNode = icraft::xir::Node]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:86:27:   required from 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::parentReduceAccept(icraft::xir::Node*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::HostMemNode; BaseNode = icraft::xir::MemTypeNode]'
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:72:16:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:35: warning: unused parameter 'other' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                     ~~~~~~~~~~~~~~^~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:63: warning: unused parameter 'reduce' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                                          ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h: In instantiation of 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::reduceAccept(ConcreteNode*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::ScalarTypeNode; BaseNode = icraft::xir::DataTypeNode]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:86:27:   required from 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::parentReduceAccept(icraft::xir::Node*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::IntegerTypeNode; BaseNode = icraft::xir::ScalarTypeNode]'
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:72:16:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:35: warning: unused parameter 'other' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                     ~~~~~~~~~~~~~~^~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:63: warning: unused parameter 'reduce' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                                          ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h: In instantiation of 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::reduceAccept(ConcreteNode*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::DataTypeNode; BaseNode = icraft::xir::Node]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:86:27:   required from 'bool icraft::xir::NodeBase<ConcreteNode, BaseNode>::parentReduceAccept(icraft::xir::Node*, const icraft::xir::ReduceVisitor&) const [with ConcreteNode = icraft::xir::ScalarTypeNode; BaseNode = icraft::xir::DataTypeNode]'
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:72:16:   required from here
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:35: warning: unused parameter 'other' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                     ~~~~~~~~~~~~~~^~~~~
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/core/node.h:55:63: warning: unused parameter 'reduce' [-Wunused-parameter]
+   55 |   bool reduceAccept(ConcreteNode* other, const ReduceVisitor& reduce) const {
+      |                                          ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+In file included from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/string.h:5,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/core/device.h:10,
+                 from /root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xrt/dev/zg330_device.h:4,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/../initialize/render_resident.cpp:6,
+                 from /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_renderer.cpp:8:
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/object.h: In member function 'bool icraft::xir::Object::isInstance() const [with TargetType = icraft::xrt::ZG330DeviceNode]':
+/root/heterogs_npu/sdk_3.36.1/usr/include/icraft-xir/base/object.h:32:4: warning: nonnull argument 'this' compared to NULL [-Wnonnull-compare]
+   32 |    if (this != nullptr) {
+      |    ^~

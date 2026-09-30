@@ -35,7 +35,11 @@ class LiveFrame:
 class LiveRenderer:
     def __init__(self, binary, environment, log_path, *, threads=4, max_gaussians=0,
                  batch=2, cached=True, cpu=False, comparison_sort=False, uniform_preview=False,
-                 compact_payload=False, depth_layout=False):
+                 compact_payload=False, depth_layout=False, radix_bits=11, parallel_tiles=True):
+        if radix_bits not in (8, 11, 16):
+            raise ValueError("radix_bits must be 8, 11 or 16")
+        if parallel_tiles and depth_layout:
+            raise ValueError("parallel_tiles requires source-order Gaussian storage")
         self.process = None
         self.log = Path(log_path).open("wb")
         self.pending = bytearray()
@@ -45,6 +49,7 @@ class LiveRenderer:
                                   batch=batch, cached=cached, comparison_sort=comparison_sort,
                                   uniform_preview=uniform_preview,
                                   compact_payload=compact_payload, depth_layout=depth_layout,
+                                  radix_bits=radix_bits, parallel_tiles=parallel_tiles,
                                   backend="cpu_dense" if cpu else "fpga")
         command = [str(binary), "--threads", str(threads), "--max-gaussians",
                    str(max_gaussians), "--batch", str(batch)]
@@ -60,6 +65,10 @@ class LiveRenderer:
             command.append("--compact-payload")
         if depth_layout:
             command.append("--depth-layout")
+        if radix_bits != 8:
+            command.extend(("--radix-bits", str(radix_bits)))
+        if parallel_tiles:
+            command.append("--parallel-tiles")
         try:
             environment = dict(environment)
             environment.setdefault("OMP_WAIT_POLICY", "PASSIVE")

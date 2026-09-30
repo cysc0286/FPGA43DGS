@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/verify.py", line 12, in <module>
+    from rendering.pipeline_adapter import PipelineRenderer
+  File "/root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/pipeline_adapter.py", line 8, in <module>
+    from initialize.renderer_runtime import frozen_renderer_module
+ModuleNotFoundError: No module named 'initialize.renderer_runtime'

@@ -21,7 +21,8 @@ def summarize(records):
                 peak_rss_kib=max(r.get('rss_kib', 0) for r in records),
                 mean_hardware_cycles=statistics.mean(r.get('hardware_cycles', 0) for r in records),
                 stages_ms={key:statistics.mean(r[key] for r in records) for key in
-                           ("project_ms", "sort_ms", "engine_ms", "pack_ms", "upload_ms", "wait_ms", "read_ms")})
+                           ("project_ms", "sort_ms", "engine_ms", "pack_ms", "upload_ms", "wait_ms", "read_ms",
+                            "collect_ms", "radix_ms", "scatter_ms") if all(key in r for r in records)})
 
 
 def main():

@@ -1,0 +1,18 @@
+{
+  "common.py": "c0db587a21ac04e4be63a6a84b77a184c2f5ecf10877ed234588a784cb9993ed",
+  "rendering/benchmark.py": "784ff38d5199b3286a75d58b772a2f1b1d967a2b6ae75657aff1fc4570f2c339",
+  "rendering/build.sh": "63df6710cb647016bce5764785067540378a7cbc9ca0aa669a7a658a7abe891f",
+  "rendering/cached_projection.hpp": "090327ceca10af96e79863f1f4e15a5ee4610ce106a0eae48078551c971000bc",
+  "rendering/compare_builds.py": "77d557710243dfecee87db758f891bcde956e543c94bcc89ca5c997d4599dacc",
+  "rendering/depth_sort.hpp": "5afed43f2ccc248255d5aa0d8857bd6c5c131cab98f5ce92c2d52ea567d67004",
+  "rendering/live_renderer.cpp": "8228ebaa2dec899a99bc6676d7896bd3d9dc7397cf85f742cec2200912e095e1",
+  "rendering/pipeline_adapter.py": "552fb4cc09338d97cacb112fde132c79617a575eb98246e6706294df2d635af2",
+  "rendering/report.py": "58b9a6d5edaaf568753a7c45631aac63da157d293d3e8248fbbdcc2a83cfaaad",
+  "rendering/runtime.py": "ada3d2a9bd71bd854fb8233f77e235265163ff80afc61a9ae31a03b8d7efba9a",
+  "rendering/verify.py": "11679ce76a7b4dba73820c5387171a5d62dc53ca0b9f64fc3a3634f6050f2984",
+  "rendering/__init__.py": "49eda3656dfbfabbe412426f6ecb1b0cc6df2fe93e5c27d989336c1d2b658959",
+  "rendering/tests/depth_sort_test.cpp": "3f4e86bc4743af529606669ca5d8b7045395d3c155cc4a378be2b44629ef6a13",
+  "initialize/__init__.py": "da9dc0596b399d90af7982c74143881fc1c57f21efdb437d5a6f5968f9a9970b",
+  "initialize/session.py": "128d908b4394ed556bc7515db4e2a9b66b53772974fbe6713ec8f6090f93bbca",
+  "initialize/render_resident.cpp": "c6bb7ea9fa6417c14310f9a3becc4541243015dfc876291d074941f3e7fee40d"
+}

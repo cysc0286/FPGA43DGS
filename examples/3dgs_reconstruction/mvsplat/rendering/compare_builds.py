@@ -22,6 +22,8 @@ def main():
     p.add_argument('--compact-build', action='append', default=[])
     p.add_argument('--depth-build', action='append', default=[])
     p.add_argument('--cpu-build', action='append', default=[])
+    p.add_argument('--radix-build', action='append', default=[], help='name=8|11|16')
+    p.add_argument('--parallel-tiles-build', action='append', default=[])
     a = p.parse_args()
     if platform.machine() != 'aarch64' or not 1 <= a.repeats <= 100 or not 1 <= a.rounds <= 10:
         p.error('Bounded real-board comparison required')
@@ -29,6 +31,7 @@ def main():
     meta = json.loads((a.scene / 'manifest.json').read_text())
     cameras = [c['file'] for c in meta['cameras'] if c['role'] == 'target']
     builds = [entry.split('=', 1) for entry in a.build]
+    radix = dict(entry.split('=', 1) for entry in a.radix_build)
     result = dict(scene=str(a.scene), resolution='128x128', builds={}, rounds=a.rounds,
                   scope='camera to complete RGB, initialized scene, no archive or display',
                   scene_sha256=hashlib.sha256((a.scene/'model.ply').read_bytes()).hexdigest())
@@ -43,6 +46,8 @@ def main():
             with LiveRenderer(binary, render_environment(), folder/'native.log', threads=4, batch=2,
                               compact_payload=name in a.compact_build,
                               depth_layout=name in a.depth_build,
+                              radix_bits=int(radix.get(name, 8)),
+                              parallel_tiles=name in a.parallel_tiles_build,
                               cpu=name in a.cpu_build) as runtime:
                 scene = runtime.load_scene(a.scene/'model.ply')
                 first = runtime.render_camera((a.scene/cameras[0]).read_bytes()).metadata
