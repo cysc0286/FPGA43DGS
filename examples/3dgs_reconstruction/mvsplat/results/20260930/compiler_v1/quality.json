@@ -1,0 +1,45 @@
+{
+  "board_rendered": true,
+  "domain": "clipped float RGB against held-out video RGB",
+  "views": {
+    "frame_000007": {
+      "psnr_db": 19.451852636890163,
+      "ssim_rgb_gaussian_11_sigma1p5_valid": 0.804464432248991,
+      "mae": 0.06569625273450762,
+      "max_abs_error": 0.8664088828890931,
+      "raw_sha256": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+      "pixel_rgb_mae_p95": 0.20484978170955878,
+      "worst_16x16_tile_mae": 0.29526388918360075,
+      "worst_tile_xy": [
+        112,
+        112
+      ]
+    },
+    "frame_000015": {
+      "psnr_db": 20.222310372823337,
+      "ssim_rgb_gaussian_11_sigma1p5_valid": 0.7851347812365331,
+      "mae": 0.04667657757295126,
+      "max_abs_error": 0.9368435728783701,
+      "raw_sha256": "8ccb31d903d062bcaadc8d9aa8f4d9af519a4a1098fc3030336f9ab40dff1bf8",
+      "pixel_rgb_mae_p95": 0.17204526016135605,
+      "worst_16x16_tile_mae": 0.2328560473093021,
+      "worst_tile_xy": [
+        0,
+        64
+      ]
+    },
+    "frame_000022": {
+      "psnr_db": 21.348609182643795,
+      "ssim_rgb_gaussian_11_sigma1p5_valid": 0.7842323764493295,
+      "mae": 0.043373968898473926,
+      "max_abs_error": 0.8993070714613971,
+      "raw_sha256": "70519d98b2dfe67d8f4fc80eb35352781e67130a45f011e9ed718d29f174b9af",
+      "pixel_rgb_mae_p95": 0.14653187870200132,
+      "worst_16x16_tile_mae": 0.15167857665641635,
+      "worst_tile_xy": [
+        0,
+        64
+      ]
+    }
+  }
+}

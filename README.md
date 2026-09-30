@@ -2,6 +2,11 @@
 
 面向悟净 30TAI Lite 的视频重建与 CPU＋FPGA 3DGS 渲染工程。当前研究目标是在画质合格的前提下缩短总耗时，充分使用板上资源。
 
+最新编译器配对实测：完整点集 CPU＋FPGA **约 50 ms/帧**，优化后的纯 CPU
+**约 161 ms/帧**；视频结束至首帧新测 **24.337 s**。编译配置、完整数据与
+无收益的布局实验见 [编译优化报告](examples/3dgs_reconstruction/mvsplat/rendering/COMPILER_VALIDATION.md)。
+这些结果使用原 FPGA，尚不能代表新查表硬件候选。
+
 2026-09-30：新增单进程原生 [rendering](examples/3dgs_reconstruction/mvsplat/rendering/README.md)。
 128×128、32,768 高斯的完整点集换视角实板平均 **50.64 ms**；16,384 点近似预览 **31.93 ms**。
 预览牺牲画质，两者不可混报。视频完整链、对照和效果图见

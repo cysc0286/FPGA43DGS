@@ -19,6 +19,8 @@ file, Python pixel loop, or image archive is on this path.
 - benchmark.py: real-board full-point, thread, batch and lossy-budget profiles.
 - build.sh: uses the frozen CPU sources and the installed ICraft SDK. The
   existing initialize/render_resident.cpp supplies established FLK1 helpers.
+- compare_builds.py: paired native compiler/layout experiments on the ARM board;
+  alternates variant order and archives output differences after timing.
 
 The model, projection/sort workspace and FPGA allocation remain in one native
 process. The existing hardware two-bank queue is reused; no new bitstream or
@@ -31,6 +33,13 @@ finite pixel checks remain enforced.
     PYTHONPATH=mvsplat python3 -m rendering.benchmark \
       --scene /path/to/renderer_input --binary mvsplat/rendering/live_renderer \
       --reference /path/to/previous/validation.json --out /path/to/new/results
+
+The build defaults to the measured Cortex-A53 profile. Optional second and third
+arguments select `portable`, `a53`, or experimental `a53-fma`, and the output
+binary path. `COMPILER_VALIDATION.md` reports the paired ARM measurements,
+including negative FMA/prepacking results. Optional `LiveRenderer` arguments
+`compact_payload` and `depth_layout` default to false; no unproven layout gain
+is silently enabled.
 
 For video preparation, append --live-renderer /absolute/path/live_renderer to
 the existing initialize command. Optional --render-max-gaussians 16384 is

@@ -34,7 +34,8 @@ class LiveFrame:
 
 class LiveRenderer:
     def __init__(self, binary, environment, log_path, *, threads=4, max_gaussians=0,
-                 batch=2, cached=True, cpu=False, comparison_sort=False, uniform_preview=False):
+                 batch=2, cached=True, cpu=False, comparison_sort=False, uniform_preview=False,
+                 compact_payload=False, depth_layout=False):
         self.process = None
         self.log = Path(log_path).open("wb")
         self.pending = bytearray()
@@ -43,6 +44,7 @@ class LiveRenderer:
         self.configuration = dict(threads=threads, max_gaussians=max_gaussians,
                                   batch=batch, cached=cached, comparison_sort=comparison_sort,
                                   uniform_preview=uniform_preview,
+                                  compact_payload=compact_payload, depth_layout=depth_layout,
                                   backend="cpu_dense" if cpu else "fpga")
         command = [str(binary), "--threads", str(threads), "--max-gaussians",
                    str(max_gaussians), "--batch", str(batch)]
@@ -54,6 +56,10 @@ class LiveRenderer:
             command.append("--comparison-sort")
         if uniform_preview:
             command.append("--uniform-preview")
+        if compact_payload:
+            command.append("--compact-payload")
+        if depth_layout:
+            command.append("--depth-layout")
         try:
             environment = dict(environment)
             environment.setdefault("OMP_WAIT_POLICY", "PASSIVE")

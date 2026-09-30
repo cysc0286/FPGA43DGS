@@ -16,7 +16,10 @@ from rendering.runtime import LiveRenderer
 def summarize(records):
     times = np.array([r["wall_ms"] for r in records])
     return dict(n=len(times), mean_ms=float(times.mean()), median_ms=float(np.median(times)),
-                p95_ms=float(np.percentile(times, 95)), max_ms=float(times.max()),
+                p95_ms=float(np.percentile(times, 95)), p99_ms=float(np.percentile(times, 99)),
+                max_ms=float(times.max()),
+                peak_rss_kib=max(r.get('rss_kib', 0) for r in records),
+                mean_hardware_cycles=statistics.mean(r.get('hardware_cycles', 0) for r in records),
                 stages_ms={key:statistics.mean(r[key] for r in records) for key in
                            ("project_ms", "sort_ms", "engine_ms", "pack_ms", "upload_ms", "wait_ms", "read_ms")})
 

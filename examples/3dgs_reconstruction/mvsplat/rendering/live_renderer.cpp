@@ -23,13 +23,19 @@ struct FrameStats {
 struct EngineWorkspace {
     DeviceBuffer memory;
     size_t capacity=0;
-    std::vector<Word> payload[2],received;
+    std::vector<Word> payload[2],received,packed;
     std::vector<Pixel> pixels;
     std::vector<uint32_t> tags;
     uint32_t sequence=0;
 
+    bool compact_payload=false;
     void execute(const Scene& s,unsigned batch,FrameStats& stats) {
         Board board;
+        if(compact_payload) {
+            // One DMA record per visible Gaussian; reuse it across Tile lists.
+            packed.resize(s.gs.size());
+            for(size_t i=0;i<s.gs.size();++i)std::memcpy(packed[i].data(),&s.gs[i].x,36);
+        }
         size_t maxwords=0;
         for(unsigned b=0;b<s.tiles;b+=batch) {
             size_t n=std::min(batch,s.tiles-b);
@@ -50,16 +56,23 @@ struct EngineWorkspace {
         tags.resize(jobs);
         auto launch=[&](unsigned j) {
             unsigned slot=j&1,b=j*batch,e=std::min(b+batch,s.tiles);
-            auto& v=payload[slot];v.clear();
+            auto& v=payload[slot];
+            size_t position=0;
+            if(compact_payload) {
+                size_t words=e-b;
+                for(unsigned t=b;t<e;++t)words+=s.ranges[t][1]-s.ranges[t][0];
+                v.resize(words);
+            }else v.clear();
             for(unsigned t=b;t<e;++t) {
                 auto range=s.ranges[t];Word h{};
                 unsigned x=(t%((s.w+15)/16))*16,y=(t/((s.w+15)/16))*16;
                 put32(h,0,range[1]-range[0]);put16(h,4,x);put16(h,6,y);
                 put16(h,8,std::min(16u,s.w-x)|(std::min(16u,s.h-y)<<5));
                 for(int k=0;k<3;++k)put16(h,10+2*k,tohalf(s.bg[k]));
-                v.push_back(h);
+                if(compact_payload)v[position++]=h;else v.push_back(h);
                 for(unsigned k=range[0];k<range[1];++k) {
-                    Word q{};std::memcpy(q.data(),&s.gs[s.ids[k]].x,36);v.push_back(q);
+                    if(compact_payload)v[position++]=packed[s.ids[k]];
+                    else {Word q{};std::memcpy(q.data(),&s.gs[s.ids[k]].x,36);v.push_back(q);}
                 }
             }
             auto begin=Clock::now();
@@ -110,7 +123,7 @@ struct LiveScene {
     std::vector<uint64_t> keys,scratch;
     Scene scene{};
     unsigned count=0,budget=0,threads=1;
-    bool cached=true,comparison_sort=false,uniform_preview=false;
+    bool cached=true,comparison_sort=false,uniform_preview=false,depth_layout=false;
 
     void install(std::vector<float> next,unsigned n) {
         std::vector<PreparedGaussian> properties(n);
@@ -163,8 +176,10 @@ struct LiveScene {
         s.ranges.assign(s.tiles,{0,0});cursors.assign(s.tiles,0);
         for(unsigned i:selected) {
             const auto& a=attrs[i];if(!a.valid)continue;
-            remap[i]=s.gs.size();Gaussian g{};g.id=i;
-            std::memcpy(&g.x,a.q,sizeof(a.q));s.gs.push_back(g);
+            if(!depth_layout) {
+                remap[i]=s.gs.size();Gaussian g{};g.id=i;
+                std::memcpy(&g.x,a.q,sizeof(a.q));s.gs.push_back(g);
+            }
             uint32_t depth;std::memcpy(&depth,&a.q[9],4);
             keys.push_back((uint64_t(depth)<<32)|i);
             for(unsigned y=a.min_y;y<a.max_y;++y)for(unsigned x=a.min_x;x<a.max_x;++x)++cursors[y*nx+x];
@@ -193,7 +208,12 @@ struct LiveScene {
         }
         s.ids.resize(total);
         for(uint64_t key:keys) {
-            const uint32_t i=uint32_t(key),mapped=remap[i];const auto& a=attrs[i];
+            const uint32_t i=uint32_t(key);const auto& a=attrs[i];
+            uint32_t mapped=remap[i];
+            if(depth_layout) {
+                mapped=s.gs.size();Gaussian g{};g.id=i;
+                std::memcpy(&g.x,a.q,sizeof(a.q));s.gs.push_back(g);
+            }
             for(unsigned y=a.min_y;y<a.max_y;++y)for(unsigned x=a.min_x;x<a.max_x;++x)
                 s.ids[cursors[y*nx+x]++]=mapped;
         }
@@ -205,12 +225,14 @@ struct LiveScene {
 int main(int argc,char** argv) {
     std::ios::sync_with_stdio(false);
     try {
-        LiveScene model;unsigned batch=8;bool cpu=false;
+        LiveScene model;unsigned batch=8;bool cpu=false,compact_payload=false;
         for(int i=1;i<argc;++i) {
             const std::string a=argv[i];
             if(a=="--uncached")model.cached=false;
             else if(a=="--comparison-sort")model.comparison_sort=true;
             else if(a=="--uniform-preview")model.uniform_preview=true;
+            else if(a=="--depth-layout")model.depth_layout=true;
+            else if(a=="--compact-payload")compact_payload=true;
             else if(a=="--cpu")cpu=true;
             else if((a=="--threads"||a=="--max-gaussians"||a=="--batch")&&i+1<argc) {
                 unsigned v=std::stoul(argv[++i]);
@@ -227,7 +249,7 @@ int main(int argc,char** argv) {
         if(camera_fd<0)throw std::runtime_error("camera memfd");
         const std::string camera_path="/proc/self/fd/"+std::to_string(camera_fd);
         {
-            EngineWorkspace engine;std::vector<uint8_t> rgb;
+            EngineWorkspace engine;engine.compact_payload=compact_payload;std::vector<uint8_t> rgb;
             std::cout<<"LIVE_READY 1"<<std::endl;
             std::string line;
             while(std::getline(std::cin,line)) {

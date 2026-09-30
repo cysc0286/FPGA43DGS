@@ -1,5 +1,12 @@
 # 3DGS 主线与目录入口
 
+2026-09-30 编译器增量：同源码 A53 定向编译让纯 CPU 渲染
+177.553→161.341 ms，CPU＋原 FPGA 50.604→49.995 ms；当前新源码默认
+复测 50.294 ms。完整视频场景准备新测 **24.337347 s**，图像哈希不变。
+详细配对数据、负结果、内存和画质见
+[编译与布局验证](examples/3dgs_reconstruction/mvsplat/rendering/COMPILER_VALIDATION.md)。
+软件结果使用原冻结 FPGA；新硬件候选不能混入这些对照。
+
 2026-09-30 最新：单进程原生渲染位于
 [mvsplat/rendering](examples/3dgs_reconstruction/mvsplat/rendering/README.md)。
 同场景完整点集换视角 50.64 ms；可选 16k 近似预览 31.93 ms。
