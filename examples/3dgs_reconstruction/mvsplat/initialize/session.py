@@ -54,9 +54,16 @@ class WarmSession:
             # Imports and package/device initialization are outside the video clock.
             import video_input.prepare
             import export
-            from initialize.renderer_runtime import RendererRuntime
-            self.renderer = self.resources.enter_context(RendererRuntime(args.renderer,
-                args.resident_binary, render_environment(), out / "renderer.log"))
+            if getattr(args, "live_renderer", None):
+                from rendering.pipeline_adapter import PipelineRenderer
+                self.renderer = self.resources.enter_context(PipelineRenderer(args.renderer,
+                    args.live_renderer, render_environment(), out / "renderer.log",
+                    threads=args.render_threads, max_gaussians=args.render_max_gaussians,
+                    batch=args.render_batch, uniform_preview=args.render_uniform_preview))
+            else:
+                from initialize.renderer_runtime import RendererRuntime
+                self.renderer = self.resources.enter_context(RendererRuntime(args.renderer,
+                    args.resident_binary, render_environment(), out / "renderer.log"))
             gc.collect()
             self.record = dict(preheat_seconds_record_only=time.monotonic()-started,
                 model_load_seconds_record_only=self.model.load_seconds, backend=args.backend,
@@ -64,6 +71,9 @@ class WarmSession:
                 warm_scope="weights, Python dependencies, selected compiled sessions, FPGA device/runtime",
                 kernel_first_use_warmed=False, scene_cache="Gaussian rows loaded once; projection remains per view",
                 rss_mib_at_ready=self._rss())
+            if getattr(args, "live_renderer", None):
+                self.record["renderer_configuration"] = dict(self.renderer.runtime.configuration)
+                self.record["scene_cache"] = "Gaussian rows and world covariance/opacity cached; per-view projection"
             if self.partitions:
                 self.record["partitions"] = self.partitions.report()
                 self.record["numerical_readiness"] = numerical_readiness

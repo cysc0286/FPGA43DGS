@@ -1,0 +1,12 @@
+{
+  "common.py": "c0db587a21ac04e4be63a6a84b77a184c2f5ecf10877ed234588a784cb9993ed",
+  "initialize/__init__.py": "da9dc0596b399d90af7982c74143881fc1c57f21efdb437d5a6f5968f9a9970b",
+  "initialize/session.py": "a54c4f7429798074604c87dbdee7279c48902942af7bd3962171f684f20c24dd",
+  "initialize/render_resident.cpp": "c6bb7ea9fa6417c14310f9a3becc4541243015dfc876291d074941f3e7fee40d",
+  "rendering/benchmark.py": "6f77816975001339e6420289d319072f3ca9a1ef68e6d69c34cb616981fed5ab",
+  "rendering/build.sh": "7acca90414aa303f5224b8ff3f7626e83a10d010f2a161b453d6c98718bb2e18",
+  "rendering/cached_projection.hpp": "090327ceca10af96e79863f1f4e15a5ee4610ce106a0eae48078551c971000bc",
+  "rendering/live_renderer.cpp": "a47c912fe3708dd69445b70577d8e6adfae560920cf535c515b579c069a4160d",
+  "rendering/runtime.py": "4ec0f241a650c36902a269ca9d36afe395e6b774bf9f112a0aabd6905dfb4be4",
+  "rendering/__init__.py": "49eda3656dfbfabbe412426f6ecb1b0cc6df2fe93e5c27d989336c1d2b658959"
+}

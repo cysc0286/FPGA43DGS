@@ -1,0 +1,15 @@
+{
+  "initialize/renderer_runtime.py": "3202468ea104eaefe57c25a98392ebc5c719550ffb99aefd99bf9a31fb98f80e",
+  "initialize/run.py": "3da8bfe5ce72e155c727c31ba710023dd97eef66c54695dd86eef7cc47319e86",
+  "initialize/session.py": "1eae88c823cbb7c25d2c256c1fdc88c51646a99ba2f16e3aab7a8ff552d3c219",
+  "rendering/benchmark.py": "fb03a2d4a2f3fcc400fdacd553736d77af89c057c57aa8caa2f7ae2f76a4a4bf",
+  "rendering/build.sh": "7acca90414aa303f5224b8ff3f7626e83a10d010f2a161b453d6c98718bb2e18",
+  "rendering/cached_projection.hpp": "090327ceca10af96e79863f1f4e15a5ee4610ce106a0eae48078551c971000bc",
+  "rendering/live_renderer.cpp": "b4607e6c113594a43727142f795d16488fa06805a8a157c940c16e1534887d37",
+  "rendering/pipeline_adapter.py": "552fb4cc09338d97cacb112fde132c79617a575eb98246e6706294df2d635af2",
+  "rendering/README.md": "82e0455d567dc6bc99cb050943a713f7a21448ff82fe4460f3eb53f52e4f619b",
+  "rendering/report.py": "99d7d92375e4ae13acbe829400a570a437d4f22ea38b8edaeef6305fb1eb8ed5",
+  "rendering/runtime.py": "3421cde3ab1ad80823279c80780cfa352a6d629312fd36636eef37a295e640ae",
+  "rendering/verify.py": "11679ce76a7b4dba73820c5387171a5d62dc53ca0b9f64fc3a3634f6050f2984",
+  "rendering/__init__.py": "49eda3656dfbfabbe412426f6ecb1b0cc6df2fe93e5c27d989336c1d2b658959"
+}

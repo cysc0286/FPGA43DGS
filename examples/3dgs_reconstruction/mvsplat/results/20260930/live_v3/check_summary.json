@@ -1,0 +1,10 @@
+{
+  "python_files_parsed": 305,
+  "offline_tests_passed": 71,
+  "arm_build_passed": true,
+  "board_lifecycle_checks_passed": true,
+  "full_video_runs_passed": 3,
+  "first_frames_equal": true,
+  "npu_used": false,
+  "firmware_changed": false
+}

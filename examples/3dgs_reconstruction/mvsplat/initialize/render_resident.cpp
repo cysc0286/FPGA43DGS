@@ -140,6 +140,7 @@ int render_once(int argc,char**argv)try{
  if(!out||!timing||!trace)throw std::runtime_error("Write results failed");return 0;
 }catch(const std::exception&e){std::cerr<<e.what()<<std::endl;return 1;}
 
+#ifndef HETEROGS_RENDER_LIBRARY
 int main(int argc,char**argv){
  if(argc!=2||std::string(argv[1])!="serve")return render_once(argc,argv);
  Board::resident=true;
@@ -160,5 +161,6 @@ int main(int argc,char**argv){
   icraft::xrt::Device::Close(Board::retained_device);
   close(Board::retained_fd);
   return 0;
- }catch(const std::exception&e){std::cerr<<e.what()<<std::endl;return 1;}
+}catch(const std::exception&e){std::cerr<<e.what()<<std::endl;return 1;}
 }
+#endif

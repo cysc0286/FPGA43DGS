@@ -2,17 +2,22 @@
 
 面向悟净 30TAI Lite 的视频重建与 CPU＋FPGA 3DGS 渲染工程。当前研究目标是在画质合格的前提下缩短总耗时，充分使用板上资源。
 
+2026-09-30：新增单进程原生 [rendering](examples/3dgs_reconstruction/mvsplat/rendering/README.md)。
+128×128、32,768 高斯的完整点集换视角实板平均 **50.64 ms**；16,384 点近似预览 **31.93 ms**。
+预览牺牲画质，两者不可混报。视频完整链、对照和效果图见
+[本轮报告](examples/3dgs_reconstruction/mvsplat/rendering/VALIDATION.md)。
+
 ## 主线结构
 
 ```text
 视频前 initialize 预热 → READY
   → video_input 接收完整视频 → VIDEO_COMPLETE
-  → 抽帧/位姿 → MVSplat 前馈（已验证 ARM CPU；可选 NPU 子图待实板）
+  → 抽帧/位姿 → MVSplat 前馈（已验证 ARM CPU；NPU 数值问题待修复）
   → Gaussian 导出与装入 → SCENE_READY
   → CPU 投影/排序＋FPGA 渲染 → FRAME_COMPLETE
 ```
 
-源码已加入预热、视频准备、常驻场景和 MVSplat NPU 分区候选，目录入口如下。板端已验收的是原冷路径；新候选的本机回归及 ICraft 编译结果见 [验证报告](examples/3dgs_reconstruction/mvsplat/INITIALIZE_NPU_VALIDATION.md)，不能把编译成功当作板端 NPU 加速成功。
+源码包含预热、视频准备、常驻场景和 MVSplat NPU 分区候选。CPU＋FPGA 的预热和新原生渲染已有实板验证；NPU 数值问题仍待解决，不能把 ICraft 编译成功当作板端 NPU 加速成功。旧离线阶段见 [历史报告](examples/3dgs_reconstruction/mvsplat/INITIALIZE_NPU_VALIDATION.md)。
 
 ```text
 examples/3dgs_reconstruction/
@@ -21,6 +26,7 @@ examples/3dgs_reconstruction/
 └── mvsplat/
     ├── initialize/                     # 视频前权重/设备预热、常驻渲染候选
     ├── video_input/                    # 文件接收、抽帧、两视图与目标位姿
+    ├── rendering/                      # 常驻原生换视角、帧交付、预览预算
     ├── warm_pipeline.py                # 视频后推理/PnP 调度、导出、首帧
     ├── npu/                            # 导出、编译、运行、核验与离线打包
     ├── infer.py / export.py            # 冷推理参考与 Gaussian 格式转换
@@ -36,7 +42,8 @@ examples/3dgs_reconstruction/
 | 高斯生成 | `examples/3dgs_reconstruction/mvsplat` | 主线使用固定权重 MVSplat，在 ARM CPU 前馈生成高斯；OpenSplat 训练仅保留历史对照 |
 | 渲染调用 | `examples/3dgs_reconstruction/modules/rendering` | 校验接口并调用已有冻结渲染器 |
 | 实际渲染后端 | `examples/3dgs_flicker_hw` | CPU 投影/SH/分组排序，FPGA 筛选/求值/合成；四单元基线已留存 |
-| MVSplat NPU 候选 | `examples/3dgs_reconstruction/mvsplat/npu` | 7 个真实子图通过 ICraft 编译；常驻接口及 CPU ONNX 整网回归通过，实机 NPU 待测 |
+| 原生交互调用 | `examples/3dgs_reconstruction/mvsplat/rendering` | 单进程 CPU＋FPGA、常驻缓冲、内存帧交付；完整点集和近似预览已实板测试 |
+| MVSplat NPU 候选 | `examples/3dgs_reconstruction/mvsplat/npu` | 7 个真实子图已有实板执行，但数值/权重预检问题未解决，未纳入可用整链 |
 | 旧匹配 NPU 对照 | `examples/3dgs_reconstruction/npu_frontend` | 匹配正确性已有局部实测，不是当前 MVSplat 网络加速实现 |
 
 统一入口为 [pipeline.py](examples/3dgs_reconstruction/pipeline.py)。板端默认主线：
@@ -61,7 +68,7 @@ python examples/3dgs_reconstruction/pipeline.py --help
 
 默认检查使用自动生成的合成接口文件，验证16项接口、8项资源控制和3项主入口兼容行为；不连接板卡、不训练、不烧录。完整安装边界、固定第三方版本和重新打包命令见 [源码交付说明](docs/GITHUB_PACKAGE.md)，本次核验见 [CORE_VALIDATION.md](docs/CORE_VALIDATION.md)。
 
-检查新增预热、视频与 NPU 数据合同（共 50 项软件测试，无需权重或 SDK）：
+检查预热、视频、原生帧协议与 NPU 数据合同（本轮共 71 项软件测试，无需权重或 SDK）：
 
 ```text
 python -m pip install -r requirements-mvsplat-checks.txt

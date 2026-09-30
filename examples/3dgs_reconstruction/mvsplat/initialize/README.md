@@ -1,5 +1,11 @@
 # 视频前预热与常驻渲染候选
 
+2026-09-30：新增 [rendering 原生后端](../rendering/README.md)。
+initialize 仍负责视频前权重和设备预热；rendering 独立负责场景装载后的换视角。
+追加 --live-renderer 指定已构建的原生程序即可接回本视频链；首帧仍完成原归档核验。
+追加 --render-max-gaussians 16384 --render-uniform-preview 可显式启用近似预览，
+其画质和时间必须单列，不能冒充完整高斯结果。
+
 状态：2026-09-29 已在 30TAI Lite 验证预热 CPU＋FPGA 首帧与连续换视角，详见 [实板结果](../BOARD_WARM_NPU_VALIDATION.md)。原离线证据见 [结果](../INITIALIZE_NPU_VALIDATION.md)。旧 `pipeline.py reconstruct` 保留冷启动对照；冻结 `releases/3dgs_renderer_v1_20260928` 未改。
 
 ## 结构与状态
