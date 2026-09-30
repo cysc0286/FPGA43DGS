@@ -1,0 +1,19 @@
+MODE_PASS mode=          0 cycles=     27687 input=51 output=192
+SPLIT_PROFILE mode=          0 stage=dut.render.split_U0.prepare_geometry_U0 input_block=          7 output_block=        151 reads=         55 writes=         55
+SPLIT_PROFILE mode=          0 stage=dut.render.split_U0.expand_subtiles_U0 input_block=        188 output_block=       3946 reads=         55 writes=        167
+MODE_PASS mode=          1 cycles=     25277 input=51 output=192
+SPLIT_PROFILE mode=          1 stage=dut.render.split_U0.prepare_geometry_U0 input_block=          9 output_block=        151 reads=         55 writes=         55
+SPLIT_PROFILE mode=          1 stage=dut.render.split_U0.expand_subtiles_U0 input_block=        190 output_block=       1527 reads=         55 writes=        152
+MODE_PASS mode=          2 cycles=      4737 input=51 output=192
+SPLIT_PROFILE mode=          2 stage=dut.render.split_U0.prepare_geometry_U0 input_block=          7 output_block=        159 reads=         55 writes=         55
+SPLIT_PROFILE mode=          2 stage=dut.render.split_U0.expand_subtiles_U0 input_block=        188 output_block=         50 reads=         55 writes=        152
+MODE_PASS mode=          3 cycles=      4648 input=51 output=192
+SPLIT_PROFILE mode=          3 stage=dut.render.split_U0.prepare_geometry_U0 input_block=          5 output_block=        151 reads=         55 writes=         55
+SPLIT_PROFILE mode=          3 stage=dut.render.split_U0.expand_subtiles_U0 input_block=        186 output_block=          0 reads=         55 writes=        152
+MODE_PASS mode=          4 cycles=      4636 input=51 output=192
+SPLIT_PROFILE mode=          4 stage=dut.render.split_U0.prepare_geometry_U0 input_block=         11 output_block=        151 reads=         55 writes=         55
+SPLIT_PROFILE mode=          4 stage=dut.render.split_U0.expand_subtiles_U0 input_block=        192 output_block=          0 reads=         55 writes=        152
+MODE_PASS mode=          5 cycles=      4654 input=51 output=192
+SPLIT_PROFILE mode=          5 stage=dut.render.split_U0.prepare_geometry_U0 input_block=          5 output_block=        151 reads=         55 writes=         55
+SPLIT_PROFILE mode=          5 stage=dut.render.split_U0.expand_subtiles_U0 input_block=        186 output_block=          0 reads=         55 writes=        152
+PASS: CTU+VRU+DMA+CDC six real modes 4608 pixels, stalls, guards and ownership

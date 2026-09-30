@@ -1,5 +1,9 @@
 # FLK1 复跑入口
 
+2026-09-30：针对换视角渲染的 FPGA 主耗时，新增独立候选与负结果记录：
+[像素工作集搬运及跨子块合并](lane_workset/README.md)。保持原位流和默认
+单子块路径；HLS/RTL 周期改善不能当作已上板的整帧加速。
+
 这是 FLICKER AABB→CTU→FIFO→VRU 集成版本，和上一级 FLK0 分开保存。状态、数值范围和未完成项见 [VALIDATION.md](VALIDATION.md)，数据格式见 [CONTRACT.md](CONTRACT.md)。工作目录为仓库根目录 `D:\ADProjects\FPGA43DGS`。
 
 2026-09-28 已补板端CPU前处理与分组排序；从PLY＋相机开始复跑的入口为 [frontend/README.md](../frontend/README.md)，完整功能/性能边界为 [frontend/VALIDATION.md](../frontend/VALIDATION.md)。下文主要针对已准备有序列表的硬件构建与渲染测试，不能把其计时当作整链时延。

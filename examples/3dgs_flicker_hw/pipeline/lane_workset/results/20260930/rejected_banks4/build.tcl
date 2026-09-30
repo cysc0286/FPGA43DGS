@@ -8,13 +8,9 @@ set flags {-std=c++0x}
 if {[info exists ::env(FLK_EXACT_EXP_ROM)] && $::env(FLK_EXACT_EXP_ROM) in {1 2}} {
  append flags " -DFLK_EXACT_EXP_ROM=$::env(FLK_EXACT_EXP_ROM)"
 }
-if {[info exists ::env(FLK_STATE_PORTS)]} {
- if {$::env(FLK_STATE_PORTS) ni {1 2}} {error "FLK_STATE_PORTS must be 1 or 2"}
- append flags " -DFLK_STATE_PORTS=$::env(FLK_STATE_PORTS)"
-}
-if {[info exists ::env(FLK_GROUP_SUBTILES)]} {
- if {$::env(FLK_GROUP_SUBTILES) ni {0 1 2}} {error "FLK_GROUP_SUBTILES must be 0, 1 or 2"}
- append flags " -DFLK_GROUP_SUBTILES=$::env(FLK_GROUP_SUBTILES)"
+if {[info exists ::env(FLK_STATE_BANKS)]} {
+ if {$::env(FLK_STATE_BANKS) ni {1 4}} {error "FLK_STATE_BANKS must be 1 or 4"}
+ append flags " -DFLK_STATE_BANKS=$::env(FLK_STATE_BANKS)"
 }
 add_files [file join $here pipeline.cpp] -cflags $flags
 add_files [file join $here framed_ctu.cpp] -cflags {-std=c++0x}
@@ -25,7 +21,7 @@ set_part {xc7z030ffg676-2}
 create_clock -period 5 -name default
 csim_design -clean -O
 csynth_design
-foreach f [glob -nocomplain $project/solution1/syn/report/evaluate_*csynth.xml] {
+foreach f [glob $project/solution1/syn/report/evaluate_mini*csynth.xml] {
  set fd [open $f r];set report [read $fd];close $fd
  foreach {all ii} [regexp -all -inline {<PipelineII>([0-9]+)</PipelineII>} $report] {
   if {$ii != 1} {error "Mini-tile pipeline II=$ii failed in $f; preserve reports, skip expensive cosim"}

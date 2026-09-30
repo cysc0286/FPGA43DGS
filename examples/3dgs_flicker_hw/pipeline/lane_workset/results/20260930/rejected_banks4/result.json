@@ -1,0 +1,24 @@
+{
+  "status": "rejected_at_synthesis",
+  "c_reference_passed": true,
+  "evaluate_latency_cycles": 984,
+  "evaluate_II": 60,
+  "transfer_cycles": 4,
+  "baseline_evaluate_latency": 133,
+  "baseline_II": 1,
+  "cosim_run": false,
+  "board_run": false,
+  "reason": "Cyclic partition produces loop-carried dependency scheduling; slower despite shorter transfers",
+  "sha256": {
+    "build.tcl": "7a2d9020a9fca11c006efd018254f15c1b3732056c679913ff95e7b873344a8b",
+    "evaluate_mini_0u_s_csynth.rpt": "3df2b827aa5972ae484f3c87eeb5d5f2d67a1c497683586bb50cac656f72d9c7",
+    "evaluate_mini_0u_s_csynth.xml": "3221158baea4e9a40c21fd2c6ffb4b4ec0411878eff83e4f6503650860cbebb5",
+    "flicker_render_pipeline_csynth.rpt": "445b89bb653c4efedfe1eb436c38db0ca325426013d5572d0b62f8e61553f123",
+    "flicker_render_pipeline_csynth.xml": "ebcad7409764db124fca9d4d1b155c9a680f96bd1453484d669eafb833ecee1e",
+    "pipeline.cpp": "979828c5ccc54a8982e47086b253ed9c19e5c8f5ac7133bd0d816e1dbe5a649f",
+    "pipeline_20260930T183724.log": "8ed114cfb51a3525d0706c0a08304694213191b6e41ff9d9491761c68460c198",
+    "render_lane_0u_s_csynth.rpt": "090c99138e8df10e02eb22b824e31b107ebf8fdf66f6ec630c847425c6d41de3",
+    "render_lane_0u_s_csynth.xml": "5e645aa7a5faa593392a0af4ed949ae492998084a7b5bffd4159c52b95e9d993",
+    "vivado_hls.app": "c2aa0063a33f960bc8720d2740e27c2a32151f50943847dc899d7b5919cfc290"
+  }
+}

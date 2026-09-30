@@ -5,6 +5,13 @@ Tile list construction. On the unchanged FPGA, 32,768 Gaussians at 128×128,
 paired view-switch latency falls from 48.632 to **45.212 ms** (7.03%; P95
 46.263 ms). Pixels are unchanged. See [view-switch validation](VIEW_SWITCH_VALIDATION.md).
 
+Next-step analysis: [sort-free methods and physical optimization](SORT_FREE_AND_ROUTING_PLAN.md).
+This is a sourced design comparison, not another board performance result.
+
+Dominant-stage work: [FPGA hot path and candidate status](HOT_PATH_20260930.md).
+Hardware candidates are opt-in; the installed renderer remains the baseline
+until routed timing and matched board measurements are accepted.
+
 The scene is prepared before interactive rendering. LiveRenderer.load_scene()
 or load_rows() installs a scene; render_camera() accepts the existing 136-byte
 camera and returns a complete RGB framebuffer. LiveFrame.archive() is explicit

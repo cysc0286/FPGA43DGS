@@ -50,8 +50,9 @@ def main():
         for source in rom.iterdir():
             if source.suffix in {'.cpp', '.hpp', '.tcl', '.md'}:
                 copy(source, Path('sources/pipeline/exp_rom') / source.name)
-    if (project/'hls.app').exists():
-        copy(project/'hls.app', Path('hls.app'))
+    for project_file in ['hls.app', 'vivado_hls.app']:
+        if (project/project_file).exists():
+            copy(project/project_file, Path(project_file))
     for source in (project / 'solution1/syn/report').iterdir():
         if source.is_file():
             copy(source, Path('reports') / source.name)

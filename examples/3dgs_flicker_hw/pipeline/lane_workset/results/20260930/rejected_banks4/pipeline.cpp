@@ -2,16 +2,13 @@
 // Four VRU channels are an explicit resource-scaled FPGA adaptation.
 #include "pipeline.hpp"
 
-// Keep the installed single-transfer design as the default. The dual-port variant
+// Keep the installed single-bank design as the default. The four-bank variant
 // is an opt-in experiment: it widens only state transfers, not Gaussian order.
-#ifndef FLK_STATE_PORTS
-#define FLK_STATE_PORTS 1
+#ifndef FLK_STATE_BANKS
+#define FLK_STATE_BANKS 1
 #endif
-#if FLK_STATE_PORTS != 1 && FLK_STATE_PORTS != 2
-#error "FLK_STATE_PORTS must be 1 or 2"
-#endif
-#ifndef FLK_GROUP_SUBTILES
-#define FLK_GROUP_SUBTILES 0
+#if FLK_STATE_BANKS != 1 && FLK_STATE_BANKS != 4
+#error "FLK_STATE_BANKS must be 1 or 4"
 #endif
 #if FLK_EXACT_EXP_ROM == 2
 #include "exp_rom/table_compact.hpp"
@@ -163,84 +160,46 @@ template<unsigned LANE> static void evaluate_mini(Word q,half rr[16],half gg[16]
  }
 }
 
-#if FLK_GROUP_SUBTILES
-// Each lane owns 64 different pixels across four subtiles. Evaluate one
-// Gaussian's selected subtiles in a single monotonic 64-pixel traversal.
-// A complete call commits before the next Gaussian, so alpha order is intact.
-template<unsigned LANE> static void evaluate_group(Word records[4],ap_uint<4> valid,
- half rr[64],half gg[64],half bb[64],half tt[64],unsigned last[64],bool stopped[64]){
-#pragma HLS INLINE off
- for(unsigned p=0;p<64;p++){
-#pragma HLS PIPELINE II=1
-  unsigned sub=p/16,k=p%16;Word q=records[sub];
-  unsigned ox=q.range(159,144),oy=q.range(175,160),w=q.range(180,176),h=q.range(185,181),ordinal=q.range(223,192);
-  unsigned x=(LANE&1)*4+k%4,y=(LANE>>1)*4+k/4;
-  if(valid[sub]&&x<w&&y<h&&!stopped[p]){
-   half mx=unpack_half(q,0),my=unpack_half(q,16),a=unpack_half(q,32),b=unpack_half(q,48),c=unpack_half(q,64);
-   half opacity=unpack_half(q,80),red=unpack_half(q,96),green=unpack_half(q,112),blue=unpack_half(q,128);
-   half pw=power(half(ox+x),half(oy+y),mx,my,a,b,c);
-   if(pw<=half(0)){
-#ifdef FLK_EXACT_EXP_ROM
-    half exponential=exact_negative_exp<LANE>(pw);
-#else
-    half exponential=hls::half_exp(pw);
-#endif
-    half alpha=half(opacity*exponential);if(alpha>half(.99f))alpha=half(.99f);
-    if(alpha>=half(1.f/255.f)){
-     half next=half(tt[p]*half(half(1)-alpha));
-     if(next<half(.0001f))stopped[p]=true;
-     else{half weight=half(alpha*tt[p]);rr[p]=half(rr[p]+half(red*weight));gg[p]=half(gg[p]+half(green*weight));bb[p]=half(bb[p]+half(blue*weight));tt[p]=next;last[p]=ordinal;}
-    }
-   }
-  }
- }
-}
-#endif
-
 template<unsigned LANE> static void render_lane(hls::stream<Word>& input,hls::stream<PixelBits>& output){
 #pragma HLS INLINE off
  half rr[64],gg[64],bb[64],tt[64];unsigned last[64];bool stopped[64];
  half mr[16],mg[16],mb[16],mt[16];unsigned ml[16];bool ms[16];
-#if FLK_STATE_PORTS == 2
-// True dual-port memories accept two state writes per cycle without banking.
-#pragma HLS RESOURCE variable=rr core=RAM_T2P_BRAM
-#pragma HLS RESOURCE variable=gg core=RAM_T2P_BRAM
-#pragma HLS RESOURCE variable=bb core=RAM_T2P_BRAM
-#pragma HLS RESOURCE variable=tt core=RAM_T2P_BRAM
-#pragma HLS RESOURCE variable=last core=RAM_T2P_BRAM
-#pragma HLS RESOURCE variable=stopped core=RAM_T2P_BRAM
-#pragma HLS RESOURCE variable=mr core=RAM_T2P_BRAM
-#pragma HLS RESOURCE variable=mg core=RAM_T2P_BRAM
-#pragma HLS RESOURCE variable=mb core=RAM_T2P_BRAM
-#pragma HLS RESOURCE variable=mt core=RAM_T2P_BRAM
-#pragma HLS RESOURCE variable=ml core=RAM_T2P_BRAM
-#pragma HLS RESOURCE variable=ms core=RAM_T2P_BRAM
+#if FLK_STATE_BANKS == 4
+// Shallow distributed memories avoid spending four BRAMs per 64-word array.
+// Each consecutive group of four pixels maps to four independent banks.
+#pragma HLS ARRAY_PARTITION variable=rr cyclic factor=4 dim=1
+#pragma HLS ARRAY_PARTITION variable=gg cyclic factor=4 dim=1
+#pragma HLS ARRAY_PARTITION variable=bb cyclic factor=4 dim=1
+#pragma HLS ARRAY_PARTITION variable=tt cyclic factor=4 dim=1
+#pragma HLS ARRAY_PARTITION variable=last cyclic factor=4 dim=1
+#pragma HLS ARRAY_PARTITION variable=stopped cyclic factor=4 dim=1
+#pragma HLS ARRAY_PARTITION variable=mr cyclic factor=4 dim=1
+#pragma HLS ARRAY_PARTITION variable=mg cyclic factor=4 dim=1
+#pragma HLS ARRAY_PARTITION variable=mb cyclic factor=4 dim=1
+#pragma HLS ARRAY_PARTITION variable=mt cyclic factor=4 dim=1
+#pragma HLS ARRAY_PARTITION variable=ml cyclic factor=4 dim=1
+#pragma HLS ARRAY_PARTITION variable=ms cyclic factor=4 dim=1
+#pragma HLS RESOURCE variable=rr core=RAM_2P_LUTRAM
+#pragma HLS RESOURCE variable=gg core=RAM_2P_LUTRAM
+#pragma HLS RESOURCE variable=bb core=RAM_2P_LUTRAM
+#pragma HLS RESOURCE variable=tt core=RAM_2P_LUTRAM
+#pragma HLS RESOURCE variable=last core=RAM_2P_LUTRAM
+#pragma HLS RESOURCE variable=stopped core=RAM_2P_LUTRAM
+#pragma HLS RESOURCE variable=mr core=RAM_2P_LUTRAM
+#pragma HLS RESOURCE variable=mg core=RAM_2P_LUTRAM
+#pragma HLS RESOURCE variable=mb core=RAM_2P_LUTRAM
+#pragma HLS RESOURCE variable=mt core=RAM_2P_LUTRAM
+#pragma HLS RESOURCE variable=ml core=RAM_2P_LUTRAM
+#pragma HLS RESOURCE variable=ms core=RAM_2P_LUTRAM
 #else
 #pragma HLS RESOURCE variable=rr core=RAM_2P_BRAM
 #pragma HLS RESOURCE variable=gg core=RAM_2P_BRAM
 #pragma HLS RESOURCE variable=bb core=RAM_2P_BRAM
 #pragma HLS RESOURCE variable=tt core=RAM_2P_BRAM
 #endif
-#if FLK_GROUP_SUBTILES
- Word records[4];ap_uint<4> valid=0;unsigned group_ordinal=0;
-#if FLK_GROUP_SUBTILES == 2
- // Four wide records are too shallow for efficient BRAM mapping. Register
- // only this read-only evaluator input; never partition the pixel feedback.
-#pragma HLS ARRAY_PARTITION variable=records complete dim=1
-#endif
- // Initialize inactive slots so C simulation never reads uninitialized words.
- for(unsigned sub=0;sub<4;sub++)records[sub]=0;
-#endif
  bool end=false;unsigned tile=0;
  while(!end){
   Word q=input.read();unsigned type=kind(q);
-#if FLK_GROUP_SUBTILES
-  unsigned incoming_ordinal=q.range(223,192);
-  if(valid!=0&&(type!=0||incoming_ordinal!=group_ordinal)){
-   evaluate_group<LANE>(records,valid,rr,gg,bb,tt,last,stopped);
-   valid=0;
-  }
-#endif
   if(type==3)end=true;
   else if(type==1){
    for(unsigned p=0;p<64;p++){
@@ -260,27 +219,23 @@ template<unsigned LANE> static void render_lane(hls::stream<Word>& input,hls::st
    tile++;
   }else{
    unsigned sub=q.range(229,228);
-#if FLK_GROUP_SUBTILES
-   records[sub]=q;valid[sub]=1;group_ordinal=incoming_ordinal;
-#else
    // A bounded 16-pixel working set makes both ownership and aliasing explicit.
    // Load, evaluate, and commit finish before the next ordered Gaussian starts.
    for(unsigned k=0;k<16;k++){
 #pragma HLS PIPELINE II=1
-#if FLK_STATE_PORTS == 2
-#pragma HLS UNROLL factor=2
+#if FLK_STATE_BANKS == 4
+#pragma HLS UNROLL factor=4
 #endif
     unsigned p=sub*16+k;mr[k]=rr[p];mg[k]=gg[p];mb[k]=bb[p];mt[k]=tt[p];ml[k]=last[p];ms[k]=stopped[p];
    }
    evaluate_mini<LANE>(q,mr,mg,mb,mt,ml,ms);
    for(unsigned k=0;k<16;k++){
 #pragma HLS PIPELINE II=1
-#if FLK_STATE_PORTS == 2
-#pragma HLS UNROLL factor=2
+#if FLK_STATE_BANKS == 4
+#pragma HLS UNROLL factor=4
 #endif
     unsigned p=sub*16+k;rr[p]=mr[k];gg[p]=mg[k];bb[p]=mb[k];tt[p]=mt[k];last[p]=ml[k];stopped[p]=ms[k];
    }
-#endif
   }
  }
 }

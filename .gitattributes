@@ -22,3 +22,8 @@ examples/3dgs_reconstruction/mvsplat/results/20260930/fpga_exp_rom/images/**/*.b
 examples/3dgs_reconstruction/mvsplat/results/20260930/view_switch_v4/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
 examples/3dgs_reconstruction/mvsplat/results/20260930/view_switch_v4/images/**/*.ppm binary
 examples/3dgs_reconstruction/mvsplat/results/20260930/view_switch_v4/images/**/*.bin binary
+
+# Preserve exact HLS candidate receipts, including rejected experiments.
+examples/3dgs_flicker_hw/pipeline/lane_workset/results/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+examples/3dgs_flicker_hw/pipeline/lane_workset/results/**/*.flk binary
+examples/3dgs_flicker_hw/pipeline/lane_workset/results/**/*.raw binary
