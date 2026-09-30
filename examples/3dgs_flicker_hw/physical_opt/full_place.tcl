@@ -1,13 +1,16 @@
 # Independent full-placement control for a changed netlist whose incremental
 # placement is expensive. Read the post-opt checkpoint BEFORE incremental reuse.
 # No project properties, source checkpoint or board state are modified.
-if {$argc != 3} {error "Usage: full_place.tcl post_opt.dcp new_output_directory original_vendor_opt_pre.tcl"}
+if {$argc < 3 || $argc > 4} {error "Usage: full_place.tcl post_opt.dcp new_output_directory original_vendor_opt_pre.tcl ?directive?"}
+set directive ExtraNetDelay_high
+if {$argc == 4} {set directive [lindex $argv 3]}
+if {$directive ni {ExtraNetDelay_high AltSpreadLogic_high Explore}} {error "Unsupported reviewed placement directive"}
 set source [file normalize [lindex $argv 0]]
 set out [file normalize [lindex $argv 1]]
 if {[file exists $out]} {error "Preserve previous placement evidence"}
 file mkdir $out
 set f [open [file join $out provenance.txt] w]
-puts $f "source=$source\nversion=[version -short]\nincremental=false\nboard_programmed=false"
+puts $f "source=$source\nversion=[version -short]\ndirective=$directive\nincremental=false\nboard_programmed=false"
 close $f
 set_param general.maxThreads 4
 open_checkpoint $source
@@ -25,7 +28,7 @@ set f [open [file join $out inherited_vendor_checks.txt] w]
 puts $f "hook=$vendor\nREQP-44 REQP-46 REQP-52 REQP-56: original proxy-device exclusions restored; no new waiver."
 close $f
 set started [clock seconds]
-place_design -directive ExtraNetDelay_high
+place_design -directive $directive
 write_checkpoint [file join $out full_placed.dcp]
 report_utilization -file [file join $out utilization.rpt]
 report_timing_summary -delay_type min_max -file [file join $out timing.rpt]

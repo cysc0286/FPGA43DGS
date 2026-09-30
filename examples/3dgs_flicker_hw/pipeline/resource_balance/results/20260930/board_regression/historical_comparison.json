@@ -1,0 +1,4 @@
+{
+  "all_seven_checks_exact": true,
+  "reference": "examples/3dgs_reconstruction/mvsplat/results/20260930/view_switch_v4/verification.json"
+}

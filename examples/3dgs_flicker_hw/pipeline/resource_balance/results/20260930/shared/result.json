@@ -1,0 +1,34 @@
+{
+  "project": "hls_pipeline_groupshared_20260930",
+  "scope": "offline HLS/RTL; not physical or board timing",
+  "board_tested": false,
+  "physical_tested": false,
+  "hls_resources": {
+    "BRAM_18K": 203,
+    "DSP48E": 244,
+    "FF": 65163,
+    "LUT": 33947
+  },
+  "mode_cycles": {
+    "0": 10368,
+    "1": 10298,
+    "2": 3409,
+    "3": 3017,
+    "4": 3227,
+    "5": 3124
+  },
+  "extended_c_reference": "../shared_c_reference/result.json",
+  "hls_evidence": "examples\\3dgs_flicker_hw\\evidence\\hls_pipeline_groupshared_20260930_20260930T213621",
+  "integration_evidence": "examples\\3dgs_flicker_hw\\evidence\\pipeline_integration_20260930T213626",
+  "platform": "platform/flicker_groupshared_fpga",
+  "sha256": {
+    "build.tcl": "17bedaa8dd4c83d15fec95e069abee73cb0f2ffd27c41b13f9135583337cc25d",
+    "cosim.rpt": "aac4c379d199049219494963c9cd24dbb15560b53ff209d837fac9a545fb8e3f",
+    "hls.xml": "b2357895a93a755a253dd021dce881a6fe36df888d1a6e2f476d5f97e62f4ce0",
+    "hls_freeze.json": "a710f2f62e4e7391fd3d95d7e81f710f076d387304e6ba5f3ad964752718dc8e",
+    "integration.json": "7f7b087ec43e5186df3be613d4920382961fdc1d452bdb74332a08c7af9f4d0d",
+    "integration_excerpt.txt": "69593de5ab640ad92b1e5b052d7de10fbdf3f96099ba8241f5f0fb64577745db",
+    "pipeline.cpp": "8a946d03b8598aa239acef91057ed9a19c16127504e2a86b49b8012653159aef",
+    "vivado_hls.app": "eb0f771ad8963b728526eee3cb5d6749a06eb8c8730e2fdd1055e4316ee3eb27"
+  }
+}

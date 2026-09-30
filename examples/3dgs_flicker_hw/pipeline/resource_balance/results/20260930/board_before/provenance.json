@@ -1,0 +1,22 @@
+{
+  "boot_sha256": "0528e019a5fb19c7f281b773ddf5ab5a8a524ddfebdc4fc9acf74273db31d048",
+  "board_executed": true,
+  "baseline_matches_historical": true,
+  "binary_sha256": "5dace0ce6ffd7ece5b8389598a938270aec784660e9eeed056e305ef9e9408c7",
+  "files": {
+    "board_status.txt": "3decc58d09a4fb2972e61e94057d9d3e5d2a59d92d73362ec56cfaddcb03618e",
+    "command.json": "ca97671f2ac81b772928621d66d5a7fbe54de5f9594b55a1fb306fcba2dfa569",
+    "console.txt": "8b0d8fd9ca9e026e43061fdd7168faf953a2a9a1dcf35248a4f9e963792ad046",
+    "results.json": "18f21e4f74dfc69e32421e6617cc1a2838577586830c3e70fe5577faad228530",
+    "frame_000007\\frame.bin": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+    "frame_000007\\frame.ppm": "11ca662acf91dc5ae699627193e5d13b5fa2fb03d0c5ac963a8993fc4ebc70e5",
+    "frame_000007\\result.json": "fc54b581b41c5c2b8ebd7ddda89af1cbc3b7a05a2ce25bc8fd30d27e3583fa9c",
+    "frame_000015\\frame.bin": "8ccb31d903d062bcaadc8d9aa8f4d9af519a4a1098fc3030336f9ab40dff1bf8",
+    "frame_000015\\frame.ppm": "ec78f34f1aee554f34fc9b6b20a0c1eb6385091c94d8c123096e380b062a5d1e",
+    "frame_000015\\result.json": "c5a52f6386fcfe6e390fd5d02e20aef711134860e7ab53a256b7a75334cf860d",
+    "frame_000022\\frame.bin": "70519d98b2dfe67d8f4fc80eb35352781e67130a45f011e9ed718d29f174b9af",
+    "frame_000022\\frame.ppm": "e3c512d236b02b84f3dc059748daed6d80740fc7174ae55cbf805d9aa020b5e3",
+    "frame_000022\\result.json": "6ce441c48027c5579eb0b7e2810d2326c04be1d44ada9ff3e14ee21ff107fb66"
+  },
+  "boot_id": "56c61f9a-e51e-40a8-ae41-dbcb12483bb6"
+}

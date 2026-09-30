@@ -1,0 +1,1344 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
+| Date         : Wed Sep 30 22:41:24 2026
+| Host         : cysc-0286 running 64-bit major release  (build 9200)
+| Command      : report_timing -through [get_pins -of_objects [get_cells -hier -filter {NAME =~ *U_flicker*}] -filter {DIRECTION == OUT}] -delay_type min -max_paths 20 -file D:/ADProjects/FPGA43DGS/examples/3dgs_flicker_hw/build/board_cat_20260930_213732/renderer_min_paths.rpt
+| Design       : ai7030_edif_top
+| Device       : 7z030-ffg676
+| Speed File   : -2  PRODUCTION 1.11 2025-11-03
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             0.054ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/gather_U0/p_Result_s_reg_532_reg[384]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/dma/output_queue_reg_0_3_384_389/RAMA/I
+                            (rising edge-triggered cell RAMD32 clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.197ns  (logic 0.100ns (50.706%)  route 0.097ns (49.294%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.012ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.987ns
+    Source Clock Delay      (SCD):    1.622ns
+    Clock Pessimism Removal (CPR):    0.352ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.515     1.622    U_adder_top/U_flicker/render/gather_U0/ui_clk
+    SLICE_X60Y121        FDRE                                         r  U_adder_top/U_flicker/render/gather_U0/p_Result_s_reg_532_reg[384]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X60Y121        FDRE (Prop_fdre_C_Q)         0.100     1.722 r  U_adder_top/U_flicker/render/gather_U0/p_Result_s_reg_532_reg[384]/Q
+                         net (fo=1, routed)           0.097     1.820    U_adder_top/U_flicker/dma/output_queue_reg_0_3_384_389/DIA0
+    SLICE_X58Y121        RAMD32                                       r  U_adder_top/U_flicker/dma/output_queue_reg_0_3_384_389/RAMA/I
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.719     1.987    U_adder_top/U_flicker/dma/output_queue_reg_0_3_384_389/WCLK
+    SLICE_X58Y121        RAMD32                                       r  U_adder_top/U_flicker/dma/output_queue_reg_0_3_384_389/RAMA/CLK
+                         clock pessimism             -0.352     1.634    
+    SLICE_X58Y121        RAMD32 (Hold_ramd32_CLK_I)
+                                                      0.131     1.765    U_adder_top/U_flicker/dma/output_queue_reg_0_3_384_389/RAMA
+  -------------------------------------------------------------------
+                         required time                         -1.765    
+                         arrival time                           1.820    
+  -------------------------------------------------------------------
+                         slack                                  0.054    
+
+Slack (MET) :             0.057ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/gather_U0/p_Result_s_reg_532_reg[436]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/dma/output_queue_reg_0_3_432_437/RAMC/I
+                            (rising edge-triggered cell RAMD32 clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.199ns  (logic 0.100ns (50.197%)  route 0.099ns (49.803%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.013ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.987ns
+    Source Clock Delay      (SCD):    1.621ns
+    Clock Pessimism Removal (CPR):    0.352ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.514     1.621    U_adder_top/U_flicker/render/gather_U0/ui_clk
+    SLICE_X60Y127        FDRE                                         r  U_adder_top/U_flicker/render/gather_U0/p_Result_s_reg_532_reg[436]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X60Y127        FDRE (Prop_fdre_C_Q)         0.100     1.721 r  U_adder_top/U_flicker/render/gather_U0/p_Result_s_reg_532_reg[436]/Q
+                         net (fo=1, routed)           0.099     1.821    U_adder_top/U_flicker/dma/output_queue_reg_0_3_432_437/DIC0
+    SLICE_X58Y128        RAMD32                                       r  U_adder_top/U_flicker/dma/output_queue_reg_0_3_432_437/RAMC/I
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.719     1.987    U_adder_top/U_flicker/dma/output_queue_reg_0_3_432_437/WCLK
+    SLICE_X58Y128        RAMD32                                       r  U_adder_top/U_flicker/dma/output_queue_reg_0_3_432_437/RAMC/CLK
+                         clock pessimism             -0.352     1.634    
+    SLICE_X58Y128        RAMD32 (Hold_ramd32_CLK_I)
+                                                      0.129     1.763    U_adder_top/U_flicker/dma/output_queue_reg_0_3_432_437/RAMC
+  -------------------------------------------------------------------
+                         required time                         -1.763    
+                         arrival time                           1.821    
+  -------------------------------------------------------------------
+                         slack                                  0.057    
+
+Slack (MET) :             0.057ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/framed_ctu_U0/expand_frames_U0/tmp_p_q_V_fu_70_reg[141]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/framed_ctu_U0/requests_V_p_q_V_U/U_fifo_w512_d16_S_ram/SRL_SIG_reg[15][141]_srl16/D
+                            (rising edge-triggered cell SRL16E clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.253ns  (logic 0.107ns (42.238%)  route 0.146ns (57.762%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.140ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.013ns
+    Source Clock Delay      (SCD):    1.704ns
+    Clock Pessimism Removal (CPR):    0.168ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.597     1.704    U_adder_top/U_flicker/render/framed_ctu_U0/expand_frames_U0/ui_clk
+    SLICE_X58Y49         FDRE                                         r  U_adder_top/U_flicker/render/framed_ctu_U0/expand_frames_U0/tmp_p_q_V_fu_70_reg[141]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X58Y49         FDRE (Prop_fdre_C_Q)         0.107     1.811 r  U_adder_top/U_flicker/render/framed_ctu_U0/expand_frames_U0/tmp_p_q_V_fu_70_reg[141]/Q
+                         net (fo=1, routed)           0.146     1.958    U_adder_top/U_flicker/render/framed_ctu_U0/requests_V_p_q_V_U/U_fifo_w512_d16_S_ram/in[141]
+    SLICE_X58Y50         SRL16E                                       r  U_adder_top/U_flicker/render/framed_ctu_U0/requests_V_p_q_V_U/U_fifo_w512_d16_S_ram/SRL_SIG_reg[15][141]_srl16/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.745     2.013    U_adder_top/U_flicker/render/framed_ctu_U0/requests_V_p_q_V_U/U_fifo_w512_d16_S_ram/ui_clk
+    SLICE_X58Y50         SRL16E                                       r  U_adder_top/U_flicker/render/framed_ctu_U0/requests_V_p_q_V_U/U_fifo_w512_d16_S_ram/SRL_SIG_reg[15][141]_srl16/CLK
+                         clock pessimism             -0.168     1.844    
+    SLICE_X58Y50         SRL16E (Hold_srl16e_CLK_D)
+                                                      0.056     1.900    U_adder_top/U_flicker/render/framed_ctu_U0/requests_V_p_q_V_U/U_fifo_w512_d16_S_ram/SRL_SIG_reg[15][141]_srl16
+  -------------------------------------------------------------------
+                         required time                         -1.900    
+                         arrival time                           1.958    
+  -------------------------------------------------------------------
+                         slack                                  0.057    
+
+Slack (MET) :             0.058ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/render_lane_0u_U0/grp_evaluate_group_0u_s_fu_446/p_Result_69_reg_1035_reg[1]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/render_lane_0u_U0/grp_evaluate_group_0u_s_fu_446/tmp_260_reg_1073_reg[1]/D
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.394ns  (logic 0.177ns (44.937%)  route 0.217ns (55.063%))
+  Logic Levels:           2  (CARRY4=1 LUT2=1)
+  Clock Path Skew:        0.265ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.098ns
+    Source Clock Delay      (SCD):    1.664ns
+    Clock Pessimism Removal (CPR):    0.168ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.557     1.664    U_adder_top/U_flicker/render/render_lane_0u_U0/grp_evaluate_group_0u_s_fu_446/ui_clk
+    SLICE_X89Y50         FDRE                                         r  U_adder_top/U_flicker/render/render_lane_0u_U0/grp_evaluate_group_0u_s_fu_446/p_Result_69_reg_1035_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X89Y50         FDRE (Prop_fdre_C_Q)         0.100     1.764 r  U_adder_top/U_flicker/render/render_lane_0u_U0/grp_evaluate_group_0u_s_fu_446/p_Result_69_reg_1035_reg[1]/Q
+                         net (fo=2, routed)           0.217     1.981    U_adder_top/U_flicker/render/render_lane_0u_U0/grp_evaluate_group_0u_s_fu_446/p_Result_69_reg_1035[1]
+    SLICE_X91Y47         LUT2 (Prop_lut2_I0_O)        0.028     2.009 r  U_adder_top/U_flicker/render/render_lane_0u_U0/grp_evaluate_group_0u_s_fu_446/tmp_260_reg_1073[3]_i_2/O
+                         net (fo=1, routed)           0.000     2.009    U_adder_top/U_flicker/render/render_lane_0u_U0/grp_evaluate_group_0u_s_fu_446/tmp_260_reg_1073[3]_i_2_n_0
+    SLICE_X91Y47         CARRY4 (Prop_carry4_S[1]_O[1])
+                                                      0.049     2.058 r  U_adder_top/U_flicker/render/render_lane_0u_U0/grp_evaluate_group_0u_s_fu_446/tmp_260_reg_1073_reg[3]_i_1/O[1]
+                         net (fo=1, routed)           0.000     2.058    U_adder_top/U_flicker/render/render_lane_0u_U0/grp_evaluate_group_0u_s_fu_446/tmp_260_fu_854_p2[1]
+    SLICE_X91Y47         FDRE                                         r  U_adder_top/U_flicker/render/render_lane_0u_U0/grp_evaluate_group_0u_s_fu_446/tmp_260_reg_1073_reg[1]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.830     2.098    U_adder_top/U_flicker/render/render_lane_0u_U0/grp_evaluate_group_0u_s_fu_446/ui_clk
+    SLICE_X91Y47         FDRE                                         r  U_adder_top/U_flicker/render/render_lane_0u_U0/grp_evaluate_group_0u_s_fu_446/tmp_260_reg_1073_reg[1]/C
+                         clock pessimism             -0.168     1.929    
+    SLICE_X91Y47         FDRE (Hold_fdre_C_D)         0.071     2.000    U_adder_top/U_flicker/render/render_lane_0u_U0/grp_evaluate_group_0u_s_fu_446/tmp_260_reg_1073_reg[1]
+  -------------------------------------------------------------------
+                         required time                         -2.000    
+                         arrival time                           2.058    
+  -------------------------------------------------------------------
+                         slack                                  0.058    
+
+Slack (MET) :             0.058ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/A_IP_DELAY/i_pipe/opt_has_pipe.first_q_reg[6]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.ALIGN_ADD/DSP2/DSP/D[6]
+                            (rising edge-triggered cell DSP48E1 clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.503ns  (logic 0.118ns (23.468%)  route 0.385ns (76.532%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.356ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.159ns
+    Source Clock Delay      (SCD):    1.634ns
+    Clock Pessimism Removal (CPR):    0.168ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.527     1.634    U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/A_IP_DELAY/i_pipe/aclk
+    SLICE_X54Y146        FDRE                                         r  U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/A_IP_DELAY/i_pipe/opt_has_pipe.first_q_reg[6]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X54Y146        FDRE (Prop_fdre_C_Q)         0.118     1.752 r  U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/A_IP_DELAY/i_pipe/opt_has_pipe.first_q_reg[6]/Q
+                         net (fo=2, routed)           0.385     2.137    U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.ALIGN_ADD/DSP2/Q[6]
+    DSP48_X3Y61          DSP48E1                                      r  U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.ALIGN_ADD/DSP2/DSP/D[6]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.891     2.159    U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.ALIGN_ADD/DSP2/aclk
+    DSP48_X3Y61          DSP48E1                                      r  U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.ALIGN_ADD/DSP2/DSP/CLK
+                         clock pessimism             -0.168     1.990    
+    DSP48_X3Y61          DSP48E1 (Hold_dsp48e1_CLK_D[6])
+                                                      0.089     2.079    U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.ALIGN_ADD/DSP2/DSP
+  -------------------------------------------------------------------
+                         required time                         -2.079    
+                         arrival time                           2.137    
+  -------------------------------------------------------------------
+                         slack                                  0.058    
+
+Slack (MET) :             0.058ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/render_lane_1u_U0/grp_evaluate_group_1u_s_fu_448/flicker_render_piibs_U185/flicker_render_pipeline_ap_uitofp_6_no_dsp_32_u/U0/i_synth/FIX_TO_FLT_OP.SPD.OP/NORM_SHIFT/MUX_LOOP[0].DEL_SHIFT/i_pipe/opt_has_pipe.first_q_reg[34]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/render_lane_1u_U0/grp_evaluate_group_1u_s_fu_448/flicker_render_piibs_U185/flicker_render_pipeline_ap_uitofp_6_no_dsp_32_u/U0/i_synth/FIX_TO_FLT_OP.SPD.OP/NORM_SHIFT/MUX_LOOP[1].DEL_SHIFT/i_pipe/opt_has_pipe.first_q_reg[22]/D
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.307ns  (logic 0.146ns (47.505%)  route 0.161ns (52.495%))
+  Logic Levels:           1  (LUT6=1)
+  Clock Path Skew:        0.189ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.083ns
+    Source Clock Delay      (SCD):    1.705ns
+    Clock Pessimism Removal (CPR):    0.188ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.598     1.705    U_adder_top/U_flicker/render/render_lane_1u_U0/grp_evaluate_group_1u_s_fu_448/flicker_render_piibs_U185/flicker_render_pipeline_ap_uitofp_6_no_dsp_32_u/U0/i_synth/FIX_TO_FLT_OP.SPD.OP/NORM_SHIFT/MUX_LOOP[0].DEL_SHIFT/i_pipe/aclk
+    SLICE_X62Y0          FDRE                                         r  U_adder_top/U_flicker/render/render_lane_1u_U0/grp_evaluate_group_1u_s_fu_448/flicker_render_piibs_U185/flicker_render_pipeline_ap_uitofp_6_no_dsp_32_u/U0/i_synth/FIX_TO_FLT_OP.SPD.OP/NORM_SHIFT/MUX_LOOP[0].DEL_SHIFT/i_pipe/opt_has_pipe.first_q_reg[34]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y0          FDRE (Prop_fdre_C_Q)         0.118     1.823 r  U_adder_top/U_flicker/render/render_lane_1u_U0/grp_evaluate_group_1u_s_fu_448/flicker_render_piibs_U185/flicker_render_pipeline_ap_uitofp_6_no_dsp_32_u/U0/i_synth/FIX_TO_FLT_OP.SPD.OP/NORM_SHIFT/MUX_LOOP[0].DEL_SHIFT/i_pipe/opt_has_pipe.first_q_reg[34]/Q
+                         net (fo=2, routed)           0.161     1.985    U_adder_top/U_flicker/render/render_lane_1u_U0/grp_evaluate_group_1u_s_fu_448/flicker_render_piibs_U185/flicker_render_pipeline_ap_uitofp_6_no_dsp_32_u/U0/i_synth/FIX_TO_FLT_OP.SPD.OP/NORM_SHIFT/MUX_LOOP[0].DEL_SHIFT/i_pipe/opt_has_pipe.first_q_reg_n_0_[34]
+    SLICE_X57Y0          LUT6 (Prop_lut6_I0_O)        0.028     2.013 r  U_adder_top/U_flicker/render/render_lane_1u_U0/grp_evaluate_group_1u_s_fu_448/flicker_render_piibs_U185/flicker_render_pipeline_ap_uitofp_6_no_dsp_32_u/U0/i_synth/FIX_TO_FLT_OP.SPD.OP/NORM_SHIFT/MUX_LOOP[0].DEL_SHIFT/i_pipe/opt_has_pipe.first_q[22]_i_1/O
+                         net (fo=1, routed)           0.000     2.013    U_adder_top/U_flicker/render/render_lane_1u_U0/grp_evaluate_group_1u_s_fu_448/flicker_render_piibs_U185/flicker_render_pipeline_ap_uitofp_6_no_dsp_32_u/U0/i_synth/FIX_TO_FLT_OP.SPD.OP/NORM_SHIFT/MUX_LOOP[1].DEL_SHIFT/i_pipe/opt_has_pipe.first_q_reg[28]_0[21]
+    SLICE_X57Y0          FDRE                                         r  U_adder_top/U_flicker/render/render_lane_1u_U0/grp_evaluate_group_1u_s_fu_448/flicker_render_piibs_U185/flicker_render_pipeline_ap_uitofp_6_no_dsp_32_u/U0/i_synth/FIX_TO_FLT_OP.SPD.OP/NORM_SHIFT/MUX_LOOP[1].DEL_SHIFT/i_pipe/opt_has_pipe.first_q_reg[22]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.815     2.083    U_adder_top/U_flicker/render/render_lane_1u_U0/grp_evaluate_group_1u_s_fu_448/flicker_render_piibs_U185/flicker_render_pipeline_ap_uitofp_6_no_dsp_32_u/U0/i_synth/FIX_TO_FLT_OP.SPD.OP/NORM_SHIFT/MUX_LOOP[1].DEL_SHIFT/i_pipe/aclk
+    SLICE_X57Y0          FDRE                                         r  U_adder_top/U_flicker/render/render_lane_1u_U0/grp_evaluate_group_1u_s_fu_448/flicker_render_piibs_U185/flicker_render_pipeline_ap_uitofp_6_no_dsp_32_u/U0/i_synth/FIX_TO_FLT_OP.SPD.OP/NORM_SHIFT/MUX_LOOP[1].DEL_SHIFT/i_pipe/opt_has_pipe.first_q_reg[22]/C
+                         clock pessimism             -0.188     1.894    
+    SLICE_X57Y0          FDRE (Hold_fdre_C_D)         0.060     1.954    U_adder_top/U_flicker/render/render_lane_1u_U0/grp_evaluate_group_1u_s_fu_448/flicker_render_piibs_U185/flicker_render_pipeline_ap_uitofp_6_no_dsp_32_u/U0/i_synth/FIX_TO_FLT_OP.SPD.OP/NORM_SHIFT/MUX_LOOP[1].DEL_SHIFT/i_pipe/opt_has_pipe.first_q_reg[22]
+  -------------------------------------------------------------------
+                         required time                         -1.954    
+                         arrival time                           2.013    
+  -------------------------------------------------------------------
+                         slack                                  0.058    
+
+Slack (MET) :             0.059ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter1_reg_reg[27]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter32_reg_reg[27]_srl31/D
+                            (rising edge-triggered cell SRLC32E clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.307ns  (logic 0.091ns (29.669%)  route 0.216ns (70.331%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.190ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.075ns
+    Source Clock Delay      (SCD):    1.696ns
+    Clock Pessimism Removal (CPR):    0.188ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.589     1.696    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/ui_clk
+    SLICE_X56Y36         FDRE                                         r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter1_reg_reg[27]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X56Y36         FDRE (Prop_fdre_C_Q)         0.091     1.787 r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter1_reg_reg[27]/Q
+                         net (fo=1, routed)           0.216     2.003    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter1_reg[27]
+    SLICE_X58Y31         SRLC32E                                      r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter32_reg_reg[27]_srl31/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.807     2.075    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/ui_clk
+    SLICE_X58Y31         SRLC32E                                      r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter32_reg_reg[27]_srl31/CLK
+                         clock pessimism             -0.188     1.886    
+    SLICE_X58Y31         SRLC32E (Hold_srlc32e_CLK_D)
+                                                      0.058     1.944    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter32_reg_reg[27]_srl31
+  -------------------------------------------------------------------
+                         required time                         -1.944    
+                         arrival time                           2.003    
+  -------------------------------------------------------------------
+                         slack                                  0.059    
+
+Slack (MET) :             0.061ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_pixdS_U281/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/COND_DET_B/EXP_DET_LUT.EXP_ALL_ONE_DEL/i_pipe/opt_has_pipe.first_q_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_pixdS_U281/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/STATE_DELAY/i_pipe/opt_has_pipe.first_q_reg[0]/D
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.318ns  (logic 0.146ns (45.937%)  route 0.172ns (54.063%))
+  Logic Levels:           1  (LUT4=1)
+  Clock Path Skew:        0.196ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.996ns
+    Source Clock Delay      (SCD):    1.631ns
+    Clock Pessimism Removal (CPR):    0.168ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.524     1.631    U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_pixdS_U281/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/COND_DET_B/EXP_DET_LUT.EXP_ALL_ONE_DEL/i_pipe/aclk
+    SLICE_X58Y108        FDRE                                         r  U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_pixdS_U281/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/COND_DET_B/EXP_DET_LUT.EXP_ALL_ONE_DEL/i_pipe/opt_has_pipe.first_q_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X58Y108        FDRE (Prop_fdre_C_Q)         0.118     1.749 r  U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_pixdS_U281/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/COND_DET_B/EXP_DET_LUT.EXP_ALL_ONE_DEL/i_pipe/opt_has_pipe.first_q_reg[0]/Q
+                         net (fo=4, routed)           0.172     1.921    U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_pixdS_U281/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/COND_DET_B/EXP_DET_LUT.EXP_ALL_ZERO_DEL/i_pipe/opt_has_pipe.first_q_reg[0]_3[0]
+    SLICE_X57Y108        LUT4 (Prop_lut4_I3_O)        0.028     1.949 r  U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_pixdS_U281/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/COND_DET_B/EXP_DET_LUT.EXP_ALL_ZERO_DEL/i_pipe/opt_has_pipe.first_q[0]_i_1__7/O
+                         net (fo=1, routed)           0.000     1.949    U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_pixdS_U281/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/STATE_DELAY/i_pipe/D[0]
+    SLICE_X57Y108        FDRE                                         r  U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_pixdS_U281/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/STATE_DELAY/i_pipe/opt_has_pipe.first_q_reg[0]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.728     1.996    U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_pixdS_U281/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/STATE_DELAY/i_pipe/aclk
+    SLICE_X57Y108        FDRE                                         r  U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_pixdS_U281/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/STATE_DELAY/i_pipe/opt_has_pipe.first_q_reg[0]/C
+                         clock pessimism             -0.168     1.827    
+    SLICE_X57Y108        FDRE (Hold_fdre_C_D)         0.061     1.888    U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_pixdS_U281/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/STATE_DELAY/i_pipe/opt_has_pipe.first_q_reg[0]
+  -------------------------------------------------------------------
+                         required time                         -1.888    
+                         arrival time                           1.949    
+  -------------------------------------------------------------------
+                         slack                                  0.061    
+
+Slack (MET) :             0.061ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/split_U0/geometry_V_V_U/q_tmp_reg[82]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/split_U0/geometry_V_V_U/dout_buf_reg[82]/D
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.323ns  (logic 0.130ns (40.259%)  route 0.193ns (59.741%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        0.187ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.071ns
+    Source Clock Delay      (SCD):    1.695ns
+    Clock Pessimism Removal (CPR):    0.188ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.588     1.695    U_adder_top/U_flicker/render/split_U0/geometry_V_V_U/ui_clk
+    SLICE_X56Y33         FDRE                                         r  U_adder_top/U_flicker/render/split_U0/geometry_V_V_U/q_tmp_reg[82]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X56Y33         FDRE (Prop_fdre_C_Q)         0.100     1.795 r  U_adder_top/U_flicker/render/split_U0/geometry_V_V_U/q_tmp_reg[82]/Q
+                         net (fo=1, routed)           0.193     1.988    U_adder_top/U_flicker/render/split_U0/geometry_V_V_U/q_tmp[82]
+    SLICE_X59Y27         LUT3 (Prop_lut3_I0_O)        0.030     2.018 r  U_adder_top/U_flicker/render/split_U0/geometry_V_V_U/dout_buf[82]_i_1/O
+                         net (fo=1, routed)           0.000     2.018    U_adder_top/U_flicker/render/split_U0/geometry_V_V_U/dout_buf[82]_i_1_n_0
+    SLICE_X59Y27         FDRE                                         r  U_adder_top/U_flicker/render/split_U0/geometry_V_V_U/dout_buf_reg[82]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.803     2.071    U_adder_top/U_flicker/render/split_U0/geometry_V_V_U/ui_clk
+    SLICE_X59Y27         FDRE                                         r  U_adder_top/U_flicker/render/split_U0/geometry_V_V_U/dout_buf_reg[82]/C
+                         clock pessimism             -0.188     1.882    
+    SLICE_X59Y27         FDRE (Hold_fdre_C_D)         0.075     1.957    U_adder_top/U_flicker/render/split_U0/geometry_V_V_U/dout_buf_reg[82]
+  -------------------------------------------------------------------
+                         required time                         -1.957    
+                         arrival time                           2.018    
+  -------------------------------------------------------------------
+                         slack                                  0.061    
+
+Slack (MET) :             0.061ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/A_IP_DELAY/i_pipe/opt_has_pipe.first_q_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.ALIGN_ADD/DSP2/DSP/D[4]
+                            (rising edge-triggered cell DSP48E1 clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.505ns  (logic 0.118ns (23.374%)  route 0.387ns (76.626%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.355ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.159ns
+    Source Clock Delay      (SCD):    1.635ns
+    Clock Pessimism Removal (CPR):    0.168ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.528     1.635    U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/A_IP_DELAY/i_pipe/aclk
+    SLICE_X52Y146        FDRE                                         r  U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/A_IP_DELAY/i_pipe/opt_has_pipe.first_q_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X52Y146        FDRE (Prop_fdre_C_Q)         0.118     1.753 r  U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/A_IP_DELAY/i_pipe/opt_has_pipe.first_q_reg[4]/Q
+                         net (fo=2, routed)           0.387     2.140    U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.ALIGN_ADD/DSP2/Q[4]
+    DSP48_X3Y61          DSP48E1                                      r  U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.ALIGN_ADD/DSP2/DSP/D[4]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.891     2.159    U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.ALIGN_ADD/DSP2/aclk
+    DSP48_X3Y61          DSP48E1                                      r  U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.ALIGN_ADD/DSP2/DSP/CLK
+                         clock pessimism             -0.168     1.990    
+    DSP48_X3Y61          DSP48E1 (Hold_dsp48e1_CLK_D[4])
+                                                      0.089     2.079    U_adder_top/U_flicker/render/render_lane_0u_U0/flicker_render_pixdS_U173/flicker_render_pipeline_ap_hadd_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.ALIGN_ADD/DSP2/DSP
+  -------------------------------------------------------------------
+                         required time                         -2.079    
+                         arrival time                           2.140    
+  -------------------------------------------------------------------
+                         slack                                  0.061    
+
+Slack (MET) :             0.062ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/gather_U0/p_Result_s_reg_532_reg[355]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/dma/output_queue_reg_0_3_354_359/RAMA_D1/I
+                            (rising edge-triggered cell RAMD32 clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.145ns  (logic 0.091ns (62.919%)  route 0.054ns (37.081%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.011ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.002ns
+    Source Clock Delay      (SCD):    1.637ns
+    Clock Pessimism Removal (CPR):    0.353ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.530     1.637    U_adder_top/U_flicker/render/gather_U0/ui_clk
+    SLICE_X89Y130        FDRE                                         r  U_adder_top/U_flicker/render/gather_U0/p_Result_s_reg_532_reg[355]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X89Y130        FDRE (Prop_fdre_C_Q)         0.091     1.728 r  U_adder_top/U_flicker/render/gather_U0/p_Result_s_reg_532_reg[355]/Q
+                         net (fo=1, routed)           0.054     1.782    U_adder_top/U_flicker/dma/output_queue_reg_0_3_354_359/DIA1
+    SLICE_X88Y130        RAMD32                                       r  U_adder_top/U_flicker/dma/output_queue_reg_0_3_354_359/RAMA_D1/I
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.734     2.002    U_adder_top/U_flicker/dma/output_queue_reg_0_3_354_359/WCLK
+    SLICE_X88Y130        RAMD32                                       r  U_adder_top/U_flicker/dma/output_queue_reg_0_3_354_359/RAMA_D1/CLK
+                         clock pessimism             -0.353     1.648    
+    SLICE_X88Y130        RAMD32 (Hold_ramd32_CLK_I)
+                                                      0.072     1.720    U_adder_top/U_flicker/dma/output_queue_reg_0_3_354_359/RAMA_D1
+  -------------------------------------------------------------------
+                         required time                         -1.720    
+                         arrival time                           1.782    
+  -------------------------------------------------------------------
+                         slack                                  0.062    
+
+Slack (MET) :             0.063ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/ap_phi_reg_pp0_iter0_tmp_V_reg_196_reg[314]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/ap_phi_reg_pp0_iter1_tmp_V_reg_196_reg[314]/D
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.298ns  (logic 0.100ns (33.579%)  route 0.198ns (66.421%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.195ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.012ns
+    Source Clock Delay      (SCD):    1.648ns
+    Clock Pessimism Removal (CPR):    0.168ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.541     1.648    U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/ui_clk
+    SLICE_X57Y55         FDRE                                         r  U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/ap_phi_reg_pp0_iter0_tmp_V_reg_196_reg[314]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X57Y55         FDRE (Prop_fdre_C_Q)         0.100     1.748 r  U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/ap_phi_reg_pp0_iter0_tmp_V_reg_196_reg[314]/Q
+                         net (fo=1, routed)           0.198     1.946    U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/ap_phi_reg_pp0_iter0_tmp_V_reg_196[314]
+    SLICE_X59Y55         FDRE                                         r  U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/ap_phi_reg_pp0_iter1_tmp_V_reg_196_reg[314]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.744     2.012    U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/ui_clk
+    SLICE_X59Y55         FDRE                                         r  U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/ap_phi_reg_pp0_iter1_tmp_V_reg_196_reg[314]/C
+                         clock pessimism             -0.168     1.843    
+    SLICE_X59Y55         FDRE (Hold_fdre_C_D)         0.040     1.883    U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/ap_phi_reg_pp0_iter1_tmp_V_reg_196_reg[314]
+  -------------------------------------------------------------------
+                         required time                         -1.883    
+                         arrival time                           1.946    
+  -------------------------------------------------------------------
+                         slack                                  0.063    
+
+Slack (MET) :             0.063ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/gather_U0/p_Result_s_reg_532_reg[88]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/dma/output_queue_reg_0_3_84_89/RAMC/I
+                            (rising edge-triggered cell RAMD32 clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.201ns  (logic 0.100ns (49.633%)  route 0.101ns (50.367%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.009ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.987ns
+    Source Clock Delay      (SCD):    1.625ns
+    Clock Pessimism Removal (CPR):    0.352ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.518     1.625    U_adder_top/U_flicker/render/gather_U0/ui_clk
+    SLICE_X67Y122        FDRE                                         r  U_adder_top/U_flicker/render/gather_U0/p_Result_s_reg_532_reg[88]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X67Y122        FDRE (Prop_fdre_C_Q)         0.100     1.725 r  U_adder_top/U_flicker/render/gather_U0/p_Result_s_reg_532_reg[88]/Q
+                         net (fo=1, routed)           0.101     1.827    U_adder_top/U_flicker/dma/output_queue_reg_0_3_84_89/DIC0
+    SLICE_X66Y124        RAMD32                                       r  U_adder_top/U_flicker/dma/output_queue_reg_0_3_84_89/RAMC/I
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.719     1.987    U_adder_top/U_flicker/dma/output_queue_reg_0_3_84_89/WCLK
+    SLICE_X66Y124        RAMD32                                       r  U_adder_top/U_flicker/dma/output_queue_reg_0_3_84_89/RAMC/CLK
+                         clock pessimism             -0.352     1.634    
+    SLICE_X66Y124        RAMD32 (Hold_ramd32_CLK_I)
+                                                      0.129     1.763    U_adder_top/U_flicker/dma/output_queue_reg_0_3_84_89/RAMC
+  -------------------------------------------------------------------
+                         required time                         -1.763    
+                         arrival time                           1.827    
+  -------------------------------------------------------------------
+                         slack                                  0.063    
+
+Slack (MET) :             0.064ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/flicker_render_pieOg_U12/flicker_render_pipeline_ap_fdiv_28_no_dsp_32_u/U0/i_synth/DIV_OP.SPD.OP/EXP/EXP_SIG_DEL/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2][7]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/flicker_render_pieOg_U12/flicker_render_pipeline_ap_fdiv_28_no_dsp_32_u/U0/i_synth/DIV_OP.SPD.OP/EXP/EXP_PRE_RND_DEL/i_pipe/opt_has_pipe.i_pipe[24].pipe_reg[24][7]_srl24/D
+                            (rising edge-triggered cell SRLC32E clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.192ns  (logic 0.091ns (47.288%)  route 0.101ns (52.712%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.010ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.104ns
+    Source Clock Delay      (SCD):    1.727ns
+    Clock Pessimism Removal (CPR):    0.366ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.620     1.727    U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/flicker_render_pieOg_U12/flicker_render_pipeline_ap_fdiv_28_no_dsp_32_u/U0/i_synth/DIV_OP.SPD.OP/EXP/EXP_SIG_DEL/i_pipe/aclk
+    SLICE_X29Y26         FDRE                                         r  U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/flicker_render_pieOg_U12/flicker_render_pipeline_ap_fdiv_28_no_dsp_32_u/U0/i_synth/DIV_OP.SPD.OP/EXP/EXP_SIG_DEL/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2][7]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X29Y26         FDRE (Prop_fdre_C_Q)         0.091     1.818 r  U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/flicker_render_pieOg_U12/flicker_render_pipeline_ap_fdiv_28_no_dsp_32_u/U0/i_synth/DIV_OP.SPD.OP/EXP/EXP_SIG_DEL/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2][7]/Q
+                         net (fo=5, routed)           0.101     1.920    U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/flicker_render_pieOg_U12/flicker_render_pipeline_ap_fdiv_28_no_dsp_32_u/U0/i_synth/DIV_OP.SPD.OP/EXP/EXP_PRE_RND_DEL/i_pipe/Q[7]
+    SLICE_X30Y25         SRLC32E                                      r  U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/flicker_render_pieOg_U12/flicker_render_pipeline_ap_fdiv_28_no_dsp_32_u/U0/i_synth/DIV_OP.SPD.OP/EXP/EXP_PRE_RND_DEL/i_pipe/opt_has_pipe.i_pipe[24].pipe_reg[24][7]_srl24/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.836     2.104    U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/flicker_render_pieOg_U12/flicker_render_pipeline_ap_fdiv_28_no_dsp_32_u/U0/i_synth/DIV_OP.SPD.OP/EXP/EXP_PRE_RND_DEL/i_pipe/aclk
+    SLICE_X30Y25         SRLC32E                                      r  U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/flicker_render_pieOg_U12/flicker_render_pipeline_ap_fdiv_28_no_dsp_32_u/U0/i_synth/DIV_OP.SPD.OP/EXP/EXP_PRE_RND_DEL/i_pipe/opt_has_pipe.i_pipe[24].pipe_reg[24][7]_srl24/CLK
+                         clock pessimism             -0.366     1.737    
+    SLICE_X30Y25         SRLC32E (Hold_srlc32e_CLK_D)
+                                                      0.118     1.855    U_adder_top/U_flicker/render/split_U0/prepare_geometry_U0/flicker_render_pieOg_U12/flicker_render_pipeline_ap_fdiv_28_no_dsp_32_u/U0/i_synth/DIV_OP.SPD.OP/EXP/EXP_PRE_RND_DEL/i_pipe/opt_has_pipe.i_pipe[24].pipe_reg[24][7]_srl24
+  -------------------------------------------------------------------
+                         required time                         -1.855    
+                         arrival time                           1.920    
+  -------------------------------------------------------------------
+                         slack                                  0.064    
+
+Slack (MET) :             0.064ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677_pp0_iter13_reg_reg[4]_srl2/D
+                            (rising edge-triggered cell SRL16E clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.200ns  (logic 0.100ns (49.877%)  route 0.100ns (50.123%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.034ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.086ns
+    Source Clock Delay      (SCD):    1.703ns
+    Clock Pessimism Removal (CPR):    0.348ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.596     1.703    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/ui_clk
+    SLICE_X61Y43         FDRE                                         r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X61Y43         FDRE (Prop_fdre_C_Q)         0.100     1.803 r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677_reg[4]/Q
+                         net (fo=1, routed)           0.100     1.904    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677[4]
+    SLICE_X62Y43         SRL16E                                       r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677_pp0_iter13_reg_reg[4]_srl2/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.818     2.086    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/ui_clk
+    SLICE_X62Y43         SRL16E                                       r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677_pp0_iter13_reg_reg[4]_srl2/CLK
+                         clock pessimism             -0.348     1.737    
+    SLICE_X62Y43         SRL16E (Hold_srl16e_CLK_D)
+                                                      0.102     1.839    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677_pp0_iter13_reg_reg[4]_srl2
+  -------------------------------------------------------------------
+                         required time                         -1.839    
+                         arrival time                           1.904    
+  -------------------------------------------------------------------
+                         slack                                  0.064    
+
+Slack (MET) :             0.065ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/framed_ctu_U0/expand_frames_U0/tmp_p_q_V_fu_70_reg[133]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/framed_ctu_U0/requests_V_p_q_V_U/U_fifo_w512_d16_S_ram/SRL_SIG_reg[15][133]_srl16/D
+                            (rising edge-triggered cell SRL16E clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.262ns  (logic 0.107ns (40.874%)  route 0.155ns (59.126%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.141ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.015ns
+    Source Clock Delay      (SCD):    1.705ns
+    Clock Pessimism Removal (CPR):    0.168ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.598     1.705    U_adder_top/U_flicker/render/framed_ctu_U0/expand_frames_U0/ui_clk
+    SLICE_X54Y49         FDRE                                         r  U_adder_top/U_flicker/render/framed_ctu_U0/expand_frames_U0/tmp_p_q_V_fu_70_reg[133]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X54Y49         FDRE (Prop_fdre_C_Q)         0.107     1.812 r  U_adder_top/U_flicker/render/framed_ctu_U0/expand_frames_U0/tmp_p_q_V_fu_70_reg[133]/Q
+                         net (fo=1, routed)           0.155     1.967    U_adder_top/U_flicker/render/framed_ctu_U0/requests_V_p_q_V_U/U_fifo_w512_d16_S_ram/in[133]
+    SLICE_X54Y50         SRL16E                                       r  U_adder_top/U_flicker/render/framed_ctu_U0/requests_V_p_q_V_U/U_fifo_w512_d16_S_ram/SRL_SIG_reg[15][133]_srl16/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.747     2.015    U_adder_top/U_flicker/render/framed_ctu_U0/requests_V_p_q_V_U/U_fifo_w512_d16_S_ram/ui_clk
+    SLICE_X54Y50         SRL16E                                       r  U_adder_top/U_flicker/render/framed_ctu_U0/requests_V_p_q_V_U/U_fifo_w512_d16_S_ram/SRL_SIG_reg[15][133]_srl16/CLK
+                         clock pessimism             -0.168     1.846    
+    SLICE_X54Y50         SRL16E (Hold_srl16e_CLK_D)
+                                                      0.056     1.902    U_adder_top/U_flicker/render/framed_ctu_U0/requests_V_p_q_V_U/U_fifo_w512_d16_S_ram/SRL_SIG_reg[15][133]_srl16
+  -------------------------------------------------------------------
+                         required time                         -1.902    
+                         arrival time                           1.967    
+  -------------------------------------------------------------------
+                         slack                                  0.065    
+
+Slack (MET) :             0.065ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_piyd2_U282/flicker_render_pipeline_ap_hsub_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/B_SIGN_DELAY/i_pipe/opt_has_pipe.first_q_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_piyd2_U282/flicker_render_pipeline_ap_hsub_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/DET_SIGN_DELAY/i_pipe/opt_has_pipe.first_q_reg[0]/D
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.418ns  (logic 0.155ns (37.094%)  route 0.263ns (62.906%))
+  Logic Levels:           1  (LUT6=1)
+  Clock Path Skew:        0.266ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.090ns
+    Source Clock Delay      (SCD):    1.655ns
+    Clock Pessimism Removal (CPR):    0.168ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.548     1.655    U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_piyd2_U282/flicker_render_pipeline_ap_hsub_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/B_SIGN_DELAY/i_pipe/aclk
+    SLICE_X69Y50         FDRE                                         r  U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_piyd2_U282/flicker_render_pipeline_ap_hsub_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/B_SIGN_DELAY/i_pipe/opt_has_pipe.first_q_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X69Y50         FDRE (Prop_fdre_C_Q)         0.091     1.746 r  U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_piyd2_U282/flicker_render_pipeline_ap_hsub_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/B_SIGN_DELAY/i_pipe/opt_has_pipe.first_q_reg[0]/Q
+                         net (fo=2, routed)           0.263     2.009    U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_piyd2_U282/flicker_render_pipeline_ap_hsub_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/COND_DET_A/MANT_CARRY.MANT_ALL_ZERO_DET/CARRY_ZERO_DET/b_sign_del
+    SLICE_X70Y47         LUT6 (Prop_lut6_I4_O)        0.064     2.073 r  U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_piyd2_U282/flicker_render_pipeline_ap_hsub_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/COND_DET_A/MANT_CARRY.MANT_ALL_ZERO_DET/CARRY_ZERO_DET/opt_has_pipe.first_q[0]_i_1__5/O
+                         net (fo=1, routed)           0.000     2.073    U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_piyd2_U282/flicker_render_pipeline_ap_hsub_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/DET_SIGN_DELAY/i_pipe/D[0]
+    SLICE_X70Y47         FDRE                                         r  U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_piyd2_U282/flicker_render_pipeline_ap_hsub_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/DET_SIGN_DELAY/i_pipe/opt_has_pipe.first_q_reg[0]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.822     2.090    U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_piyd2_U282/flicker_render_pipeline_ap_hsub_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/DET_SIGN_DELAY/i_pipe/aclk
+    SLICE_X70Y47         FDRE                                         r  U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_piyd2_U282/flicker_render_pipeline_ap_hsub_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/DET_SIGN_DELAY/i_pipe/opt_has_pipe.first_q_reg[0]/C
+                         clock pessimism             -0.168     1.921    
+    SLICE_X70Y47         FDRE (Hold_fdre_C_D)         0.087     2.008    U_adder_top/U_flicker/render/render_lane_3u_U0/grp_evaluate_group_3u_s_fu_456/flicker_render_piyd2_U282/flicker_render_pipeline_ap_hsub_8_full_dsp_16_u/U0/i_synth/ADDSUB_OP.ADDSUB/SPEED_OP.DSP.OP/DSP48E1_BODY_HP.EXP/DET_SIGN_DELAY/i_pipe/opt_has_pipe.first_q_reg[0]
+  -------------------------------------------------------------------
+                         required time                         -2.008    
+                         arrival time                           2.073    
+  -------------------------------------------------------------------
+                         slack                                  0.065    
+
+Slack (MET) :             0.066ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter1_reg_reg[59]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter32_reg_reg[59]_srl31/D
+                            (rising edge-triggered cell SRLC32E clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.213ns  (logic 0.107ns (50.322%)  route 0.106ns (49.678%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.031ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.080ns
+    Source Clock Delay      (SCD):    1.700ns
+    Clock Pessimism Removal (CPR):    0.348ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.593     1.700    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/ui_clk
+    SLICE_X54Y34         FDRE                                         r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter1_reg_reg[59]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X54Y34         FDRE (Prop_fdre_C_Q)         0.107     1.807 r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter1_reg_reg[59]/Q
+                         net (fo=1, routed)           0.106     1.913    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter1_reg[59]
+    SLICE_X52Y33         SRLC32E                                      r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter32_reg_reg[59]_srl31/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.812     2.080    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/ui_clk
+    SLICE_X52Y33         SRLC32E                                      r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter32_reg_reg[59]_srl31/CLK
+                         clock pessimism             -0.348     1.731    
+    SLICE_X52Y33         SRLC32E (Hold_srlc32e_CLK_D)
+                                                      0.116     1.847    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/tmp_V_reg_307_pp0_iter32_reg_reg[59]_srl31
+  -------------------------------------------------------------------
+                         required time                         -1.847    
+                         arrival time                           1.913    
+  -------------------------------------------------------------------
+                         slack                                  0.066    
+
+Slack (MET) :             0.066ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/split_U0/expand_subtiles_U0/tmp_V_22_reg_1000_reg[510]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/split_U0/expand_subtiles_U0/ap_CS_fsm_reg[1]/D
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.346ns  (logic 0.128ns (36.957%)  route 0.218ns (63.043%))
+  Logic Levels:           1  (LUT6=1)
+  Clock Path Skew:        0.193ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.071ns
+    Source Clock Delay      (SCD):    1.689ns
+    Clock Pessimism Removal (CPR):    0.188ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.582     1.689    U_adder_top/U_flicker/render/split_U0/expand_subtiles_U0/ui_clk
+    SLICE_X57Y27         FDRE                                         r  U_adder_top/U_flicker/render/split_U0/expand_subtiles_U0/tmp_V_22_reg_1000_reg[510]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X57Y27         FDRE (Prop_fdre_C_Q)         0.100     1.789 f  U_adder_top/U_flicker/render/split_U0/expand_subtiles_U0/tmp_V_22_reg_1000_reg[510]/Q
+                         net (fo=8, routed)           0.218     2.008    U_adder_top/U_flicker/render/split_U0/expand_subtiles_U0/tmp_V_22_reg_1000_reg[510]_0
+    SLICE_X58Y22         LUT6 (Prop_lut6_I3_O)        0.028     2.036 r  U_adder_top/U_flicker/render/split_U0/expand_subtiles_U0/ap_CS_fsm[1]_i_1__1/O
+                         net (fo=1, routed)           0.000     2.036    U_adder_top/U_flicker/render/split_U0/expand_subtiles_U0/ap_NS_fsm[1]
+    SLICE_X58Y22         FDRE                                         r  U_adder_top/U_flicker/render/split_U0/expand_subtiles_U0/ap_CS_fsm_reg[1]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.803     2.071    U_adder_top/U_flicker/render/split_U0/expand_subtiles_U0/ui_clk
+    SLICE_X58Y22         FDRE                                         r  U_adder_top/U_flicker/render/split_U0/expand_subtiles_U0/ap_CS_fsm_reg[1]/C
+                         clock pessimism             -0.188     1.882    
+    SLICE_X58Y22         FDRE (Hold_fdre_C_D)         0.087     1.969    U_adder_top/U_flicker/render/split_U0/expand_subtiles_U0/ap_CS_fsm_reg[1]
+  -------------------------------------------------------------------
+                         required time                         -1.969    
+                         arrival time                           2.036    
+  -------------------------------------------------------------------
+                         slack                                  0.066    
+
+Slack (MET) :             0.067ns  (arrival time - required time)
+  Source:                 U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677_reg[5]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677_pp0_iter13_reg_reg[5]_srl2/D
+                            (rising edge-triggered cell SRL16E clocked by clk_pll_i  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_pll_i
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_pll_i rise@0.000ns - clk_pll_i rise@0.000ns)
+  Data Path Delay:        0.200ns  (logic 0.100ns (49.877%)  route 0.100ns (50.123%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.034ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.086ns
+    Source Clock Delay      (SCD):    1.703ns
+    Clock Pessimism Removal (CPR):    0.348ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.390     0.390 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.503     0.893    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.050     0.943 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.378     1.321    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.023     1.344 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.343     1.687    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.165     0.522 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.559     1.081    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     1.107 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.596     1.703    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/ui_clk
+    SLICE_X61Y43         FDRE                                         r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677_reg[5]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X61Y43         FDRE (Prop_fdre_C_Q)         0.100     1.803 r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677_reg[5]/Q
+                         net (fo=1, routed)           0.100     1.904    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677[5]
+    SLICE_X62Y43         SRL16E                                       r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677_pp0_iter13_reg_reg[5]_srl2/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pll_i rise edge)
+                                                      0.000     0.000 r  
+    C8                                                0.000     0.000 r  sys_clk_p (IN)
+                         net (fo=0)                   0.000     0.000    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/sys_clk_p
+    C8                   IBUFDS (Prop_ibufds_I_O)     0.469     0.469 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_clk_ibuf/diff_input_clk.u_ibufg_sys_clk/O
+                         net (fo=3, routed)           0.554     1.023    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/out
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT3)
+                                                      0.053     1.076 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/plle2_i/CLKOUT3
+                         net (fo=1, routed)           0.437     1.513    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3_out
+    BUFHCE_X1Y24         BUFH (Prop_bufh_I_O)         0.045     1.558 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufh_pll_clk3/O
+                         net (fo=1, routed)           0.506     2.064    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/pll_clk3
+    MMCME2_ADV_X1Y2      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKFBOUT)
+                                                     -1.449     0.615 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT
+                         net (fo=1, routed)           0.623     1.238    U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/clk_pll_i
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.030     1.268 r  U0_ps_ai_peripheral/mig_ddr3_u0/u_mig_7series_0_mig/u_ddr3_infrastructure/u_bufg_clkdiv0/O
+                         net (fo=105846, routed)      0.818     2.086    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/ui_clk
+    SLICE_X62Y43         SRL16E                                       r  U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677_pp0_iter13_reg_reg[5]_srl2/CLK
+                         clock pessimism             -0.348     1.737    
+    SLICE_X62Y43         SRL16E (Hold_srl16e_CLK_D)
+                                                      0.099     1.836    U_adder_top/U_flicker/render/framed_ctu_U0/prepare_frames_U0/grp_log_generic_fu_142/tmp_21_reg_1677_pp0_iter13_reg_reg[5]_srl2
+  -------------------------------------------------------------------
+                         required time                         -1.836    
+                         arrival time                           1.904    
+  -------------------------------------------------------------------
+                         slack                                  0.067    
+
+
+
+

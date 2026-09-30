@@ -1,0 +1,5 @@
+source=D:/ADProjects/FPGA43DGS/platform/flicker_grouplutram_fpga/fpai_demo_vivado.runs/impl_1/ai7030_edif_top_opt.dcp
+version=2018.3
+directive=AltSpreadLogic_high
+incremental=false
+board_programmed=false

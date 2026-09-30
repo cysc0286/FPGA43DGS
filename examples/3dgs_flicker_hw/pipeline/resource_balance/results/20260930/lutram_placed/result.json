@@ -1,0 +1,18 @@
+{
+  "stage": "fully placed, before routing",
+  "placement_passed": true,
+  "route_passed": false,
+  "board_tested": false,
+  "slice": 19650,
+  "slice_capacity": 19650,
+  "lut": 62697,
+  "ff": 99903,
+  "bram36_equivalent": 218.5,
+  "dsp": 252,
+  "control_sets": 2762,
+  "estimated_post_place_wns_ns": -1.315,
+  "sha256": {
+    "ai7030_edif_top_control_sets_placed.rpt": "e91a8caf3cf10cd618bd57b5635de3c495028eb00b2c390639eefa0d2516b874",
+    "ai7030_edif_top_utilization_placed.rpt": "46a65e42647979f0ead3d70e98f2084e6657d42f2ed4565e45488ce82be6c863"
+  }
+}

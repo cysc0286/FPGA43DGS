@@ -1,0 +1,6 @@
+PROJECT=D:/ADProjects/FPGA43DGS/platform/flicker_groupshared_fpga
+REPORT_DIR=D:/ADProjects/FPGA43DGS/examples/3dgs_flicker_hw/pipeline/../build/board_cat_20260930_213732
+RUN=synth_1 STATUS=synth_design Complete! PROGRESS=100%
+RUN=impl_1 STATUS=write_bitstream Complete! PROGRESS=100%
+BITSTREAM_GENERATION=PASS
+TIMING_ACCEPTANCE=FAIL_REQUIRES_REPORT_REVIEW

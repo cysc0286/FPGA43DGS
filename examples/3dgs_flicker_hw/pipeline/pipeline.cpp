@@ -19,6 +19,47 @@
 #if FLK_GROUP_TRIM_RANGE && !FLK_GROUP_SUBTILES
 #error "Trimming requires grouped subtiles"
 #endif
+#ifndef FLK_LANE_FIFO_STORAGE
+#define FLK_LANE_FIFO_STORAGE 0
+#endif
+#if FLK_LANE_FIFO_STORAGE < 0 || FLK_LANE_FIFO_STORAGE > 2
+#error "FLK_LANE_FIFO_STORAGE must be 0, 1 or 2"
+#endif
+#if FLK_LANE_FIFO_STORAGE && FLK_GROUP_SUBTILES != 3
+#error "Packed lane queues require the validated compact group cache"
+#endif
+#ifndef FLK_GROUP_SHARED_ATTR
+#define FLK_GROUP_SHARED_ATTR 0
+#endif
+#if FLK_GROUP_SHARED_ATTR && FLK_GROUP_SUBTILES != 3
+#error "Shared attributes require the compact grouped evaluator"
+#endif
+// External DMA and CTU words remain 512 bits. After dispatch, the lane only
+// consumes parameters [223:0], subtile [229:228], and the control kind [511:510].
+// Keep the low range contiguous; unused mask bits cost less than another ABI.
+#if FLK_LANE_FIFO_STORAGE
+typedef ap_uint<232> LaneWord;
+static LaneWord pack_lane(Word q){
+#pragma HLS INLINE
+ LaneWord packed=0;packed.range(229,0)=q.range(229,0);
+ packed.range(231,230)=q.range(511,510);return packed;
+}
+static Word unpack_lane(LaneWord packed){
+#pragma HLS INLINE
+ Word q=0;q.range(229,0)=packed.range(229,0);
+ q.range(511,510)=packed.range(231,230);return q;
+}
+#else
+typedef Word LaneWord;
+static LaneWord pack_lane(Word q){
+#pragma HLS INLINE
+ return q;
+}
+static Word unpack_lane(LaneWord q){
+#pragma HLS INLINE
+ return q;
+}
+#endif
 #if FLK_EXACT_EXP_ROM == 2
 #include "exp_rom/table_compact.hpp"
 #elif FLK_EXACT_EXP_ROM == 1
@@ -122,15 +163,16 @@ void flicker_split_probe(hls::stream<Word>& input,hls::stream<Word>& output,unsi
 }
 #endif
 
-static void dispatch(hls::stream<Word>& input,hls::stream<Word>& a,hls::stream<Word>& b,hls::stream<Word>& c,hls::stream<Word>& d){
+static void dispatch(hls::stream<Word>& input,hls::stream<LaneWord>& a,hls::stream<LaneWord>& b,hls::stream<LaneWord>& c,hls::stream<LaneWord>& d){
  bool end=false;
  while(!end){
 #pragma HLS PIPELINE II=1
   Word q=input.read();unsigned type=kind(q);end=type==3;
-  if(type||q[224])a.write(q);
-  if(type||q[225])b.write(q);
-  if(type||q[226])c.write(q);
-  if(type||q[227])d.write(q);
+  LaneWord packed=pack_lane(q);
+  if(type||q[224])a.write(packed);
+  if(type||q[225])b.write(packed);
+  if(type||q[226])c.write(packed);
+  if(type||q[227])d.write(packed);
  }
 }
 
@@ -183,6 +225,19 @@ typedef Word GroupRecord;
 template<unsigned LANE> static void evaluate_group(GroupRecord records[4],ap_uint<4> valid,
  half rr[64],half gg[64],half bb[64],half tt[64],unsigned last[64],bool stopped[64]){
 #pragma HLS INLINE off
+#if FLK_GROUP_SHARED_ATTR
+ // Dispatch groups records from one Gaussian ordinal. Its FP16 parameters and
+ // ordinal are identical in every selected subtile; only origin/extent vary.
+ // Load invariant attributes once, avoiding long per-pixel parameter pipelines.
+ // The caller only enters with valid != 0, including sparse nonzero first slots.
+ unsigned first=valid[0]?0:(valid[1]?1:(valid[2]?2:3));
+ Word shared=records[first];
+ unsigned ordinal=shared.range(223,192);
+ half mx=unpack_half(shared,0),my=unpack_half(shared,16);
+ half a=unpack_half(shared,32),b=unpack_half(shared,48),c=unpack_half(shared,64);
+ half opacity=unpack_half(shared,80),red=unpack_half(shared,96);
+ half green=unpack_half(shared,112),blue=unpack_half(shared,128);
+#endif
 #if FLK_GROUP_TRIM_RANGE
  // Skip wholly absent trailing subtiles. The constant zero start and explicit
  // bound retain HLS's proof that all feedback addresses are distinct within a
@@ -195,11 +250,16 @@ template<unsigned LANE> static void evaluate_group(GroupRecord records[4],ap_uin
 #endif
 #pragma HLS PIPELINE II=1
   unsigned sub=p/16,k=p%16;Word q=records[sub];
-  unsigned ox=q.range(159,144),oy=q.range(175,160),w=q.range(180,176),h=q.range(185,181),ordinal=q.range(223,192);
+  unsigned ox=q.range(159,144),oy=q.range(175,160),w=q.range(180,176),h=q.range(185,181);
+#if !FLK_GROUP_SHARED_ATTR
+  unsigned ordinal=q.range(223,192);
+#endif
   unsigned x=(LANE&1)*4+k%4,y=(LANE>>1)*4+k/4;
   if(valid[sub]&&x<w&&y<h&&!stopped[p]){
+#if !FLK_GROUP_SHARED_ATTR
    half mx=unpack_half(q,0),my=unpack_half(q,16),a=unpack_half(q,32),b=unpack_half(q,48),c=unpack_half(q,64);
    half opacity=unpack_half(q,80),red=unpack_half(q,96),green=unpack_half(q,112),blue=unpack_half(q,128);
+#endif
    half pw=power(half(ox+x),half(oy+y),mx,my,a,b,c);
    if(pw<=half(0)){
 #ifdef FLK_EXACT_EXP_ROM
@@ -219,7 +279,7 @@ template<unsigned LANE> static void evaluate_group(GroupRecord records[4],ap_uin
 }
 #endif
 
-template<unsigned LANE> static void render_lane(hls::stream<Word>& input,hls::stream<PixelBits>& output){
+template<unsigned LANE> static void render_lane(hls::stream<LaneWord>& input,hls::stream<PixelBits>& output){
 #pragma HLS INLINE off
  half rr[64],gg[64],bb[64],tt[64];unsigned last[64];bool stopped[64];
  half mr[16],mg[16],mb[16],mt[16];unsigned ml[16];bool ms[16];
@@ -259,7 +319,7 @@ template<unsigned LANE> static void render_lane(hls::stream<Word>& input,hls::st
 #endif
  bool end=false;unsigned tile=0;
  while(!end){
-  Word q=input.read();unsigned type=kind(q);
+  Word q=unpack_lane(input.read());unsigned type=kind(q);
 #if FLK_GROUP_SUBTILES
   unsigned incoming_ordinal=q.range(223,192);
   if(valid!=0&&(type!=0||incoming_ordinal!=group_ordinal)){
@@ -336,7 +396,8 @@ void flicker_render_pipeline(hls::stream<Word>& input,hls::stream<Word>& output,
 #pragma HLS INTERFACE ap_fifo port=output
 #pragma HLS INTERFACE ap_ctrl_hs port=return
 #pragma HLS DATAFLOW
- hls::stream<Word> subtiles,masks,q0,q1,q2,q3;
+ hls::stream<Word> subtiles,masks;
+ hls::stream<LaneWord> q0,q1,q2,q3;
  hls::stream<PixelBits> p0,p1,p2,p3;
 #pragma HLS STREAM variable=subtiles depth=16
 #pragma HLS STREAM variable=masks depth=16
@@ -350,10 +411,20 @@ void flicker_render_pipeline(hls::stream<Word>& input,hls::stream<Word>& output,
 #pragma HLS STREAM variable=p3 depth=8
 #pragma HLS RESOURCE variable=subtiles core=FIFO_SRL
 #pragma HLS RESOURCE variable=masks core=FIFO_SRL
+#if FLK_LANE_FIFO_STORAGE == 2
+// Use spare block RAM for queues, retaining one word/cycle and FIFO ordering.
+// HLS 2018.3 estimates thirteen BRAM18 lanes per 232-bit FIFO; physical
+// synthesis may trim more unused bits, so the whole-board report decides fit.
+#pragma HLS RESOURCE variable=q0 core=FIFO_BRAM
+#pragma HLS RESOURCE variable=q1 core=FIFO_BRAM
+#pragma HLS RESOURCE variable=q2 core=FIFO_BRAM
+#pragma HLS RESOURCE variable=q3 core=FIFO_BRAM
+#else
 #pragma HLS RESOURCE variable=q0 core=FIFO_SRL
 #pragma HLS RESOURCE variable=q1 core=FIFO_SRL
 #pragma HLS RESOURCE variable=q2 core=FIFO_SRL
 #pragma HLS RESOURCE variable=q3 core=FIFO_SRL
+#endif
 #pragma HLS RESOURCE variable=p0 core=FIFO_SRL
 #pragma HLS RESOURCE variable=p1 core=FIFO_SRL
 #pragma HLS RESOURCE variable=p2 core=FIFO_SRL

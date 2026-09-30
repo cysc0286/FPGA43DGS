@@ -27,3 +27,10 @@ examples/3dgs_reconstruction/mvsplat/results/20260930/view_switch_v4/images/**/*
 examples/3dgs_flicker_hw/pipeline/lane_workset/results/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
 examples/3dgs_flicker_hw/pipeline/lane_workset/results/**/*.flk binary
 examples/3dgs_flicker_hw/pipeline/lane_workset/results/**/*.raw binary
+
+# Resource allocation and physical/board comparisons retain measured bytes.
+examples/3dgs_flicker_hw/pipeline/resource_balance/results/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+examples/3dgs_flicker_hw/pipeline/resource_balance/results/**/*.flk binary
+examples/3dgs_flicker_hw/pipeline/resource_balance/results/**/*.raw binary
+examples/3dgs_flicker_hw/pipeline/resource_balance/results/**/*.bin binary
+examples/3dgs_flicker_hw/pipeline/resource_balance/results/**/*.ppm binary

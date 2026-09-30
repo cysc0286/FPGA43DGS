@@ -1,0 +1,44 @@
+[
+  {
+    "variant": "packed",
+    "hls": {
+      "BRAM_18K": 203,
+      "DSP48E": 244,
+      "FF": 68603,
+      "LUT": 36787
+    },
+    "mode2_cycles": 3414,
+    "c_reference_passed": true,
+    "integration_passed": true,
+    "board_tested": false
+  },
+  {
+    "variant": "bram_fifo",
+    "hls": {
+      "BRAM_18K": 255,
+      "DSP48E": 244,
+      "FF": 69555,
+      "LUT": 36627
+    },
+    "mode2_cycles": 3413,
+    "c_reference_passed": true,
+    "integration_passed": true,
+    "board_tested": false
+  },
+  {
+    "variant": "shared",
+    "hls": {
+      "BRAM_18K": 203,
+      "DSP48E": 244,
+      "FF": 65163,
+      "LUT": 33947
+    },
+    "mode2_cycles": 3409,
+    "c_reference_passed": true,
+    "integration_passed": true,
+    "board_tested": true,
+    "physical_tested": true,
+    "physical_receipt": "physical_shared/result.json",
+    "board_summary": "summary.json"
+  }
+]

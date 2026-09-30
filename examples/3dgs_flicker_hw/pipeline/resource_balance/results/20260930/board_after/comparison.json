@@ -1,0 +1,73 @@
+{
+  "complete": true,
+  "board_executed": true,
+  "baseline": "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_flicker_hw\\pipeline\\resource_balance\\results\\20260930\\board_before",
+  "scope": "loaded scene camera to complete RGB; no video or display",
+  "boot_id": "f812f210-a0c4-4ac3-b64e-e120713c12d2",
+  "boot_sha256": "b4e6d4d238d8a33bbf77c4d18df43143fa4304f7c713f09b479c6d5ccd39f9c6",
+  "comparisons": {
+    "parallel11": {
+      "before": {
+        "n": 60,
+        "mean_ms": 46.93039333333313,
+        "median_ms": 46.77700000000584,
+        "p95_ms": 48.0276820000185,
+        "p99_ms": 48.049516899986315,
+        "max_ms": 48.055469999980005,
+        "peak_rss_kib": 39148,
+        "mean_hardware_cycles": 5215402.15,
+        "stages_ms": {
+          "project_ms": 7.975208333333334,
+          "sort_ms": 10.011484333333334,
+          "engine_ms": 26.681605,
+          "pack_ms": 1.2314406666666666,
+          "upload_ms": 2.489282,
+          "wait_ms": 15.209445666666667,
+          "read_ms": 0.6732736666666667,
+          "collect_ms": 3.6120095,
+          "radix_ms": 2.470308833333333,
+          "scatter_ms": 3.928671
+        }
+      },
+      "after": {
+        "n": 60,
+        "mean_ms": 44.22301300000069,
+        "median_ms": 44.3393950000015,
+        "p95_ms": 45.278038000001786,
+        "p99_ms": 46.527278700000345,
+        "max_ms": 47.14977000000431,
+        "peak_rss_kib": 39068,
+        "mean_hardware_cycles": 4762922.916666667,
+        "stages_ms": {
+          "project_ms": 7.805121,
+          "sort_ms": 9.7272135,
+          "engine_ms": 24.414266666666666,
+          "pack_ms": 1.2291876666666666,
+          "upload_ms": 2.4960575,
+          "wait_ms": 12.932587166666666,
+          "read_ms": 0.677843,
+          "collect_ms": 3.53934,
+          "radix_ms": 2.447728166666667,
+          "scatter_ms": 3.739488666666667
+        }
+      },
+      "frames_exact": true,
+      "latency_reduction_percent": 5.768927428548687,
+      "hardware_cycle_reduction_percent": 8.675826337444247
+    }
+  },
+  "files_sha256": {
+    "command.json": "e6fc935d7cdadf03ecaa23cdb25fdf244ec66f98c7b2239d7528cd26f45a346f",
+    "console.txt": "31d5c1d1ddc312decc3ef82de569e284974a060959856ac59817e317eae74dfd",
+    "results.json": "d807285b37f218efd378044041475967e1a38a506e2c1037fbed752ba4860322",
+    "parallel11\\frame_000007\\frame.bin": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+    "parallel11\\frame_000007\\frame.ppm": "11ca662acf91dc5ae699627193e5d13b5fa2fb03d0c5ac963a8993fc4ebc70e5",
+    "parallel11\\frame_000007\\result.json": "823d63a7aac4fe9ba6d64206cc392f7645ece49ce207f2e0becb958a01a02aff",
+    "parallel11\\frame_000015\\frame.bin": "8ccb31d903d062bcaadc8d9aa8f4d9af519a4a1098fc3030336f9ab40dff1bf8",
+    "parallel11\\frame_000015\\frame.ppm": "ec78f34f1aee554f34fc9b6b20a0c1eb6385091c94d8c123096e380b062a5d1e",
+    "parallel11\\frame_000015\\result.json": "b79472d22054ed93f7e30cdfaed7e59547637acf819122ae9d1dc1ff9b529e8f",
+    "parallel11\\frame_000022\\frame.bin": "70519d98b2dfe67d8f4fc80eb35352781e67130a45f011e9ed718d29f174b9af",
+    "parallel11\\frame_000022\\frame.ppm": "e3c512d236b02b84f3dc059748daed6d80740fc7174ae55cbf805d9aa020b5e3",
+    "parallel11\\frame_000022\\result.json": "9f2dd0ccf5ba34327f796819c5423dcb844311be9ef6b0e2fec3d7625866ec2e"
+  }
+}

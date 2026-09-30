@@ -1,0 +1,1 @@
+Board benchmark and all downloads completed. One-off host launcher shadowed its client variable during download and raised AttributeError in cleanup after printing results; process exit closed SSH. Repeat launcher fixed variable names, completed normally, matched all frame hashes; no board test process remains. No production runtime change.

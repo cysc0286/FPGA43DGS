@@ -1,0 +1,73 @@
+{
+  "complete": true,
+  "board_executed": true,
+  "baseline": "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_flicker_hw\\pipeline\\resource_balance\\results\\20260930\\board_before",
+  "scope": "loaded scene camera to complete RGB; no video or display",
+  "boot_id": "f812f210-a0c4-4ac3-b64e-e120713c12d2",
+  "boot_sha256": "b4e6d4d238d8a33bbf77c4d18df43143fa4304f7c713f09b479c6d5ccd39f9c6",
+  "comparisons": {
+    "parallel11": {
+      "before": {
+        "n": 60,
+        "mean_ms": 46.93039333333313,
+        "median_ms": 46.77700000000584,
+        "p95_ms": 48.0276820000185,
+        "p99_ms": 48.049516899986315,
+        "max_ms": 48.055469999980005,
+        "peak_rss_kib": 39148,
+        "mean_hardware_cycles": 5215402.15,
+        "stages_ms": {
+          "project_ms": 7.975208333333334,
+          "sort_ms": 10.011484333333334,
+          "engine_ms": 26.681605,
+          "pack_ms": 1.2314406666666666,
+          "upload_ms": 2.489282,
+          "wait_ms": 15.209445666666667,
+          "read_ms": 0.6732736666666667,
+          "collect_ms": 3.6120095,
+          "radix_ms": 2.470308833333333,
+          "scatter_ms": 3.928671
+        }
+      },
+      "after": {
+        "n": 60,
+        "mean_ms": 43.34802166666687,
+        "median_ms": 43.29987999999929,
+        "p95_ms": 44.292298999996405,
+        "p99_ms": 46.180949399994944,
+        "max_ms": 46.449009999989244,
+        "peak_rss_kib": 39472,
+        "mean_hardware_cycles": 4762892.05,
+        "stages_ms": {
+          "project_ms": 7.7441648333333335,
+          "sort_ms": 8.9186125,
+          "engine_ms": 24.414621666666665,
+          "pack_ms": 1.2313145,
+          "upload_ms": 2.493464,
+          "wait_ms": 12.945696,
+          "read_ms": 0.6741211666666667,
+          "collect_ms": 3.2020635,
+          "radix_ms": 2.4738203333333333,
+          "scatter_ms": 3.2421891666666665
+        }
+      },
+      "frames_exact": true,
+      "latency_reduction_percent": 7.6333723461930125,
+      "hardware_cycle_reduction_percent": 8.676418174195843
+    }
+  },
+  "files_sha256": {
+    "command.json": "7db2f473736652903c7909aa1c8590a269cbf7810ff149156cbcfcd9dbc71603",
+    "console.txt": "015ff380a1ab736410e128550090b6b2e9f0fa6bcc757c56147dd4c3a76b17f5",
+    "results.json": "c99f32d74ef662fd910830e10af35ccc658d5eae7f180abbe25aa06299c962de",
+    "parallel11\\frame_000007\\frame.bin": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+    "parallel11\\frame_000007\\frame.ppm": "11ca662acf91dc5ae699627193e5d13b5fa2fb03d0c5ac963a8993fc4ebc70e5",
+    "parallel11\\frame_000007\\result.json": "df2673396172750f42a59ced468c2eb026be87bb78347bd47ec176084b5f42c2",
+    "parallel11\\frame_000015\\frame.bin": "8ccb31d903d062bcaadc8d9aa8f4d9af519a4a1098fc3030336f9ab40dff1bf8",
+    "parallel11\\frame_000015\\frame.ppm": "ec78f34f1aee554f34fc9b6b20a0c1eb6385091c94d8c123096e380b062a5d1e",
+    "parallel11\\frame_000015\\result.json": "058d33f30d546fbe7cdb90e9932e7ad24379cfae44930fa96ccd49aaa7023d08",
+    "parallel11\\frame_000022\\frame.bin": "70519d98b2dfe67d8f4fc80eb35352781e67130a45f011e9ed718d29f174b9af",
+    "parallel11\\frame_000022\\frame.ppm": "e3c512d236b02b84f3dc059748daed6d80740fc7174ae55cbf805d9aa020b5e3",
+    "parallel11\\frame_000022\\result.json": "26f42e17ca2fc5d8b1290550b432d0d2013048fb1c7d2f85f1d1c7f047b22fe7"
+  }
+}

@@ -20,6 +20,14 @@ if {[info exists ::env(FLK_GROUP_TRIM_RANGE)]} {
  if {$::env(FLK_GROUP_TRIM_RANGE) ni {0 1}} {error "FLK_GROUP_TRIM_RANGE must be 0 or 1"}
  append flags " -DFLK_GROUP_TRIM_RANGE=$::env(FLK_GROUP_TRIM_RANGE)"
 }
+if {[info exists ::env(FLK_LANE_FIFO_STORAGE)]} {
+ if {$::env(FLK_LANE_FIFO_STORAGE) ni {0 1 2}} {error "FLK_LANE_FIFO_STORAGE must be 0, 1 or 2"}
+ append flags " -DFLK_LANE_FIFO_STORAGE=$::env(FLK_LANE_FIFO_STORAGE)"
+}
+if {[info exists ::env(FLK_GROUP_SHARED_ATTR)]} {
+ if {$::env(FLK_GROUP_SHARED_ATTR) ni {0 1}} {error "FLK_GROUP_SHARED_ATTR must be 0 or 1"}
+ append flags " -DFLK_GROUP_SHARED_ATTR=$::env(FLK_GROUP_SHARED_ATTR)"
+}
 add_files [file join $here pipeline.cpp] -cflags $flags
 add_files [file join $here framed_ctu.cpp] -cflags {-std=c++0x}
 add_files -tb [file join $here .. hls renderer.cpp] -cflags {-std=c++0x}

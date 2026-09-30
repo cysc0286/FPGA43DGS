@@ -1,0 +1,22 @@
+[
+  "env",
+  "LD_LIBRARY_PATH=/root/fpga43dgs_reconstruction/arm_env/lib",
+  "PYTHONPATH=/root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat",
+  "OPENBLAS_NUM_THREADS=1",
+  "OMP_NUM_THREADS=1",
+  "/root/fpga43dgs_reconstruction/arm_env/bin/python3",
+  "-m",
+  "rendering.benchmark",
+  "--scene",
+  "/root/fpga43dgs_reconstruction/initialize_candidate_20260930_rows_v1/warm_rows_overlap3_v1/renderer_input",
+  "--binary",
+  "/root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_parallel",
+  "--out",
+  "/root/fpga43dgs_reconstruction/live_render_20260930_v1/resource_preview_20260930",
+  "--reference",
+  "/root/fpga43dgs_reconstruction/live_render_20260930_v1/resource_preview_20260930_reference.json",
+  "--profiles",
+  "batch2,preview16k",
+  "--repeats",
+  "10"
+]

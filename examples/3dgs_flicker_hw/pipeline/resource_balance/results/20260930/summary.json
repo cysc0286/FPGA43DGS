@@ -1,0 +1,73 @@
+{
+  "scope": "loaded scene camera to complete RGB, excludes archival/display/video",
+  "before": {
+    "n": 60,
+    "mean_ms": 46.93039333333313,
+    "median_ms": 46.77700000000584,
+    "p95_ms": 48.0276820000185,
+    "p99_ms": 48.049516899986315,
+    "max_ms": 48.055469999980005,
+    "peak_rss_kib": 39148,
+    "mean_hardware_cycles": 5215402.15,
+    "stages_ms": {
+      "project_ms": 7.975208333333334,
+      "sort_ms": 10.011484333333334,
+      "engine_ms": 26.681605,
+      "pack_ms": 1.2314406666666666,
+      "upload_ms": 2.489282,
+      "wait_ms": 15.209445666666667,
+      "read_ms": 0.6732736666666667,
+      "collect_ms": 3.6120095,
+      "radix_ms": 2.470308833333333,
+      "scatter_ms": 3.928671
+    }
+  },
+  "after_120_frames": {
+    "n": 120,
+    "mean_ms": 43.78551733333378,
+    "median_ms": 43.839595000005005,
+    "p95_ms": 45.27051799999917,
+    "p99_ms": 46.38169109999083,
+    "max_ms": 47.14977000000431,
+    "hardware_cycles": 4762907.483333333,
+    "stages_ms": {
+      "project_ms": 7.774642916666666,
+      "sort_ms": 9.322913000000002,
+      "engine_ms": 24.414444166666666,
+      "pack_ms": 1.2302510833333333,
+      "collect_ms": 3.37070175,
+      "radix_ms": 2.46077425,
+      "scatter_ms": 3.4908389166666667,
+      "upload_ms": 2.4947607499999997,
+      "wait_ms": 12.939141583333333,
+      "read_ms": 0.6759820833333333
+    }
+  },
+  "latency_reduction_percent": 6.70114988737085,
+  "cycle_reduction_percent": 8.67612225582004,
+  "preview16k_60_frames": {
+    "n": 60,
+    "mean_ms": 27.336933833332466,
+    "median_ms": 27.291154999986134,
+    "p95_ms": 28.07868400002036,
+    "p99_ms": 28.176372900010165,
+    "max_ms": 28.22987999999782,
+    "hardware_cycles": 2839539.35,
+    "stages_ms": {
+      "project_ms": 5.223556333333334,
+      "sort_ms": 5.214888833333334,
+      "engine_ms": 14.646276833333333,
+      "pack_ms": 1.2280391666666663,
+      "collect_ms": 2.1556720000000005,
+      "radix_ms": 1.2409666666666666,
+      "scatter_ms": 1.8177445000000003,
+      "upload_ms": 1.6452101666666665,
+      "wait_ms": 7.343099666666668,
+      "read_ms": 0.6696988333333334
+    }
+  },
+  "full_frames_exact": true,
+  "regression_seven_checks_exact": true,
+  "power": "not measured",
+  "interpretation": "CPU phase variation contributes to wall time changes. FPGA engine/cycles reproduce across runs. 16k preview is lossy and has no fresh old-hardware paired timing."
+}
