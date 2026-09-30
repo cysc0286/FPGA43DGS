@@ -1,0 +1,18 @@
+{
+  "accepted": false,
+  "reason": "Variable first pixel prevents HLS dependence proof; all four evaluators II=60, expected 1",
+  "csim": "pass",
+  "cosim": "not run",
+  "board": "not run",
+  "sha256": {
+    "build.tcl": "ac49d9e4b05270bb7c4fc53c5c90978f41e436dabd941c482e26a48f148fb88e",
+    "console.txt": "2e1605eb099170536bef386a38990928942a7369805ec1ddf65908bfbaef9634",
+    "evaluate_group_0u_s_csynth.xml": "1449376bef62fa8959d9a8a2b1ea43e4423671250cd0cbda85d7eb64425d6ed3",
+    "evaluate_group_1u_s_csynth.xml": "49ea2b0ab727bfb28af5651d9c4a0ab2bf81e3eb67bb452bfabb64a77cd7cedf",
+    "evaluate_group_2u_s_csynth.xml": "a5d3d75d191f3e14fafffa1be7eb75bc7122e3137b2995f3b96916e769e66dce",
+    "evaluate_group_3u_s_csynth.xml": "b0c6b68b6c0fa55da7961f03533164ee3061a225f86a27e7692f592dc9c96c7f",
+    "flicker_render_pipeline_csynth.xml": "49ba6901e918ae780cddeb0503ea575531d415c552532ac8468dcb03091d1fbf",
+    "pipeline.cpp": "8fb465f3593866035053397ce45c3ca0cd90566e05dffdc037ec54b635617751",
+    "vivado_hls.app": "e5b43e281e874dcbdb15e39bfd4877edadabf741a2be1e60e65475c05bde7936"
+  }
+}

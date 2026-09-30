@@ -13,6 +13,12 @@
 #ifndef FLK_GROUP_SUBTILES
 #define FLK_GROUP_SUBTILES 0
 #endif
+#ifndef FLK_GROUP_TRIM_RANGE
+#define FLK_GROUP_TRIM_RANGE 0
+#endif
+#if FLK_GROUP_TRIM_RANGE && !FLK_GROUP_SUBTILES
+#error "Trimming requires grouped subtiles"
+#endif
 #if FLK_EXACT_EXP_ROM == 2
 #include "exp_rom/table_compact.hpp"
 #elif FLK_EXACT_EXP_ROM == 1
@@ -164,13 +170,29 @@ template<unsigned LANE> static void evaluate_mini(Word q,half rr[16],half gg[16]
 }
 
 #if FLK_GROUP_SUBTILES
+#if FLK_GROUP_SUBTILES == 3
+// The evaluator reads only bits 0..223: half parameters, origin/extent, ordinal.
+// Control/subtile tags are consumed by render_lane before storing the record.
+typedef ap_uint<224> GroupRecord;
+#else
+typedef Word GroupRecord;
+#endif
 // Each lane owns 64 different pixels across four subtiles. Evaluate one
 // Gaussian's selected subtiles in a single monotonic 64-pixel traversal.
 // A complete call commits before the next Gaussian, so alpha order is intact.
-template<unsigned LANE> static void evaluate_group(Word records[4],ap_uint<4> valid,
+template<unsigned LANE> static void evaluate_group(GroupRecord records[4],ap_uint<4> valid,
  half rr[64],half gg[64],half bb[64],half tt[64],unsigned last[64],bool stopped[64]){
 #pragma HLS INLINE off
+#if FLK_GROUP_TRIM_RANGE
+ // Skip wholly absent trailing subtiles. The constant zero start and explicit
+ // bound retain HLS's proof that all feedback addresses are distinct within a
+ // call. A variable start caused II=60 in the preserved rejected experiment.
+ unsigned limit=valid[3]?64:(valid[2]?48:(valid[1]?32:16));
+ for(unsigned p=0;p<64 && p<limit;p++){
+#pragma HLS LOOP_TRIPCOUNT min=16 max=64
+#else
  for(unsigned p=0;p<64;p++){
+#endif
 #pragma HLS PIPELINE II=1
   unsigned sub=p/16,k=p%16;Word q=records[sub];
   unsigned ox=q.range(159,144),oy=q.range(175,160),w=q.range(180,176),h=q.range(185,181),ordinal=q.range(223,192);
@@ -222,11 +244,15 @@ template<unsigned LANE> static void render_lane(hls::stream<Word>& input,hls::st
 #pragma HLS RESOURCE variable=tt core=RAM_2P_BRAM
 #endif
 #if FLK_GROUP_SUBTILES
- Word records[4];ap_uint<4> valid=0;unsigned group_ordinal=0;
+ GroupRecord records[4];ap_uint<4> valid=0;unsigned group_ordinal=0;
 #if FLK_GROUP_SUBTILES == 2
  // Four wide records are too shallow for efficient BRAM mapping. Register
  // only this read-only evaluator input; never partition the pixel feedback.
 #pragma HLS ARRAY_PARTITION variable=records complete dim=1
+#elif FLK_GROUP_SUBTILES == 3
+ // A shallow parameter cache does not need large BRAMs or fully partitioned
+ // registers. Pixel-state memories and their feedback dependencies are intact.
+#pragma HLS RESOURCE variable=records core=RAM_2P_LUTRAM
 #endif
  // Initialize inactive slots so C simulation never reads uninitialized words.
  for(unsigned sub=0;sub<4;sub++)records[sub]=0;

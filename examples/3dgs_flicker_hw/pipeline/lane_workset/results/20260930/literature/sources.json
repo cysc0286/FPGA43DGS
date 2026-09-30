@@ -1,0 +1,84 @@
+{
+  "checked_local": "2026-09-30T19:36:42.662916",
+  "metadata": [
+    {
+      "title": [
+        "GSCore: Efficient Radiance Field Rendering via Architectural Support for 3D Gaussian Splatting"
+      ],
+      "DOI": "10.1145/3620666.3651385",
+      "container-title": [
+        "Proceedings of the 29th ACM International Conference on Architectural Support for Programming Languages and Operating Systems, Volume 3"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2024,
+            4,
+            27
+          ]
+        ]
+      },
+      "URL": "https://doi.org/10.1145/3620666.3651385"
+    },
+    {
+      "title": [
+        "MobileSplat: A 105 FPS 3D Gaussian Splatting Rendering FPGA Processor with Mixed Precision Computation Path and Pre-culling Architecture"
+      ],
+      "DOI": "10.1109/a-sscc67472.2025.11349500",
+      "container-title": [
+        "2025 IEEE Asian Solid-State Circuits Conference (A-SSCC)"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2025,
+            11,
+            2
+          ]
+        ]
+      },
+      "URL": "https://doi.org/10.1109/a-sscc67472.2025.11349500"
+    },
+    {
+      "title": [
+        "FAMERS: An FPGA Accelerator for Memory-Efficient Edge-Rendered 3D Gaussian Splatting"
+      ],
+      "DOI": "10.23919/date64628.2025.10993091",
+      "container-title": [
+        "2025 Design, Automation &amp;amp; Test in Europe Conference (DATE)"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2025,
+            3,
+            31
+          ]
+        ]
+      },
+      "URL": "https://doi.org/10.23919/date64628.2025.10993091"
+    }
+  ],
+  "sources": [
+    {
+      "title": "GSCore author full text",
+      "url": "https://www.jaewoong.org/pubs/asplos24-gscore.pdf",
+      "scope": "Full text sections 4 and 5; ASIC synthesis, not FPGA measurement"
+    },
+    {
+      "title": "FLICKER",
+      "url": "https://arxiv.org/abs/2603.01158",
+      "scope": "Online venue plus existing full text section IV; ASIC"
+    },
+    {
+      "title": "FAMERS DATE official programme",
+      "url": "https://date25.date-conference.com/programme",
+      "scope": "Official abstract; linked /proceedings-archive/2025/DATA/957.pdf returned 404"
+    },
+    {
+      "title": "MobileSplat",
+      "url": "https://doi.org/10.1109/A-SSCC67472.2025.11349500",
+      "scope": "Bibliographic verification only, no readable full text; not FCCM"
+    }
+  ]
+}

@@ -1,5 +1,76 @@
 # 换视角渲染：像素工作集候选
 
+## 最新候选：紧凑记录与分布式 RAM
+
+针对寄存器版的全板布局失败，新增 `grouped-lutram`：只缓存 evaluator
+实际读取的 224 位（0–223 位），用分布式 RAM 保存四条记录，保留尾部
+空块裁剪。外部 512-bit ABI 不变，控制标签在缓存前已处理，不丢弃任何
+渲染参数。此处调整存储是为了使更快的计算路径装得下，不是预留前端空间。
+
+| 候选 | mode 2 RTL 周期 | HLS FF | HLS LUT | HLS BRAM_18K | HLS DSP |
+|---|---:|---:|---:|---:|---:|
+| 原已安装 RTL 对照 | 4861 | 64227 | 34927 | 219 | 244 |
+| 上轮寄存器合并 | 3442 | 92935 | 38011 | 203 | 244 |
+| 本轮尾部裁剪＋寄存器 | 3403 | 92975 | 38191 | 203 | 244 |
+| 本轮尾部裁剪＋紧凑 LUTRAM | **3414** | **70003** | **37907** | **203** | **244** |
+
+同输入三 Tile 的 mode 2 比原版减少 29.77%，比上一轮减少 0.81%；相比
+本轮最快寄存器裁剪版多 0.32% 周期、HLS FF 少 22,972。四个计算流水
+均 II=1，单次调用 134–182 拍。36 Tile 六模式 C 对照、HLS C/RTL、
+DMA/CDC 六模式集成均通过，输出与冻结参考逐字节相同；仿真输入规模
+和既有测试相同，不把周期收益当作整场景毫秒收益。
+
+证据：`results/20260930/grouped_lutram/result.json` 及
+`group_lutram_c_reference/result.json`。平台 `platform/flicker_grouplutram_fpga`
+已经独立准备，其 HLS RTL 哈希与集成测试一致，**该版全板布局布线仍待做**。
+本轮无 SSH、烧录或上板测速；已有板端 32k 的 45.212 ms、历史 16k 的
+31.932 ms 不能被这些仿真数据替换。功耗、全视频首帧、本候选实板画质未测。
+
+下一步是该候选的全板物理验证，再于设备恢复后进行 16k/32k 配对测试。
+可用的新构建入口：
+
+```powershell
+& examples/3dgs_flicker_hw/pipeline/lane_workset/build_variant.ps1 `
+  -Variant grouped-lutram -Project hls_pipeline_grouplutram_new
+```
+
+## 后续离线增量：裁剪尾部空块
+
+用户现明确允许充分利用资源、不预留前端空间；暂时没有板卡，本次不访问
+设备。资源政策与论文借鉴顺序见 [PAPER_GUIDED_NEXT.md](PAPER_GUIDED_NEXT.md)。
+
+新增显式 `grouped-trimmed` 候选：在原寄存器合并版本上，固定从像素 0
+遍历，处理到最后一个有效子块即结束。内部空洞仍按原顺序经过；不改变
+数学和像素贡献顺序。四路 evaluator 均 II=1，延迟由固定 181 改为
+133–181 拍。HLS 顶层估算 BRAM_18K=203、DSP=244、FF=92975、LUT=38191，
+相比寄存器合并版只多 40 FF 和 180 LUT。
+
+同一组 51 条记录、三 Tile、含 DMA/CDC 的 RTL 六模式均通过，4608 像素
+逐字节相同；mode 2 周期 **3442→3403，再减 1.13%**，相对原 4861
+累计减少 **29.99%**。不是新实板成绩。另 36 Tile、六模式 C 参考共
+55,296 像素记录精确一致；C/RTL 联合仿真通过。
+
+第一个动态起点版本虽然 C 仿真通过，但 HLS II=60、调用 984–3864 拍，
+已否决并保存 `results/20260930/rejected_trim_dynamic_begin/`。随后通过
+固定零起点和显式 64 上限让 HLS 证明地址不重复；没有增加 DEPENDENCE
+豁免。新候选来源和完整哈希见 `results/20260930/grouped_trimmed/result.json`。
+
+```powershell
+& examples/3dgs_flicker_hw/pipeline/lane_workset/build_variant.ps1 `
+  -Variant grouped-trimmed -Project hls_pipeline_grouptrim_new
+python examples/3dgs_flicker_hw/pipeline/run_integration.py `
+  --project hls_pipeline_grouptrim_new --profile-split
+```
+
+下文是上一轮冻结对照。未裁剪寄存器版的全板综合通过，但布局失败：
+剩余实例需要 14534 Slice、可用位置 13805；总器件有 19650 Slice，
+控制集/原厂已固定逻辑也限制打包。不能用 HLS 资源总数推断必定能放下。
+该候选未完成布线、没有可验收的新位流；证据在
+`results/20260930/physical_grouped_registers/`。裁剪版本也需自己的物理
+验收；紧凑记录与分布式 RAM 版本的已完成检查见本文顶部。
+
+## 上一轮冻结对照
+
 本轮只优化已加载场景后的相机到完整 RGB 帧时间。现有 FPGA 位流和默认
 计算路径保持不变；全部新增选项均显式启用，尚未做新位流布线或实板测速。
 

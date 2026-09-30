@@ -1,0 +1,63 @@
+{
+  "scope": "HLS C arithmetic/ordering only; not RTL or board timing",
+  "tiles": 36,
+  "records": 528,
+  "input_sha256": "4812b23745c38a2e009baf03ab7be292b115e014c39631b9094b7287cb77619e",
+  "reference": "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_flicker_hw\\build\\hls_pipeline_exp_compact_20260930\\solution1\\csim\\build\\csim.exe",
+  "candidate": "D:\\ADProjects\\FPGA43DGS\\examples\\3dgs_flicker_hw\\build\\hls_pipeline_grouplutram_20260930\\solution1\\csim\\build\\csim.exe",
+  "executable_sha256": {
+    "reference": "2e0319868624904fa65f114e63f285416c9024c7dbf304bc4990bddd4de44254",
+    "candidate": "86c9e8f1ea25957b877ad659642a992dd4571a663cfc944c23200c4938e264ca"
+  },
+  "modes": [
+    {
+      "mode": 0,
+      "exact": true,
+      "sha256": [
+        "6ded44fc66ae77e786bd536bc7c54e3c7171da71d2edaa0c0c6d8c18069ad0d8",
+        "6ded44fc66ae77e786bd536bc7c54e3c7171da71d2edaa0c0c6d8c18069ad0d8"
+      ]
+    },
+    {
+      "mode": 1,
+      "exact": true,
+      "sha256": [
+        "532246f11f9bf6dfb03f4aa774932c0719d61d4945881f6cbe26e1bc4a2c54cb",
+        "532246f11f9bf6dfb03f4aa774932c0719d61d4945881f6cbe26e1bc4a2c54cb"
+      ]
+    },
+    {
+      "mode": 2,
+      "exact": true,
+      "sha256": [
+        "df7d24824ee17a5e4c78c85e8b6301cb00d68111757abd40b1caced78e82e35d",
+        "df7d24824ee17a5e4c78c85e8b6301cb00d68111757abd40b1caced78e82e35d"
+      ]
+    },
+    {
+      "mode": 3,
+      "exact": true,
+      "sha256": [
+        "5cb58d449b63e7b7194aae618dcbaa6897983b80f8f874e0fa01fa99f3814d58",
+        "5cb58d449b63e7b7194aae618dcbaa6897983b80f8f874e0fa01fa99f3814d58"
+      ]
+    },
+    {
+      "mode": 4,
+      "exact": true,
+      "sha256": [
+        "df98d2f9e5212036568df23774881e2ee401e2f9fdb01ef881bb4da14188bdf0",
+        "df98d2f9e5212036568df23774881e2ee401e2f9fdb01ef881bb4da14188bdf0"
+      ]
+    },
+    {
+      "mode": 5,
+      "exact": true,
+      "sha256": [
+        "59040fe8059e90b17d9b0c516fda3fe86de47a9f9ffbf6dbcbedacb8482c886f",
+        "59040fe8059e90b17d9b0c516fda3fe86de47a9f9ffbf6dbcbedacb8482c886f"
+      ]
+    }
+  ],
+  "passed": true
+}

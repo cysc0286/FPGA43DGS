@@ -1,0 +1,61 @@
+{
+  "scope": "offline HLS/RTL only, not physical implementation or board frame time",
+  "project": "examples\\3dgs_flicker_hw\\build\\hls_pipeline_grouplutram_20260930",
+  "frozen_hls": "examples\\3dgs_flicker_hw\\evidence\\hls_pipeline_grouplutram_20260930_20260930T195617",
+  "integration": "examples\\3dgs_flicker_hw\\evidence\\pipeline_integration_20260930T195619",
+  "board_tested": false,
+  "physical_tested": false,
+  "platform_prepared": "platform/flicker_grouplutram_fpga",
+  "platform_rtl_matches_integration": true,
+  "mode_cycles": {
+    "0": 10314,
+    "1": 10250,
+    "2": 3414,
+    "3": 3005,
+    "4": 3226,
+    "5": 3125
+  },
+  "production_mode": 2,
+  "mode2_reduction_vs_installed_rtl_pct": 29.767537543715285,
+  "mode2_reduction_vs_grouped_registers_pct": 0.813480534572919,
+  "mode2_increase_vs_trimmed_registers_pct": 0.32324419629738976,
+  "hls_resources": {
+    "BRAM_18K": 203,
+    "DSP48E": 244,
+    "FF": 70003,
+    "LUT": 37907
+  },
+  "cosim_min_avg_max": [
+    5605,
+    14317,
+    19221
+  ],
+  "evaluator_ii": [
+    1,
+    1,
+    1,
+    1
+  ],
+  "evaluator_latency_min_max": [
+    134,
+    182
+  ],
+  "extended_c_reference": "../group_lutram_c_reference/result.json",
+  "full_integration_log_sha256": "67a3a2be1b44f59c9c862f46ae57447e1f9984108f8b2f4ce7d18324726d5b7f",
+  "sha256": {
+    "build.tcl": "8e49f65eb193f805cb1ecbc0c3222418c79dc3a7a6c44c63d898fa2fa339bb43",
+    "evaluate_group_0u_s_csynth.xml": "058a13f060d692d68accc0c4498fc5bb2aab95df46299989a6c861b074153ce6",
+    "evaluate_group_1u_s_csynth.xml": "b7de5c54420aa4f89ef259ed04360677b46b224cda288a1c9990f50479414998",
+    "evaluate_group_2u_s_csynth.xml": "e822220a8832bfe4e5bcf565ec761b6c1a64ca27a6baacb8278077a568156ae4",
+    "evaluate_group_3u_s_csynth.xml": "29d82d4d0433f23521cc2526e8ffccf240864a6847a367203160a148fe92aad2",
+    "flicker_render_pipeline_cosim.rpt": "228c10fbe8ca824a680c72d47f437bcc36594feabe49d92f4f7b9afa8779e960",
+    "flicker_render_pipeline_csynth.xml": "fbc1f618f02d20821cbf08fa1bdaa791d522db6e7f79b62c6b7dd7aea685b7a1",
+    "hls_freeze.json": "9e3337c7424efd0d1d1b072fbb0efe9feb8cacfcc6e1e79c5267af35d187a1ed",
+    "integration.json": "449a83e765e0714d1dbc2fab10d115c73f6259a8d345cc4cd7bc0042ccec33c6",
+    "integration_excerpt.txt": "a178cd3a849cc67ab0e1fbd83253660a9149b23caaf8951d2c64a9c7b93b16a2",
+    "pipeline.cpp": "cfc7f39c1d6c34a4f6d9acf944d99bd73be49b5fa673867019ffdf1284e2ee22",
+    "prepared_platform_manifest.json": "d1cb957b6e100902804a790ac9e17fba5ade6347d95483e103945646a7b58c07",
+    "render_lane_0u_s_csynth.rpt": "74665ddd8a33680c2b982f5adb54828228300fbe7d4f2f45db6399e852ff5b79",
+    "vivado_hls.app": "4bffee98c0ee12360d984f75ee948fad946efa853e72775beb9ef388ac1864e8"
+  }
+}

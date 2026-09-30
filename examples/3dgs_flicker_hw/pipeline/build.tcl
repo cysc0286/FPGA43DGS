@@ -13,8 +13,12 @@ if {[info exists ::env(FLK_STATE_PORTS)]} {
  append flags " -DFLK_STATE_PORTS=$::env(FLK_STATE_PORTS)"
 }
 if {[info exists ::env(FLK_GROUP_SUBTILES)]} {
- if {$::env(FLK_GROUP_SUBTILES) ni {0 1 2}} {error "FLK_GROUP_SUBTILES must be 0, 1 or 2"}
+ if {$::env(FLK_GROUP_SUBTILES) ni {0 1 2 3}} {error "FLK_GROUP_SUBTILES must be 0, 1, 2 or 3"}
  append flags " -DFLK_GROUP_SUBTILES=$::env(FLK_GROUP_SUBTILES)"
+}
+if {[info exists ::env(FLK_GROUP_TRIM_RANGE)]} {
+ if {$::env(FLK_GROUP_TRIM_RANGE) ni {0 1}} {error "FLK_GROUP_TRIM_RANGE must be 0 or 1"}
+ append flags " -DFLK_GROUP_TRIM_RANGE=$::env(FLK_GROUP_TRIM_RANGE)"
 }
 add_files [file join $here pipeline.cpp] -cflags $flags
 add_files [file join $here framed_ctu.cpp] -cflags {-std=c++0x}
