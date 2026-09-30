@@ -23,7 +23,23 @@ if {[catch {
  }
  update_compile_order -fileset sources_1
  note "PROJECT=$project_dir"; note "REPORT_DIR=$report_dir"
- reset_run synth_1
+ if {[info exists ::env(FLK_INCREMENTAL_DCP)]} {
+  set reference [file normalize $::env(FLK_INCREMENTAL_DCP)]
+  if {![file exists $reference]} {error "Incremental checkpoint missing"}
+  set_property INCREMENTAL_CHECKPOINT $reference [get_runs impl_1]
+  note "INCREMENTAL_REFERENCE=$reference"
+ }
+ if {[info exists ::env(FLK_RESUME_PLACE)] && $::env(FLK_RESUME_PLACE) eq "1"} {
+  if {[get_property PROGRESS [get_runs synth_1]] ne "100%"} {error "Resume requires completed synthesis"}
+  set before [get_property STEPS.PLACE_DESIGN.TCL.PRE [get_runs impl_1]]
+  set restore [file normalize [file join $script_dir .. physical_opt restore_vendor_checks.tcl]]
+  if {$before ne "" && [file normalize $before] ne $restore} {error "Do not replace an existing place-pre hook"}
+  set_property STEPS.PLACE_DESIGN.TCL.PRE $restore [get_runs impl_1]
+  reset_run impl_1 -from_step place_design
+  note "RESUME_FROM_STEP=place_design"
+ } else {
+  reset_run synth_1
+ }
  launch_runs impl_1 -to_step write_bitstream -jobs 2
  wait_on_run impl_1
  foreach r {synth_1 impl_1} {note "RUN=$r STATUS=[get_property STATUS [get_runs $r]] PROGRESS=[get_property PROGRESS [get_runs $r]]"}

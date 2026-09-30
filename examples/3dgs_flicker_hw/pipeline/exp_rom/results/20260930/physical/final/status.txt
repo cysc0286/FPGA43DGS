@@ -1,0 +1,8 @@
+PROJECT=D:/ADProjects/FPGA43DGS/platform/flicker_rom_fpga
+REPORT_DIR=D:/ADProjects/FPGA43DGS/examples/3dgs_flicker_hw/build/board_rom_final_20260930
+POST_ROUTE_CANDIDATE=D:/ADProjects/FPGA43DGS/examples/3dgs_flicker_hw/build/rom_post_route_20260930/physical_opt.dcp
+ORIGINAL_FROZEN_MANIFEST=D:/ADProjects/FPGA43DGS/examples/3dgs_flicker_hw/build/board_cat_20260930_155540/frozen_artifacts/manifest.json
+NATIVE_max_SLACK_NS=0.030
+NATIVE_min_SLACK_NS=0.022
+BITSTREAM_GENERATION=PASS
+TIMING_ACCEPTANCE=FAIL_REQUIRES_REPORT_REVIEW

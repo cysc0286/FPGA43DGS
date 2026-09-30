@@ -1,0 +1,207 @@
+{
+  "complete": true,
+  "mode": "warm_fast_pair",
+  "backend": "cpu",
+  "result_scope": "one target frame; not full video coverage",
+  "initialize": {
+    "preheat_seconds_record_only": 46.87845843999999,
+    "model_load_seconds_record_only": 28.443024949999995,
+    "backend": "cpu",
+    "threads": {
+      "inference": 3,
+      "preparation": 1
+    },
+    "warm_scope": "weights, Python dependencies, selected compiled sessions, FPGA device/runtime",
+    "kernel_first_use_warmed": false,
+    "scene_cache": "Gaussian rows and world covariance/opacity cached; per-view projection",
+    "rss_mib_at_ready": 432.28515625,
+    "renderer_configuration": {
+      "threads": 4,
+      "max_gaussians": 0,
+      "batch": 2,
+      "cached": true,
+      "comparison_sort": false,
+      "uniform_preview": false,
+      "backend": "fpga"
+    }
+  },
+  "video_receipt": {
+    "path": "/root/fpga43dgs_reconstruction/initialize_candidate_20260929/input/nyu_snippet_curl.mp4",
+    "sha256": "0a7e3c684e917dd937ae1ec6c64f770c111b939f08f020b66965c1fccf9ae86a",
+    "bytes": 4900963,
+    "verify_seconds": 0.23943548999997688,
+    "video_input_seconds_record_only": null
+  },
+  "frame": {
+    "width": 128,
+    "height": 128,
+    "rgb_bytes": 49152,
+    "raw_bytes": 327696,
+    "project_ms": 14.62117,
+    "sort_ms": 14.04147,
+    "engine_ms": 28.41396,
+    "pack_ms": 1.28419,
+    "native_ms": 58.62595,
+    "upload_ms": 2.82788,
+    "wait_ms": 15.6254,
+    "read_ms": 0.70789,
+    "input_bytes": 3441984,
+    "output_bytes": 262144,
+    "hardware_cycles": 5393956,
+    "active": 29854,
+    "tile_entries": 53717,
+    "selected": 32768,
+    "rss_kib": 447124,
+    "complete": true,
+    "wall_ms": 61.52779999999325,
+    "scene_revision": 1,
+    "configuration": {
+      "threads": 4,
+      "max_gaussians": 0,
+      "batch": 2,
+      "cached": true,
+      "comparison_sort": false,
+      "uniform_preview": false,
+      "backend": "fpga"
+    },
+    "endpoint": "first-frame compatibility: raw frame and evidence archived",
+    "rgb_sha256": "78b7c462fb7e1b9306b2a8ec443b8e9615d072fbf09b46341cbe2d6008edf631",
+    "frame_sha256": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+    "backend": "fpga",
+    "package": "3dgs_renderer_v1_20260928",
+    "resident_scene": {
+      "gaussians": 32768,
+      "selected": 32768,
+      "native_load_ms": 59.0065,
+      "load_seconds": 0.05962420000000179,
+      "revision": 1,
+      "rows_sha256": "27564dadc25d25c12160e879beea9d99de0a4c5978268ae54599f8cce590409c"
+    },
+    "total_ms": 74.30363000000284,
+    "live_frame_ms": 61.52779999999325
+  },
+  "inference": {
+    "complete": true,
+    "device": "cpu",
+    "backend": "cpu",
+    "machine": "aarch64",
+    "platform": "Linux-5.4.52-aarch64-with-glibc2.31",
+    "source_commit": "01f9a28edb5eb68416e7e63b01f8d90c3bdfbf01",
+    "weight_sha256": "83d0d9eaa753fa4a1f925288dc1f90b8c3297fad0ab0f6ed1f11a1c5946da25a",
+    "input_sha256": "8f01469ed479d249550121b6bb12b920b7e1af8063a2eaf25ccf2c721df21d87",
+    "threads": 3,
+    "depth_chunk": 16,
+    "parameter_count": 11955734,
+    "checkpoint_encoder_tensor_count": 471,
+    "checkpoint_non_encoder_keys": [],
+    "checkpoint_load": "memory mapped; temporary state released before inference",
+    "versions": {
+      "torch": "2.7.1",
+      "einops": "0.8.1",
+      "e3nn": "0.5.8",
+      "numpy": "2.2.6"
+    },
+    "input_shape": [
+      1,
+      2,
+      3,
+      128,
+      128
+    ],
+    "load_and_setup_seconds": 0.09640299000000141,
+    "inference_seconds": 16.510651119999977,
+    "gaussians": 32768,
+    "sh_degree": 4,
+    "gaussian_sha256": "3564f8d10a49ccb46c8c06acc03e32be0619a8e65babee6aa147abdcfc4a2319",
+    "training_steps": 0,
+    "archive_verified": true,
+    "process_seconds": 17.440329480000003,
+    "scope": "Warm inference and validated memory output; archive audit follows first frame",
+    "npu_executed": false,
+    "deferred_archive_seconds": 0.2949861000000169
+  },
+  "scheduling": {
+    "context_ready_seconds": 5.738411059999976,
+    "inference_begin_seconds": 5.73864519,
+    "first_target_ready_seconds": 6.9232624599999895,
+    "poses_complete_seconds": 9.16500499,
+    "inference_end_seconds": 23.187542449999995,
+    "gaussian_row_conversion_seconds": 0.8536810599999853,
+    "renderer_scene_load_seconds": 0.05962420000000179,
+    "combined_seconds": 24.452147239999988,
+    "overlap_seconds": 3.4263598,
+    "video_prepare_stages": {
+      "decode_seconds": 3.4837568599999997,
+      "context_sift_seconds": 1.5913266999999962,
+      "context_matching_seconds": 0.396155570000019,
+      "context_pose_seconds": 0.16622437999998851,
+      "context_total_seconds": 2.1559820300000183,
+      "target_7_sift_seconds": 0.7043617200000085,
+      "target_7_matching_seconds": 0.35454192999998213,
+      "target_7_pnp_seconds": 0.024950670000009723,
+      "target_7_total_seconds": 1.0856311200000164,
+      "target_15_sift_seconds": 0.6963786299999981,
+      "target_15_matching_seconds": 0.35714397999998937,
+      "target_15_pnp_seconds": 0.0064106400000127906,
+      "target_15_total_seconds": 1.0613353899999822,
+      "target_22_sift_seconds": 0.7112213400000087,
+      "target_22_matching_seconds": 0.3577469800000017,
+      "target_22_pnp_seconds": 0.006261350000016819,
+      "target_22_total_seconds": 1.0765759800000012,
+      "remaining_target_pose_seconds": 2.1379113699999834,
+      "remaining_target_pnp_seconds": 0.01267199000002961
+    },
+    "video_prepare_total_seconds": 9.153573419999987
+  },
+  "renderer_input": "compiler_full_after/renderer_input",
+  "first_target_fast_path": true,
+  "events": [
+    {
+      "event": "READY",
+      "epoch": 1773372657.584286,
+      "monotonic": 170.44063191,
+      "backend": "cpu",
+      "weight_sha256": "83d0d9eaa753fa4a1f925288dc1f90b8c3297fad0ab0f6ed1f11a1c5946da25a",
+      "video_processed": false
+    },
+    {
+      "event": "VIDEO_COMPLETE",
+      "epoch": 1773372657.6032267,
+      "monotonic": 170.45957218,
+      "path": "/root/fpga43dgs_reconstruction/initialize_candidate_20260929/input/nyu_snippet_curl.mp4",
+      "bytes": 4900963,
+      "receipt_scope": "closed local file handed to pipeline; acquisition not measured"
+    },
+    {
+      "event": "SCENE_READY",
+      "epoch": 1773372682.2110486,
+      "monotonic": 195.06739496,
+      "gaussian_sha256": "3564f8d10a49ccb46c8c06acc03e32be0619a8e65babee6aa147abdcfc4a2319",
+      "rows_sha256": "27564dadc25d25c12160e879beea9d99de0a4c5978268ae54599f8cce590409c",
+      "camera": "frame_000007.bin",
+      "resident_scene": {
+        "gaussians": 32768,
+        "selected": 32768,
+        "native_load_ms": 59.0065,
+        "load_seconds": 0.05962420000000179,
+        "revision": 1,
+        "rows_sha256": "27564dadc25d25c12160e879beea9d99de0a4c5978268ae54599f8cce590409c"
+      },
+      "scope": "validated in-memory first-target scene; PLY audit follows"
+    },
+    {
+      "event": "FRAME_COMPLETE",
+      "epoch": 1773372682.2969093,
+      "monotonic": 195.15325511,
+      "frame_sha256": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+      "camera": "frame_000007.bin"
+    }
+  ],
+  "timing": {
+    "complete": true,
+    "ready_to_receipt_seconds_record_only": 0.018940270000001647,
+    "gaussian_scene_seconds": 24.607822779999992,
+    "first_render_seconds": 0.08586015000000202,
+    "scene_preparation_seconds": 24.693682929999994
+  }
+}

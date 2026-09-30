@@ -1,0 +1,14 @@
+{
+  "source_checkpoint_sha256": "89a42091c9cc82b091d1a73a23c037c0a5ebdcb0983f5500c1fc571997728242",
+  "optimized_checkpoint_sha256": "6d2e5b96da3173082fae7c5b451179afc7dcb5aca7a91cfb622b7cb7a8752e05",
+  "original_build": "build/board_cat_20260930_155540",
+  "final_report": "build/board_rom_final_20260930",
+  "native_clock_mhz": 200,
+  "native_setup_slack_ns": 0.03,
+  "native_hold_slack_ns": 0.022,
+  "renderer_setup_slack_ns": 0.316,
+  "renderer_hold_slack_ns": 0.05,
+  "shared_200mhz_setup_slack_ns": 0.034,
+  "inherited_ai_worst_pulse_slack_ns": -0.409,
+  "whole_board_timing_signoff": false
+}

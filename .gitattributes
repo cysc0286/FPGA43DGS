@@ -8,3 +8,14 @@ examples/3dgs_reconstruction/mvsplat/results/20260929/npu_deployment_v2/** -text
 
 # Preserve on-board receipts and measured framebuffers exactly.
 examples/3dgs_reconstruction/mvsplat/results/20260929/board_warm_npu/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+
+# Exact circuit/board evidence: retain tool-produced bytes and binary pixels.
+examples/3dgs_flicker_hw/physical_opt/results/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+examples/3dgs_flicker_hw/pipeline/exp_rom/results/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+examples/3dgs_flicker_hw/pipeline/exp_rom/*.cpp -text whitespace=cr-at-eol
+examples/3dgs_flicker_hw/pipeline/exp_rom/*.hpp -text whitespace=cr-at-eol
+examples/3dgs_flicker_hw/pipeline/exp_rom/*.tcl -text whitespace=cr-at-eol
+examples/3dgs_reconstruction/mvsplat/results/20260930/fpga_exp_rom/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+examples/3dgs_reconstruction/mvsplat/results/20260930/compiler_full_after/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+examples/3dgs_reconstruction/mvsplat/results/20260930/fpga_exp_rom/images/**/*.ppm binary
+examples/3dgs_reconstruction/mvsplat/results/20260930/fpga_exp_rom/images/**/*.bin binary

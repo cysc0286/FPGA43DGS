@@ -4,7 +4,11 @@ set project hls_pipeline_workset
 if {[info exists ::env(FLK_HLS_PROJECT)]} {set project $::env(FLK_HLS_PROJECT)}
 open_project -reset $project
 set_top flicker_render_pipeline
-add_files [file join $here pipeline.cpp] -cflags {-std=c++0x}
+set flags {-std=c++0x}
+if {[info exists ::env(FLK_EXACT_EXP_ROM)] && $::env(FLK_EXACT_EXP_ROM) in {1 2}} {
+ append flags " -DFLK_EXACT_EXP_ROM=$::env(FLK_EXACT_EXP_ROM)"
+}
+add_files [file join $here pipeline.cpp] -cflags $flags
 add_files [file join $here framed_ctu.cpp] -cflags {-std=c++0x}
 add_files -tb [file join $here .. hls renderer.cpp] -cflags {-std=c++0x}
 add_files -tb [file join $here tb.cpp] -cflags {-std=c++0x}

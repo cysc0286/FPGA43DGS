@@ -1,5 +1,11 @@
 # ARM compiler and data-layout experiments — 2026-09-30
 
+Subsequent hardware measurement: the exact-ROM four-lane candidate is now
+installed, with 49.059 ms mean complete-RGB latency and unchanged images.
+See `../../../3dgs_flicker_hw/pipeline/exp_rom/BOARD_VALIDATION.md` for hardware,
+physical and whole-chain results. The software A/B results below continue to
+refer to the original FPGA and have not been overwritten.
+
 These are new measurements on the four-core Cortex-A53 board. The FPGA was
 the frozen four-lane, 200 MHz split pipeline throughout these software tests.
 This document does not count an unprogrammed HLS candidate as board acceleration.

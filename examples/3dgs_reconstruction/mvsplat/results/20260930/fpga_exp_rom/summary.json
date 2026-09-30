@@ -1,0 +1,92 @@
+{
+  "board_executed": true,
+  "identical_native_binary": true,
+  "old_hardware": {
+    "n": 60,
+    "mean_ms": 50.29366149998774,
+    "median_ms": 50.15032999654068,
+    "p95_ms": 51.46047600101156,
+    "max_ms": 51.55775999446632,
+    "stages_ms": {
+      "project_ms": 7.567737666666667,
+      "sort_ms": 12.038892,
+      "engine_ms": 28.449949,
+      "pack_ms": 1.2302646666666666,
+      "upload_ms": 2.4976955,
+      "wait_ms": 16.988614,
+      "read_ms": 0.6746296666666667
+    }
+  },
+  "rom_hardware": {
+    "n": 60,
+    "mean_ms": 49.058945666666176,
+    "median_ms": 48.945060000001206,
+    "p95_ms": 50.20396650000123,
+    "p99_ms": 51.62015509999206,
+    "max_ms": 53.592589999993834,
+    "peak_rss_kib": 39184,
+    "mean_hardware_cycles": 5215446.266666667,
+    "stages_ms": {
+      "project_ms": 7.754203,
+      "sort_ms": 12.358896666666666,
+      "engine_ms": 26.684366833333332,
+      "pack_ms": 1.230382,
+      "upload_ms": 2.4963098333333336,
+      "wait_ms": 15.173568,
+      "read_ms": 0.67385
+    }
+  },
+  "current_cpu": {
+    "n": 60,
+    "mean_ms": 162.8303918333344,
+    "median_ms": 163.05797999999783,
+    "p95_ms": 167.5409475000066,
+    "p99_ms": 183.09081030000405,
+    "max_ms": 199.36940000000902,
+    "peak_rss_kib": 39184,
+    "mean_hardware_cycles": 0,
+    "stages_ms": {
+      "project_ms": 7.9671381666666665,
+      "sort_ms": 12.405526666666667,
+      "engine_ms": 140.21991766666667,
+      "pack_ms": 1.2341063333333333,
+      "upload_ms": 0,
+      "wait_ms": 0,
+      "read_ms": 0
+    }
+  },
+  "old_p99_ms": 51.54636119696079,
+  "old_cycles": 5570456.066666666,
+  "cycle_reduction_percent": 6.373083204521812,
+  "wall_reduction_percent": 2.4550128117473924,
+  "engine_reduction_percent": 6.205923837215554,
+  "serialized_fps": 20.38364229827843,
+  "cpu_speedup_mixed_precision": 3.319076462419206,
+  "old_boot_sha256": "9918f9b69525bad88d8a9f06c5ab0940582df341ca32edc786d4377d3ba137cc",
+  "new_boot_sha256": "0528e019a5fb19c7f281b773ddf5ab5a8a524ddfebdc4fc9acf74273db31d048",
+  "scope": "same binary, 32768 Gaussians, 128x128, 3 cameras, 60 frames; old/new FPGA before/after reboot; first renders and archival excluded",
+  "whole_chain": {
+    "compiler_full_before": {
+      "timing": {
+        "complete": true,
+        "ready_to_receipt_seconds_record_only": 0.007859789999201894,
+        "gaussian_scene_seconds": 24.26058755000122,
+        "first_render_seconds": 0.07675962999928743,
+        "scene_preparation_seconds": 24.337347180000506
+      },
+      "first_raw_sha256": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+      "inference_seconds": 16.41459346999909
+    },
+    "compiler_full_after": {
+      "timing": {
+        "complete": true,
+        "ready_to_receipt_seconds_record_only": 0.018940270000001647,
+        "gaussian_scene_seconds": 24.607822779999992,
+        "first_render_seconds": 0.08586015000000202,
+        "scene_preparation_seconds": 24.693682929999994
+      },
+      "first_raw_sha256": "4eb155cab1b75b10b9fbaa60cc3752f85898d30461c4682603d4f6ac9d7d2135",
+      "inference_seconds": 16.510651119999977
+    }
+  }
+}

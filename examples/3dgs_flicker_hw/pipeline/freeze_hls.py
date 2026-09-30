@@ -43,6 +43,15 @@ def main():
             for source in (args.source_root / folder).glob(pattern):
                 copy(source, Path('sources') / folder / source.name)
     copy(args.source_root / 'pipeline/build.tcl', Path('sources/pipeline/build.tcl'))
+    # Optional exact exponent ROM is part of the hardware source, not a tool
+    # installation detail. Preserve its tables and generation/tests for replay.
+    rom = args.source_root / 'pipeline/exp_rom'
+    if rom.exists():
+        for source in rom.iterdir():
+            if source.suffix in {'.cpp', '.hpp', '.tcl', '.md'}:
+                copy(source, Path('sources/pipeline/exp_rom') / source.name)
+    if (project/'hls.app').exists():
+        copy(project/'hls.app', Path('hls.app'))
     for source in (project / 'solution1/syn/report').iterdir():
         if source.is_file():
             copy(source, Path('reports') / source.name)

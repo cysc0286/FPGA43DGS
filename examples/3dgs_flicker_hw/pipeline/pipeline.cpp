@@ -1,6 +1,11 @@
 // FLICKER IV-B: sub-tile AABB -> CTU -> masked mini-tile FIFOs -> VRUs.
 // Four VRU channels are an explicit resource-scaled FPGA adaptation.
 #include "pipeline.hpp"
+#if FLK_EXACT_EXP_ROM == 2
+#include "exp_rom/table_compact.hpp"
+#elif FLK_EXACT_EXP_ROM == 1
+#include "exp_rom/table.hpp"
+#endif
 
 // Separate per-Gaussian geometry from sub-tile expansion. Control tokens use
 // the same ordered FIFOs as data; downstream backpressure propagates upstream.
@@ -130,7 +135,12 @@ template<unsigned LANE> static void evaluate_mini(Word q,half rr[16],half gg[16]
   if(x<w&&y<h&&!stopped[p]){
    half pw=power(half(ox+x),half(oy+y),mx,my,a,b,c);
    if(pw<=half(0)){
-    half alpha=half(opacity*hls::half_exp(pw));if(alpha>half(.99f))alpha=half(.99f);
+#ifdef FLK_EXACT_EXP_ROM
+    half exponential=exact_negative_exp<LANE>(pw);
+#else
+    half exponential=hls::half_exp(pw);
+#endif
+    half alpha=half(opacity*exponential);if(alpha>half(.99f))alpha=half(.99f);
     if(alpha>=half(1.f/255.f)){
      half next=half(tt[p]*half(half(1)-alpha));
      if(next<half(.0001f))stopped[p]=true;

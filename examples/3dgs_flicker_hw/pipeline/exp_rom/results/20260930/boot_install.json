@@ -1,0 +1,14 @@
+{
+  "previous_sha256": "9918f9b69525bad88d8a9f06c5ab0940582df341ca32edc786d4377d3ba137cc",
+  "new_sha256": "0528e019a5fb19c7f281b773ddf5ab5a8a524ddfebdc4fc9acf74273db31d048",
+  "remote": "/root/fpga43dgs_flicker/boot_20260930T162317",
+  "installed_verified": true,
+  "rebooted": true,
+  "integration_evidence": "examples\\3dgs_flicker_hw\\evidence\\pipeline_integration_20260930T145219",
+  "integration_record_sha256": "aa739a6be77e17e443c957513e43fcc298b0ad63d07fffe1adc9d253adfbfbd5",
+  "rollback_command": "bash /root/fpga43dgs_flicker/boot_20260930T162317/update_boot.sh rollback /root/fpga43dgs_flicker/boot_20260930T162317 0528e019a5fb19c7f281b773ddf5ab5a8a524ddfebdc4fc9acf74273db31d048",
+  "boot_id_before": "8c7bcca9-d27b-4294-bf93-b8b365b16fec",
+  "reboot_requested": true,
+  "boot_id_after": "bab4681a-d5aa-433b-a90c-69b9eee25343",
+  "sdk_status_passed": true
+}

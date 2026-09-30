@@ -67,3 +67,10 @@ remote-control transport and physical display. The benchmark keeps first-use
 latency separate, measures repeated different views, then archives outputs and
 compares them after the timed loop. It reports actual transferred payload bytes,
 not DDR bus traffic. NPU is not involved.
+# 2026-09-30 FPGA 硬件更新
+
+同一 A53 程序在新精确指数 ROM 位流上完成 60 帧实测：49.059 ms，P95
+50.204 ms，三视角 raw/RGB 与原 FPGA 相同。CPU 对照 162.830 ms。
+新视频首帧复测 24.694 s，仍未达到 20 s。硬件、资源、时序及完整计时见
+`../../../3dgs_flicker_hw/pipeline/exp_rom/BOARD_VALIDATION.md`；本目录旧测试
+保持原数据，不把新位流混入旧编译器配对结果。

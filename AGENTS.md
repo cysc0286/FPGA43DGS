@@ -1,5 +1,22 @@
 # HeteroGS Agent 工作规范
 
+### 2026-09-30 当前实板：精确指数 ROM 四路硬件
+
+新硬件完成 HLS/RTL、布线后优化、网络安装及上板验收。当前 BOOT SHA
+`0528e019a5fb19c7f281b773ddf5ab5a8a524ddfebdc4fc9acf74273db31d048`；
+原 `9918f9...` 四路冻结包和 BOOT 备份保留，回退见
+`examples/3dgs_flicker_hw/evidence/boot_20260930T162317/result.json`。
+同一 A53 原生程序，32,768 点/128×128/三视角各二轮共 60 帧，49.059 ms
+（旧硬件 50.294 ms），硬件周期减少 6.37%，三视角 raw/RGB 与旧板逐位一致。
+200 MHz 未改变；渲染/DMA setup/hold +0.316/+0.050 ns，全板 setup/hold
++0.030/+0.022 ns。原厂 AI 两处脉宽违例仍在，不称全板时序签核。
+新全视频 VIDEO_COMPLETE→FRAME_COMPLETE 24.693683 s，对照 24.337347 s，
+二者单次；不能宣称整链加速或达到 20 s。MVSplat 仍在 ARM，NPU 未启用。
+详情、质量、资源、编译/结构/布线负结果见
+`examples/3dgs_flicker_hw/pipeline/exp_rom/BOARD_VALIDATION.md`。
+新物理记录 `build/board_rom_final_20260930` 已冻结；勿把前一个含 −0.012 ns
+违例的初始路线当作最终位流，也勿把已有程序编译加速重复记作新硬件收益。
+
 ### 2026-09-30 编译器与布局增量
 
 原生渲染默认编译目标改为 Cortex-A53，保持有限值检查与原舍入。

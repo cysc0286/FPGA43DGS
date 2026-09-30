@@ -3,6 +3,7 @@ import argparse
 import importlib.util
 import json
 from pathlib import Path
+import sys
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -14,7 +15,10 @@ def main():
     p.add_argument("--images",type=Path,required=True)
     p.add_argument("--profiles",default="exact4,keep24k,keep16k")
     a=p.parse_args()
-    spec=importlib.util.spec_from_file_location("mvsplat_metrics",Path(__file__).resolve().parents[1]/"evaluate.py")
+    # The direct script entry point must also resolve evaluate.py's common.py.
+    module_root=Path(__file__).resolve().parents[1]
+    sys.path.insert(0,str(module_root))
+    spec=importlib.util.spec_from_file_location("mvsplat_metrics",module_root/"evaluate.py")
     metrics=importlib.util.module_from_spec(spec);spec.loader.exec_module(metrics)
     profiles=a.profiles.split(",")
     names=["frame_000007","frame_000015","frame_000022"]
@@ -25,7 +29,7 @@ def main():
     draw=ImageDraw.Draw(panel)
     try:font=ImageFont.truetype("C:/Windows/Fonts/arial.ttf",18)
     except OSError:font=ImageFont.load_default()
-    labels={"exact4":"All 32,768 Gaussians","batch2":"All 32,768 Gaussians",
+    labels={"images":"FPGA ROM: 32,768", "exact4":"All 32,768 Gaussians","batch2":"All 32,768 Gaussians",
             "keep24k":"Keep 24,576 (lossy)","keep16k":"Keep 16,384 (lossy)",
             "preview24k":"Preview 24,576","preview16k":"Preview 16,384","preview8k":"Preview 8,192"}
     for col,title in enumerate(["Held-out video"]+[labels.get(name,name) for name in profiles]):
