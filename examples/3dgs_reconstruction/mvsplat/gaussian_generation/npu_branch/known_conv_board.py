@@ -23,13 +23,15 @@ def main():
     if a.out.exists():
         p.error("Output evidence directory already exists")
     a.out.mkdir(parents=True)
-    sys.path.insert(0, str(Path(__file__).resolve().parents[3]/"3dgs_compositor/board"))
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]/"3dgs_compositor/board"))
     import remote
+    from initialize.board_sync import NPU_SOURCE_FILES, upload_sources
     client = remote.connect()
     root = a.board_root
     try:
         status, output = remote.run(client,
             "test ! -e "+shlex.quote(root)+" && mkdir -p "+shlex.quote(root), timeout=10)
+        upload_sources(client, root + "/mvsplat", NPU_SOURCE_FILES)
         sftp = client.open_sftp()
         manifest = json.loads((a.bundle/"manifest.json").read_text())
         files = {
@@ -74,7 +76,7 @@ def main():
             "timeout 90s env "
             "LD_LIBRARY_PATH=/root/fpga43dgs_reconstruction/arm_env/lib:"
             "/root/heterogs_npu/sdk_3.36.1/usr/lib/aarch64-linux-gnu "
-            "PYTHONPATH=/root/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat "
+            "PYTHONPATH=" + shlex.quote(root + "/mvsplat") + " "
             "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 "
             "/root/fpga43dgs_reconstruction/arm_env/bin/python3 "
             +shlex.quote(root+"/known_conv.py")+" run --graphs "+shlex.quote(root+"/graphs")

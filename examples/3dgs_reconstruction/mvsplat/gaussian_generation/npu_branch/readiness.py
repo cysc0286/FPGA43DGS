@@ -2,8 +2,8 @@
 from pathlib import Path
 import numpy as np
 from common import save, sha
-from npu.artifacts import relative_file, validate_bundle
-from npu.verify import errors
+from gaussian_generation.npu_branch.artifacts import relative_file, validate_bundle
+from gaussian_generation.npu_branch.verify import errors
 
 
 def validate_oracles(worker, graphs, output):

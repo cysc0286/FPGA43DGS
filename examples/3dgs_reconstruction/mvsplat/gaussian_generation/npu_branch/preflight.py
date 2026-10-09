@@ -6,9 +6,9 @@ from pathlib import Path
 import platform
 import numpy as np
 from common import new_directory, save, sha
-from npu.artifacts import relative_file, validate_bundle
-from npu.buffers import buffer_plan
-from npu.protocol import BRIDGE_ABI_VERSION, PROTOCOL_VERSION, check_bridge
+from gaussian_generation.npu_branch.artifacts import relative_file, validate_bundle
+from gaussian_generation.npu_branch.buffers import buffer_plan
+from gaussian_generation.npu_branch.protocol import BRIDGE_ABI_VERSION, PROTOCOL_VERSION, check_bridge
 
 
 def check_candidate(root, policy="shared", limit_mib=128):

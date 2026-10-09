@@ -34,14 +34,14 @@ class WarmSession:
             self.partitions = None
             numerical_readiness = None
             if args.backend != "cpu":
-                from npu.runtime import PartitionRuntime
+                from gaussian_generation.npu_branch.runtime import PartitionRuntime
                 self.partitions = self.resources.enter_context(PartitionRuntime(
                     args.backend, args.partition_bundle, args.partitions, out / "partition_runtime",
                     library=args.npu_library, worker_python=args.worker_python,
                     environment=worker_environment() if args.backend == "npu" else None,
                     buffer_policy=args.buffer_policy, buffer_limit_mib=args.buffer_limit_mib))
                 if args.backend == "npu":
-                    from npu.readiness import validate_oracles
+                    from gaussian_generation.npu_branch.readiness import validate_oracles
                     graphs = getattr(args, "oracle_graphs", None) or Path(args.partition_bundle).parent/"graphs"
                     numerical_readiness = validate_oracles(self.partitions, graphs, out/"npu_readiness.json")
             # NPU checks are in a separate SDK process. Import/load Torch before

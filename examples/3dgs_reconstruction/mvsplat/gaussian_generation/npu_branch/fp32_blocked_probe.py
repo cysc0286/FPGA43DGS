@@ -69,7 +69,7 @@ def board_run(root, readout):
     if platform.machine().lower() not in ("aarch64", "arm64"):
         raise RuntimeError("Board execution required")
     import fcntl
-    from npu.verify import errors
+    from gaussian_generation.npu_branch.verify import errors
     info = audit(root/"graph.json", root/"params.raw", root/"oracle.npz")
     lock = open("/run/lock/fpga43dgs-npu.lock", "a")
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -125,12 +125,14 @@ def main():
     audit(a.graph, a.raw, a.oracle)
     a.out.mkdir(parents=True, exist_ok=False)
     (a.out/"bridge.cpp").write_text(diagnostic_bridge(a.readout), encoding="utf-8")
-    sys.path.insert(0, str(Path(__file__).resolve().parents[3]/"3dgs_compositor/board"))
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]/"3dgs_compositor/board"))
     import remote
+    from initialize.board_sync import NPU_SOURCE_FILES, upload_sources
     client = remote.connect()
     root = shlex.quote(a.board_root)
     try:
         remote.run(client, f"test ! -e {root} && mkdir -p {root}")
+        upload_sources(client, a.board_root + "/mvsplat", NPU_SOURCE_FILES)
         sftp = client.open_sftp()
         for source, name in ((a.graph,"graph.json"), (a.raw,"params.raw"), (a.oracle,"oracle.npz"),
                              (a.out/"bridge.cpp","bridge.cpp"), (Path(__file__),"probe.py")):
@@ -140,7 +142,7 @@ def main():
                    f"-I{sdk}/include -L{sdk}/lib/aarch64-linux-gnu -Wl,-rpath,{sdk}/lib/aarch64-linux-gnu "
                    "-licraft_zg330backend -licraft_hostbackend -licraft_xrt -licraft_xir -licraft_utils -ldw -ldl -pthread")
         remote.run(client, command, timeout=200, log=a.out/"build.log")
-        command = ("timeout 90s env PYTHONPATH=/root/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat "
+        command = ("timeout 90s env PYTHONPATH=" + shlex.quote(a.board_root + "/mvsplat") + " "
                    f"LD_LIBRARY_PATH=/root/fpga43dgs_reconstruction/arm_env/lib:{sdk}/lib/aarch64-linux-gnu "
                    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 /root/fpga43dgs_reconstruction/arm_env/bin/python3 "
                    f"{root}/probe.py --board-run {root} --readout {a.readout}")

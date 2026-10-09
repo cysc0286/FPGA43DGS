@@ -3,7 +3,7 @@ import json
 from pathlib import Path, PurePosixPath, PureWindowsPath
 import numpy as np
 from common import FULL_WEIGHT_SHA256, sha
-from npu.catalog import PARTITIONS
+from gaussian_generation.npu_branch.catalog import PARTITIONS
 
 
 def relative_file(root, name):
@@ -33,7 +33,7 @@ def validate_bundle(root, names, backend):
         if not item["complete"]:
             raise ValueError("Incomplete partition: " + name)
         if backend == "npu":
-            from npu.compile_graphs import audit
+            from gaussian_generation.npu_branch.compile_graphs import audit
             graph, raw = relative_file(root, item["graph"]), relative_file(root, item["raw"])
             actual = audit(graph, raw, item["export"])
             if actual != item["audit"]:

@@ -10,7 +10,7 @@ import subprocess
 import numpy as np
 
 from common import sha
-from npu.precision_probe import compare
+from gaussian_generation.npu_branch.precision_probe import compare
 
 
 def main():
@@ -20,7 +20,7 @@ def main():
     p.add_argument("--oracle", type=Path, required=True)
     p.add_argument("--actual", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
-    p.add_argument("--runner", type=Path, default=Path(__file__).resolve().parents[4]/
+    p.add_argument("--runner", type=Path, default=Path(__file__).resolve().parents[5]/
                    "npu_3dgs/.vendor/icraft-3.36.1/bin/icraft-run.exe")
     a = p.parse_args()
     network = json.loads(a.graph.read_text())

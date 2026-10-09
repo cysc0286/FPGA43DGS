@@ -5,9 +5,9 @@ from pathlib import Path
 import time
 import numpy as np
 from common import new_directory, save, sha
-from npu.artifacts import validate_bundle, to_wire, from_wire
-from npu.buffers import MappedBuffers, buffer_plan
-from npu.benchmark import statistics
+from gaussian_generation.npu_branch.artifacts import validate_bundle, to_wire, from_wire
+from gaussian_generation.npu_branch.buffers import MappedBuffers, buffer_plan
+from gaussian_generation.npu_branch.benchmark import statistics
 
 
 def main(argv=None):

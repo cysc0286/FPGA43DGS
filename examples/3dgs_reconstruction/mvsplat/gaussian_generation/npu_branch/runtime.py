@@ -10,10 +10,10 @@ import time
 import numpy as np
 
 from common import save, sha
-from npu.artifacts import from_wire, to_wire, validate_bundle
-from npu.catalog import PARTITIONS, replace
-from npu.buffers import buffer_plan, MappedBuffers
-from npu.protocol import PROTOCOL_VERSION
+from gaussian_generation.npu_branch.artifacts import from_wire, to_wire, validate_bundle
+from gaussian_generation.npu_branch.catalog import PARTITIONS, replace
+from gaussian_generation.npu_branch.buffers import buffer_plan, MappedBuffers
+from gaussian_generation.npu_branch.protocol import PROTOCOL_VERSION
 
 
 class PartitionRuntime:
@@ -50,8 +50,8 @@ class PartitionRuntime:
             self.buffers = self.arena.views
             save(self.work / "request.json", request)
             self.log = (self.work / "worker.log").open("wb")
-            self.process = subprocess.Popen([str(worker_python or sys.executable), "-m", "npu.worker",
-                str(self.work / "request.json")], cwd=Path(__file__).resolve().parents[1], env=environment,
+            self.process = subprocess.Popen([str(worker_python or sys.executable), "-m", "gaussian_generation.npu_branch.worker",
+                str(self.work / "request.json")], cwd=Path(__file__).resolve().parents[2], env=environment,
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self.log, text=True, bufsize=1)
             self.reader = threading.Thread(target=self._read, daemon=True)
             self.reader.start()

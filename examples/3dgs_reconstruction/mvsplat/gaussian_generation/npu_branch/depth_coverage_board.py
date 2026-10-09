@@ -16,8 +16,9 @@ def main():
     if a.out.exists():
         p.error("Output evidence directory already exists")
     a.out.mkdir(parents=True)
-    sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "3dgs_compositor/board"))
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "3dgs_compositor/board"))
     import remote
+    from initialize.board_sync import NPU_SOURCE_FILES, upload_sources
     client = remote.connect()
     try:
         root = a.board_root
@@ -27,6 +28,7 @@ def main():
                                     " && mkdir -p " + shlex.quote(root + "/wheels"), timeout=15)
         if status:
             raise RuntimeError(output)
+        upload_sources(client, root + "/mvsplat", NPU_SOURCE_FILES)
         sftp = client.open_sftp()
         if not a.existing_site:
             for wheel in a.wheels.glob("*.whl"):
@@ -42,7 +44,7 @@ def main():
                 raise RuntimeError("Isolated ONNX install failed: " + output)
         command = ("cd " + board_base + "/mvsplat && timeout 360s env "
                    "LD_LIBRARY_PATH=" + env + "/lib "
-                   "PYTHONPATH=" + site + ":" + board_base + "/deps:" + board_base + "/mvsplat "
+                   "PYTHONPATH=" + site + ":" + root + "/mvsplat:" + board_base + "/deps "
                    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=2 " + env + "/bin/python3 " +
                    root + "/depth_coverage.py --context " + board_base + "/candidate/input/context.npz " +
                    "--weights " + board_base + "/weights/re10k.ckpt --vendor " +

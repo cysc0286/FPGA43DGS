@@ -3,7 +3,8 @@
 当前主线：**视频选帧 → 位姿估计 → MVSplat 固定权重生成高斯 → CPU＋FPGA 渲染**。
 使用悟净 30TAI Lite；当前高斯生成由 ARM CPU 执行，NPU 仍是隔离候选。
 
-先读 [代码结构](docs/CODE_STRUCTURE.md) 和 [四模块接口](examples/3dgs_reconstruction/modules/INTERFACES.md)。
+先读 [项目要求](docs/PROJECT_REQUIREMENTS.md)、[代码结构](docs/CODE_STRUCTURE.md)
+和 [四模块接口](examples/3dgs_reconstruction/modules/INTERFACES.md)。
 性能口径及当前版本选择集中在 [MAINLINE.md](MAINLINE.md)。
 
 ```text
@@ -14,16 +15,19 @@ examples/3dgs_reconstruction/
 │   ├── video_input/             视频接收、解码、选帧
 │   ├── pose_estimation/         两视图几何、留出目标 PnP
 │   ├── gaussian_generation/     常驻 MVSplat、Gaussian → 渲染 ABI
+│   │   └── npu_branch/          高斯生成的 NPU 候选，默认不启用
 │   ├── rendering/               最佳已验收 CPU＋FPGA 后端
 │   │   ├── render_main/         四路主线冻结包，保留源码/硬件/证据
 │   │   └── render_branch/       PipeGS HGR v4 独立候选，默认不调用
 │   ├── scene_preparation.py     组织视频和位姿交接，不藏数值算法
-│   ├── warm_pipeline.py         组织生成高斯与首帧，控制重叠及归档
-│   └── npu/                    MVSplat 高斯生成阶段的 NPU 候选
+│   └── warm_pipeline.py         组织生成高斯与首帧，控制重叠及归档
 └── modules/                     旧入口兼容与共用文件校验；不是第二套新主线
 archive/history_20261009/         历史实验 ZIP、原始路径与哈希索引
 releases/                        较早冻结后端回退包
 ```
+
+后续代码必须放到对应的现有模块；新增独立模块须先取得用户明确批注/同意。
+`npu_branch` 归属高斯生成，`render_branch` 归属渲染；目录保留不代表默认启用。
 
 ## 使用当前主线
 

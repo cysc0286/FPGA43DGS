@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import patch
 import numpy as np
 from common import sha
-from npu.readiness import validate_oracles
+from gaussian_generation.npu_branch.readiness import validate_oracles
 
 
 class ReadinessTests(unittest.TestCase):
@@ -27,7 +27,7 @@ class ReadinessTests(unittest.TestCase):
                 return value + (0.04 if corrupt and len(calls) == 2 else 0)
             worker = SimpleNamespace(parts={"backbone_cnn": {}}, execute=execute,
                 provenance={"oracle_manifest_sha256": sha(root/"manifest.json")})
-            with patch("npu.readiness.validate_bundle", return_value=(meta, {})):
+            with patch("gaussian_generation.npu_branch.readiness.validate_bundle", return_value=(meta, {})):
                 if corrupt:
                     with self.assertRaisesRegex(ValueError, "numerical readiness"):
                         validate_oracles(worker, root, root/"readiness.json")

@@ -3,11 +3,11 @@ from pathlib import Path
 import tempfile
 import unittest
 import numpy as np
-from npu.artifacts import from_wire, to_wire, relative_file, validate_bundle
-from npu.compile_graphs import host_abi
-from npu.runtime import PartitionRuntime
-from npu.buffers import buffer_plan, MappedBuffers
-from npu.protocol import check_command, check_bridge
+from gaussian_generation.npu_branch.artifacts import from_wire, to_wire, relative_file, validate_bundle
+from gaussian_generation.npu_branch.compile_graphs import host_abi
+from gaussian_generation.npu_branch.runtime import PartitionRuntime
+from gaussian_generation.npu_branch.buffers import buffer_plan, MappedBuffers
+from gaussian_generation.npu_branch.protocol import check_command, check_bridge
 
 
 class NpuContractTests(unittest.TestCase):

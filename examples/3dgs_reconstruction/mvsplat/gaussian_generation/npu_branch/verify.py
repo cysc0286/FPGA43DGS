@@ -9,8 +9,8 @@ from pathlib import Path
 import numpy as np
 from common import new_directory, save, sha, load_gaussians
 from gaussian_generation.runtime import ModelRuntime
-from npu.catalog import PARTITIONS
-from npu.runtime import PartitionRuntime
+from gaussian_generation.npu_branch.catalog import PARTITIONS
+from gaussian_generation.npu_branch.runtime import PartitionRuntime
 
 
 def errors(actual, expected, rtol, atol):

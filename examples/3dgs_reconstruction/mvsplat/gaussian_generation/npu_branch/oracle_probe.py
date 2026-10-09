@@ -4,9 +4,9 @@ import json
 from pathlib import Path
 import numpy as np
 from common import new_directory, save, sha
-from npu.artifacts import validate_bundle, relative_file
-from npu.runtime import PartitionRuntime
-from npu.verify import errors
+from gaussian_generation.npu_branch.artifacts import validate_bundle, relative_file
+from gaussian_generation.npu_branch.runtime import PartitionRuntime
+from gaussian_generation.npu_branch.verify import errors
 from initialize.session import worker_environment
 
 

@@ -10,7 +10,7 @@
 - 入口：独立交互用 `LiveRenderer.mainline(...)`；整链显式指定 `--live-renderer`，由 `PipelineRenderer(profile="mainline")` 调用同一配置。
 - CPU：常驻 C++、四线程、缓存场景、稳定深度基数排序、direct_collect、NEON 封装。
 - FPGA：四路、200 MHz、Dense mode 2、有序合成、精确指数 ROM；不额外抽点。
-- `rendering/render_branch/` 只保存 HGR v4 候选，默认不调用；`npu/` 不进入当前渲染后端。
+- `rendering/render_branch/` 只保存 HGR v4 候选，默认不调用；`gaussian_generation/npu_branch/` 是生成阶段候选，不进入当前渲染后端。
 
 ## 四模块与预热
 
@@ -18,6 +18,8 @@
 随后依次由 `video_input`、`pose_estimation`、`gaussian_generation`、`rendering` 处理。
 `scene_preparation.py` 和 `warm_pipeline.py` 组织现有同步点及数据交接，不重复实现算法。
 老 `modules/` 保留 COLMAP 冷路径和既有文件合同兼容；新的数值实现不再往那里新增。
+后续目录变更遵守 [项目要求](docs/PROJECT_REQUIREMENTS.md)：代码归属现有模块，
+不得未经用户明确批注新增独立模块。
 
 ## 时间和数据
 

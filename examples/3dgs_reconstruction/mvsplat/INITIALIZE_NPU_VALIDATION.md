@@ -79,6 +79,6 @@
 
 ## 交付与下一次执行
 
-已准备本地离线包 `../runs/mvsplat_npu_package_20260929/mvsplat_npu_candidate.tar.gz`，SHA256 `9243ff7ca43c52d92b4acb66e6eacb8d4b4286979cd769138e5b34855a047f59`。代码与命令见 [initialize](initialize/README.md)、[npu](npu/README.md)。权重/图/大样本仍在被忽略的本地目录，未向 GitHub 推送。
+已准备本地离线包 `../runs/mvsplat_npu_package_20260929/mvsplat_npu_candidate.tar.gz`，SHA256 `9243ff7ca43c52d92b4acb66e6eacb8d4b4286979cd769138e5b34855a047f59`。代码与命令见 [initialize](initialize/README.md)、[NPU 候选](gaussian_generation/npu_branch/README.md)（2026-10-09 更新目录链接）。权重/图/大样本仍在被忽略的本地目录，未向 GitHub 推送。
 
 用户回来后先检查旧中断进程和设备状态，再在新目录按顺序做：预热 CPU 串行 → CPU PnP 重叠 → 常驻多相机 → NPU 固定上下文数值 → NPU 完整视频到首帧。每版独立保留输入、配置、哈希、图像、总时间和进程树内存；最终只根据同范围实测选择后端。

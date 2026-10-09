@@ -1,6 +1,6 @@
 """Paired real-input partition benchmarks, including every IPC/SDK/layout cost.
 
-Use npu.verify afterwards for full-model correctness. Module times cannot be
+Use gaussian_generation.npu_branch.verify afterwards for full-model correctness. Module times cannot be
 added up to claim video-to-frame acceleration. ONNX mode measures host CPUs only.
 """
 import argparse
@@ -11,9 +11,9 @@ import time
 import numpy as np
 from common import new_directory, save, sha
 from gaussian_generation.runtime import ModelRuntime
-from npu.catalog import PARTITIONS, locate
-from npu.runtime import PartitionRuntime
-from npu.verify import errors
+from gaussian_generation.npu_branch.catalog import PARTITIONS, locate
+from gaussian_generation.npu_branch.runtime import PartitionRuntime
+from gaussian_generation.npu_branch.verify import errors
 
 
 def statistics(values):
@@ -47,7 +47,7 @@ def main(argv=None):
         partitions={}, scene_preparation_seconds=None)
     try:
         model = ModelRuntime(a.weights, a.vendor, a.threads, 16, out/"runtime")
-        from npu.artifacts import validate_bundle
+        from gaussian_generation.npu_branch.artifacts import validate_bundle
         meta, _ = validate_bundle(a.graphs, a.partitions, "onnx_reference")
         if meta["weight_sha256"] != sha(a.weights):
             raise ValueError("Oracle/checkpoint mismatch")

@@ -17,7 +17,7 @@ def main(argv=None):
     a = p.parse_args(argv)
     if not a.syntax_only and platform.machine().lower() not in ("aarch64", "arm64"):
         p.error("ARM link required; Windows supports --syntax-only")
-    root = Path(__file__).resolve().parents[2]
+    root = Path(__file__).resolve().parents[3]
     prefix = next((base for base in (a.sdk.resolve(), a.sdk.resolve()/"usr")
                    if (base/"include/icraft-xrt/core/session.h").is_file()), None)
     if prefix is None:

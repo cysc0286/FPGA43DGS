@@ -2,6 +2,7 @@
 
 更新：2026-10-09。**四个业务模块都在 `examples/3dgs_reconstruction/mvsplat/` 下。**
 `initialize` 是视频前预热；两个协调文件管理调用顺序。它们不是第五种重建算法。
+目录约束见 [项目要求](PROJECT_REQUIREMENTS.md)，执行规则同时写入根目录 `AGENTS.md`。
 
 | 模块 | 实际实现 | 负责什么 | 推荐执行单元 |
 |---|---|---|---|
@@ -34,7 +35,7 @@
 | `archive/history_20261009/` | 823 个历史文件条目的 ZIP 与哈希清单，含失败/负收益结果 |
 | `archive/local_workspace_20261009/` | 本机未跟踪原始实验、日志、生成物；忽略、不上传 |
 | `mvsplat/rendering/render_branch/` | 保留的 PipeGS HGR v4 独立冻结候选；主线不调用 |
-| `mvsplat/npu/` | 前馈网络 NPU 候选、编译与诊断；没有新的数值验收 |
+| `mvsplat/gaussian_generation/npu_branch/` | 高斯生成内部的 NPU 候选、编译与诊断；默认不启用，没有新的数值验收 |
 | `releases/3dgs_renderer_v1_20260928/` | 较早冻结回退及现有 CPU 契约依赖，不能当作最新位流 |
 | `reconstruction/modules/` | 原 COLMAP/OpenSplat 文件接口兼容；`contracts.py` 仍被导出/校验使用 |
 | `reconstruction/bounded/`、`npu_frontend/` | 历史训练/特征实验，不进入主线协作源码包 |
@@ -42,6 +43,28 @@
 | `examples/3dgs_compositor/board/remote.py` | 现有板卡传输工具依赖，不是渲染算法 |
 
 未提交硬件改动原地保留。本轮不把它们混入整理提交，也不把它们称为已验收主线。
+
+## 候选分支放在哪里
+
+```text
+mvsplat/
+├── initialize/                 仅预热、资源生命周期与整链部署协调
+├── video_input/
+├── pose_estimation/
+├── gaussian_generation/
+│   ├── runtime.py              当前 CPU 生成器
+│   ├── adapter.py              Gaussian/相机到渲染 ABI
+│   └── npu_branch/             NPU 生成候选及其编译、诊断和验证工具
+└── rendering/
+    ├── render_main/            当前四路冻结主线
+    └── render_branch/          独立 HGR 候选，默认不调用
+```
+
+原 `mvsplat/npu/` 已整体迁入 `gaussian_generation/npu_branch/`，不保留同级副本。
+从 `mvsplat` 目录调用 NPU 工具时使用 `python -m gaussian_generation.npu_branch.<工具名>`。
+`--backend npu` 仍是原后端选择参数；默认仍为 `cpu`，数值检查规则没有放宽。
+板端候选同步和独立诊断脚本随同更新包路径，不能只上传一个脚本后依赖旧 `npu/`。
+新增代码、测试和候选实现都必须归入对应现有模块；新独立模块需先获用户明确批注。
 
 ## 打包规则
 

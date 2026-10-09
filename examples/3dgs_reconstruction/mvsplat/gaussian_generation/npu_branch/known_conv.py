@@ -49,8 +49,8 @@ def run(graphs, bundle, library, out, repeats):
     if platform.machine().lower() not in ("aarch64", "arm64"):
         raise RuntimeError("Diagnostic inference requires the actual ARM NPU")
     import fcntl
-    from npu.artifacts import to_wire, from_wire
-    from npu.verify import errors
+    from gaussian_generation.npu_branch.artifacts import to_wire, from_wire
+    from gaussian_generation.npu_branch.verify import errors
     out = new_directory(out)
     metadata = json.loads((bundle/"manifest.json").read_text())
     if metadata["source_manifest_sha256"] != sha(graphs/"manifest.json"):

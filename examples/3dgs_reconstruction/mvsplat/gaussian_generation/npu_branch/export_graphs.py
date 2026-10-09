@@ -10,7 +10,7 @@ import numpy as np
 
 from common import new_directory, save, sha
 from gaussian_generation.runtime import ModelRuntime
-from npu.catalog import PARTITIONS, locate
+from gaussian_generation.npu_branch.catalog import PARTITIONS, locate
 
 
 def main(argv=None):

@@ -6,9 +6,10 @@ import shlex
 import sys
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT.parent.parent / "3dgs_compositor/board"))
 import remote
+from initialize.board_sync import NPU_SOURCE_FILES, upload_sources
 
 
 PARTITIONS = ("backbone_cnn", "regressor_residual", "depth_head", "upsampler",
@@ -32,10 +33,9 @@ def main():
         qroot = shlex.quote(args.board_root)
         remote.run(client, "test ! -e " + qroot + " && mkdir -p " + qroot)
         remote.run(client, "cp -a " + shlex.quote(source + "/mvsplat") + " " + qroot + "/mvsplat")
+        upload_sources(client, args.board_root + "/mvsplat", NPU_SOURCE_FILES)
         sftp = client.open_sftp()
         try:
-            for name in ("oracle_probe.py", "worker.py"):
-                sftp.put(str(ROOT / "npu" / name), args.board_root + "/mvsplat/npu/" + name)
             for name in PARTITIONS:
                 result = args.board_root + "/" + name
                 command = (
@@ -45,7 +45,7 @@ def main():
                     "PYTHONPATH=" + shlex.quote(args.board_root + "/mvsplat") + " "
                     "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 "
                     "/root/fpga43dgs_reconstruction/arm_env/bin/python3 "
-                    "-m npu.oracle_probe --bundle " + shlex.quote(source + "/candidate/compiled")
+                    "-m gaussian_generation.npu_branch.oracle_probe --bundle " + shlex.quote(source + "/candidate/compiled")
                     + " --graphs " + shlex.quote(source + "/candidate/graphs")
                     + " --library " + shlex.quote(library)
                     + " --partitions " + shlex.quote(name)

@@ -104,4 +104,4 @@
 
 回板后先检查此前中断任务和设备状态，构建 ABI 2 ARM 桥接库；从 backbone_cnn 单分区开始做固定上下文数值验证与带内存监控的同板配对测速，再逐项选择组合并跑完整视频到首帧。backbone 有 16 个卷积而逻辑边界只有 1.375 MiB，是优先验证对象，但尚未证明有加速。分区通过后才验收 NPU 与既有 FPGA 渲染共存、真实画质及场景准备时间。
 
-构建、预检、测速和整链参数见 [npu/README.md](npu/README.md)。完整包与单分区包信息见结果目录中的 `package.json` / `subset_package.json`；它们仅是编译图/输入候选包，必须搭配运行时代码、官方固定权重及 ARM SDK，不能单独启动整个工程。
+构建、预检、测速和整链参数见 [NPU 候选说明](gaussian_generation/npu_branch/README.md)（2026-10-09 更新目录链接，历史测量不变）。完整包与单分区包信息见结果目录中的 `package.json` / `subset_package.json`；它们仅是编译图/输入候选包，必须搭配运行时代码、官方固定权重及 ARM SDK，不能单独启动整个工程。

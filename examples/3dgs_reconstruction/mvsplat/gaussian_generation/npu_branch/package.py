@@ -5,8 +5,8 @@ from pathlib import Path
 import shutil
 import tarfile
 from common import new_directory, save, sha
-from npu.artifacts import validate_bundle, relative_file
-from npu.protocol import PROTOCOL_VERSION, BRIDGE_ABI_VERSION
+from gaussian_generation.npu_branch.artifacts import validate_bundle, relative_file
+from gaussian_generation.npu_branch.protocol import PROTOCOL_VERSION, BRIDGE_ABI_VERSION
 
 
 def main(argv=None):
@@ -57,7 +57,7 @@ def main(argv=None):
     files = {str(f.relative_to(bundle)).replace("\\", "/"):dict(bytes=f.stat().st_size, sha256=sha(f))
              for f in sorted(bundle.rglob("*")) if f.is_file()}
     save(bundle/"files.json", files)
-    from npu.preflight import check_candidate
+    from gaussian_generation.npu_branch.preflight import check_candidate
     checked = check_candidate(bundle)
     save(out/"preflight.json", checked)
     archive = out/"mvsplat_npu_candidate.tar.gz"

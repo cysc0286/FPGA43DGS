@@ -18,7 +18,7 @@ def main():
     base = "/root/fpga43dgs_reconstruction"
     names = ["npu_cost_probe_20260930", "depth_coverage_20260930",
              "depth_coverage_20260930_v2", "npu_backbone_prefix_20260930"]
-    sys.path.insert(0, str(Path(__file__).resolve().parents[3]/"3dgs_compositor/board"))
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]/"3dgs_compositor/board"))
     import remote
     client = remote.connect()
     try:

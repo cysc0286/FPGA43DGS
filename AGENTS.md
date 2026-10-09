@@ -1,3 +1,16 @@
+# 2026-10-09：模块归属与新增审批（当前优先规则）
+
+用户要求：后续新增代码必须放到对应现有模块，不得未经用户明确批注/同意额外新增独立模块。
+业务模块固定为 `mvsplat/{video_input,pose_estimation,gaussian_generation,rendering}`。
+NPU 候选统一位于 `gaussian_generation/npu_branch/`，不得恢复同级 `mvsplat/npu/`；
+渲染冻结主线为 `rendering/render_main/`，独立候选为 `rendering/render_branch/`，默认不调用候选。
+实现、部署脚本、测试和模块文档均归属已有模块；已有 `initialize/` 只承担预热和生命周期/部署协调。
+如需新增独立模块，必须先提交名称、位置、职责、接口及为何无法归入现有模块，
+获得用户明确批注/同意后再创建。不得用临时目录、候选目录或第二套入口规避要求。
+现有模块内部的正常实现文件/测试文件不属于新增独立业务模块；新增代码仍须符合模块职责。
+详细要求见 `docs/PROJECT_REQUIREMENTS.md`，当前目录见 `docs/CODE_STRUCTURE.md`。
+本轮用户要求不做板测；只做静态文件/语法/引用核对，不声明新的功能、数值或性能验收。
+
 # 2026-10-09：当前目录与历史归档优先说明
 
 当前结构入口为 `docs/CODE_STRUCTURE.md`，四模块合同为

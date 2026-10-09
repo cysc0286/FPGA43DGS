@@ -8,6 +8,16 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT.parent / "3dgs_compositor/board"))
 import remote
 
+# Relocated NPU sources must accompany a candidate even when its board base
+# predates the gaussian_generation package. Do not depend on an old npu/ copy.
+NPU_SOURCE_FILES = ("common.py", "runtime.py", "memory_runtime.py",
+                    "gaussian_generation/__init__.py",
+                    "gaussian_generation/runtime.py", "initialize/__init__.py",
+                    "initialize/session.py") + tuple(
+    path.relative_to(ROOT / "mvsplat").as_posix()
+    for path in sorted((ROOT / "mvsplat/gaussian_generation/npu_branch").iterdir())
+    if path.is_file() and path.suffix in (".py", ".cpp"))
+
 SOURCE_FILES = ("common.py", "export.py", "scene_preparation.py",
                 "gaussian_generation/__init__.py", "gaussian_generation/runtime.py",
                 "gaussian_generation/adapter.py", "pose_estimation/__init__.py",
@@ -19,6 +29,20 @@ SOURCE_FILES = ("common.py", "export.py", "scene_preparation.py",
                 "rendering/__init__.py", "rendering/runtime.py",
                 "rendering/pipeline_adapter.py", "rendering/mainline.json",
                 "video_input/prepare.py", "warm_pipeline.py")
+SOURCE_FILES = tuple(dict.fromkeys(SOURCE_FILES + NPU_SOURCE_FILES))
+
+
+def upload_sources(client, board_mvsplat, files=SOURCE_FILES):
+    """Upload current package paths into a separate candidate directory."""
+    directories = sorted({str(Path(name).parent).replace("\\", "/") for name in files})
+    remote.run(client, "mkdir -p " + " ".join(
+        shlex.quote(board_mvsplat + "/" + directory) for directory in directories))
+    sftp = client.open_sftp()
+    try:
+        for name in files:
+            sftp.put(str(ROOT / "mvsplat" / name), board_mvsplat + "/" + name)
+    finally:
+        sftp.close()
 
 
 def main():
@@ -40,15 +64,7 @@ def main():
         for name in ("deps", "input", "vendor", "weights"):
             remote.run(client, "ln -s " + qbase + "/" + name + " " + qdest + "/" + name)
         files = SOURCE_FILES
-        directories = sorted({str(Path(name).parent).replace("\\", "/") for name in files})
-        remote.run(client, "mkdir -p " + " ".join(
-            shlex.quote(a.dest + "/mvsplat/" + directory) for directory in directories))
-        sftp = client.open_sftp()
-        try:
-            for name in files:
-                sftp.put(str(ROOT / "mvsplat" / name), a.dest + "/mvsplat/" + name)
-        finally:
-            sftp.close()
+        upload_sources(client, a.dest + "/mvsplat", files)
         script = " ".join(shlex.quote(a.dest + "/mvsplat/" + name)
                           for name in files if name.endswith(".py"))
         status, output = remote.run(client,

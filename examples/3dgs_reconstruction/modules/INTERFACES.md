@@ -41,9 +41,11 @@
 ## 主线与独立开发
 
 - 视频/位姿优化：修改 `video_input/decode.py`、`pose_estimation/geometry.py`，保持上述上下文与目标相机合同。
-- 高斯生成优化：修改 `gaussian_generation/`；NPU 通过已有 PartitionRuntime 挂接，不改变 Gaussian 交接字段。
+- 高斯生成优化：修改 `gaussian_generation/`；NPU 代码统一放在其 `npu_branch/`，通过已有 PartitionRuntime 挂接，不改变 Gaussian 交接字段。
 - 后端优化：修改 `rendering/` 的候选实现；当前默认固定 `mainline.json`，冻结包内容不可原地改写。
 
 旧 `video_input/prepare.py`、`initialize/model_runtime.py`、根 `export.py` 只是兼容入口。
 新增功能应修改真实实现，不复制第二套算法。主线没有默认调用 `render_branch`。
+目录和模块新增约束见 [项目要求](../../../docs/PROJECT_REQUIREMENTS.md)；
+新增独立模块必须先取得用户明确批注/同意。
 本轮为源码位置与接口说明整理，功能/板端回归待恢复测试后执行。

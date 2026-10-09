@@ -7,9 +7,9 @@ import platform
 import sys
 import time
 import numpy as np
-from npu.artifacts import validate_bundle
-from npu.buffers import MappedBuffers
-from npu.protocol import PROTOCOL_VERSION, check_bridge, check_command
+from gaussian_generation.npu_branch.artifacts import validate_bundle
+from gaussian_generation.npu_branch.buffers import MappedBuffers
+from gaussian_generation.npu_branch.protocol import PROTOCOL_VERSION, check_bridge, check_command
 
 
 def main():
