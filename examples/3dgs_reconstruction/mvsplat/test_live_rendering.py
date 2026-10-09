@@ -37,6 +37,28 @@ def wire(pixels):
 
 
 class LiveProtocolTests(unittest.TestCase):
+    def test_hardware_modes_reject_unknown_values_and_cpu_mislabeling(self):
+        for mode in (-1, 6, True, 2.5):
+            with self.assertRaisesRegex(ValueError, "render_mode"):
+                LiveRenderer("unused", {}, "unused.log", render_mode=mode)
+        with self.assertRaisesRegex(ValueError, "CPU"):
+            LiveRenderer("unused", {}, "unused.log", render_mode=3, cpu=True)
+
+    def test_support_bounds_reject_invalid_or_uncached_configuration(self):
+        for guard in (-1, 3, True, 1.5):
+            with self.assertRaisesRegex(ValueError, "support_guard"):
+                LiveRenderer("unused", {}, "unused.log", support_guard=guard)
+        with self.assertRaisesRegex(ValueError, "cached"):
+            LiveRenderer("unused", {}, "unused.log", support_guard=1, cached=False)
+
+    def test_optimized_collection_requires_ordered_parallel_lists(self):
+        with self.assertRaisesRegex(ValueError,"fused_collect"):
+            LiveRenderer("unused",{},"unused.log",direct_collect=True,parallel_tiles=False)
+
+    def test_half_only_packing_rejects_arbitrary_cpu_float_output(self):
+        with self.assertRaisesRegex(ValueError,"FP16"):
+            LiveRenderer("unused",{},"unused.log",neon_pack=True,cpu=True)
+
     def test_fragmented_frames_have_separate_immutable_pixels(self):
         first=b"\0\1\2\3\4\5";second=b"\6\7\10\11\12\13"
         all_bytes=wire(first)+wire(second)

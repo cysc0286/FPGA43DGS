@@ -10,7 +10,7 @@ import time
 import numpy as np
 
 from initialize.session import render_environment
-from rendering.runtime import LiveRenderer
+from rendering.runtime import LiveRenderer, load_mainline_profile
 
 
 def summarize(records):
@@ -31,7 +31,8 @@ def main():
     p.add_argument("--binary", type=Path, required=True)
     p.add_argument("--reference", type=Path, required=True, help="Prior frozen FPGA validation.json")
     p.add_argument("--out", type=Path, required=True)
-    p.add_argument("--profiles", default="sort_compare,exact4,batch4,batch2,batch1,keep24k,keep16k,cpu4")
+    p.add_argument("--profiles", default="mainline",
+                   help="Default: accepted full-scene mainline; historical profiles remain explicit")
     p.add_argument("--repeats", type=int, default=6)
     a = p.parse_args()
     if platform.machine() != "aarch64" or not 1 <= a.repeats <= 100:
@@ -40,7 +41,9 @@ def main():
     meta = json.loads((a.scene/"manifest.json").read_text())
     cameras = [c["file"] for c in meta["cameras"] if c["role"] == "target"]
     references = {r["camera"]:r for r in json.loads(a.reference.read_text())["resident"]}
-    configs = dict(uncached1=dict(threads=1, cached=False), exact1=dict(threads=1),
+    profile = load_mainline_profile()
+    configs = dict(mainline=profile["runtime"],
+                   uncached1=dict(threads=1, cached=False), exact1=dict(threads=1),
                    exact4=dict(threads=4), batch16=dict(threads=4, batch=16),
                    batch32=dict(threads=4, batch=32), keep24k=dict(threads=4, max_gaussians=24576),
                    keep16k=dict(threads=4, max_gaussians=16384), cpu4=dict(threads=4, cpu=True),
@@ -54,12 +57,20 @@ def main():
     result = dict(board_executed=True, scene_sha256=hashlib.sha256((a.scene/"model.ply").read_bytes()).hexdigest(),
                   scope="loaded scene camera-to-RGB; no video preparation or display latency", profiles={})
     exact_images={}
-    for name in a.profiles.split(","):
+    names = a.profiles.split(",")
+    if len(set(names)) != len(names) or any(name not in configs for name in names):
+        p.error("--profiles requires unique known names: " + ",".join(configs))
+    for name in names:
         directory=a.out/name
         directory.mkdir()
         entry=dict(configuration=configs[name], measurements=[], checks=[])
         timed_frames=[]
-        with LiveRenderer(a.binary, render_environment(), directory/"native.log", **configs[name]) as runtime:
+        runtime = (LiveRenderer.mainline(a.binary, render_environment(), directory/"native.log")
+                   if name == "mainline" else
+                   LiveRenderer(a.binary, render_environment(), directory/"native.log", **configs[name]))
+        if name == "mainline":
+            entry["accepted_profile"] = profile
+        with runtime:
             entry["scene"]=runtime.load_scene(a.scene/"model.ply")
             # First render is reported independently, never silently discarded.
             f=runtime.render_camera((a.scene/cameras[0]).read_bytes())

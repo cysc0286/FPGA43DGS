@@ -1,6 +1,25 @@
 # Live camera-to-frame renderer
 
-2026-09-30: the measured default is now three-pass depth radix plus four-core
+2026-10-09 packaging: the accepted four-lane implementation is frozen in
+[package/](package/README.md), including BOOT, PL bitstream, exact generated RTL,
+HLS dependency closure and native CPU sources. The independently archived
+[render_branch](../render_branch/README.md) is never selected by this runtime.
+The October 8 paired measurement is 43.575 ms vs 53.302 ms for the candidate;
+these are historical board measurements, not new packaging performance results.
+
+
+2026-10-06: the accepted mainline is **four-lane grouped-shared hardware at
+200 MHz, persistent native C++, full-scene ordered Dense mode 2**. Use
+`LiveRenderer.mainline(binary, environment, log_path)`; the accepted options
+and artifact identities are in [mainline.json](mainline.json).
+The latest saved rollback run is 42.9170 ms mean / 44.0654 ms P95 (60 frames);
+both original-firmware runs that day total 120 frames / 43.9201 ms mean.
+These are loaded-scene, 32,768-Gaussian, 128×128 camera-to-complete-RGB results.
+See [the mainline decision, quality, resources and exclusions](MAINLINE.md).
+This profile/document update adds no new board performance measurement.
+The profile selects options; it does not attest or install board firmware.
+
+Historical 2026-09-30 result: three-pass depth radix plus four-core
 Tile list construction. On the unchanged FPGA, 32,768 Gaussians at 128×128,
 paired view-switch latency falls from 48.632 to **45.212 ms** (7.03%; P95
 46.263 ms). Pixels are unchanged. See [view-switch validation](VIEW_SWITCH_VALIDATION.md).
@@ -20,6 +39,7 @@ file, Python pixel loop, or image archive is on this path.
 
 ## Structure
 
+- mainline.json / MAINLINE.md: accepted options, artifact identity and decision.
 - runtime.py: framed pipe interface and explicit frame archival.
 - live_renderer.cpp: scene lifetime, parallel projection, ordered Tile lists,
   persistent DMA buffers and native RGB conversion.
@@ -32,15 +52,16 @@ file, Python pixel loop, or image archive is on this path.
 - pipeline_adapter.py: compatibility with the warm video-to-first-frame path.
   This adapter still counts raw-frame archival before FRAME_COMPLETE; its time
   must not be presented as the lower archive-free interactive latency.
-- benchmark.py: real-board full-point, thread, batch and lossy-budget profiles.
+- benchmark.py: real-board mainline by default; historical thread, batch and
+  lossy-budget profiles remain opt-in via --profiles.
 - build.sh: uses the frozen CPU sources and the installed ICraft SDK. The
   existing initialize/render_resident.cpp supplies established FLK1 helpers.
 - compare_builds.py: paired native compiler/layout experiments on the ARM board;
   alternates variant order and archives output differences after timing.
 
 The model, projection/sort workspace and FPGA allocation remain in one native
-process. The existing hardware two-bank queue is reused; no new bitstream or
-cross-frame double buffering is introduced. FPGA tags, lengths, idle state and
+process. The existing hardware two-bank queue is reused. This software profile
+adds no bitstream change or cross-frame double buffering. FPGA tags, lengths, idle state and
 finite pixel checks remain enforced.
 
 ## Build and use on the board
@@ -75,9 +96,11 @@ merge. It is sensitive to row ordering and can create stripes or blur. At this
 scene the 16k version outperforms importance-only pruning visually, but all
 quality loss is retained in VALIDATION.md. Full rows remain the default.
 
-For an interactive controller, construct LiveRenderer with threads=4, batch=2.
-Use max_gaussians=16384 and uniform_preview=True for the fast preview profile,
-then submit successive camera payloads to render_camera(). The returned
+For an interactive controller, use LiveRenderer.mainline(binary, environment,
+log_path), load the full scene once and submit successive camera payloads to
+render_camera(). The generic constructor remains for controlled experiments.
+max_gaussians=16384 and uniform_preview=True are a lossy preview experiment,
+not the accepted mainline; the first view loses about 2.46 dB PSNR. The returned
 frame.rgb is ready for the consumer; frame.archive(path) is an optional later
 operation. The Python controller's physical display/transport latency is not
 included in the board benchmark.
