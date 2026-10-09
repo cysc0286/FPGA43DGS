@@ -28,7 +28,7 @@ def main():
         for f in sorted((ROOT/subfolder).rglob("*")):
             if (f.is_file() and f.suffix in suffixes and not
                     set(f.relative_to(ROOT).parts) & {"__pycache__", "results", "runs", "evidence", "build",
-                                                       "render_branch", "package", "exact_workset",
+                                                       "render_branch", "render_main", "package", "exact_workset",
                                                        "archive", "archives", "hardopLog"}):
                 files[str(f.relative_to(ROOT)).replace("\\", "/")] = f
     files["pipeline.py"] = ROOT/"pipeline.py"

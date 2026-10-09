@@ -1,6 +1,6 @@
 # PipeGS HGR 实验分支（不参与默认执行）
 
-此目录与 `../rendering/` 并列。默认渲染仍使用旧版四路 grouped-shared；
+此目录位于 `rendering/` 内，与 `../render_main/` 并列。默认渲染仍使用旧版四路 grouped-shared；
 本目录只保存新版两路 PipeGS HGR v4 的源码、固件及独立验证结果。
 它不是新的默认渲染器，也不会在导入、初始化或正常渲染时自动烧录或调用。
 
@@ -19,7 +19,7 @@
 - `validation/RESULTS.md`：速度、质量、资源和采用结论。
 - `manifest.json`：固定候选身份、`default_enabled=false` 和逐文件 SHA-256。
 
-使用现有 `../rendering/` 的 CPU 软件接口；本目录没有 Python 自动导入入口、
+使用上一级 `rendering/` 的共享 CPU 软件接口；本目录没有 Python 自动导入入口、
 默认选择器或自动安装钩子。保留相同相机、Gaussian 和 DMA ABI。
 正常运行 `pipeline.py`、预热和 `LiveRenderer.mainline(...)` 都不会调用此目录。
 此处的 `render_branch` 是主仓库中的并列实验目录，不是默认 Git 分支切换。

@@ -15,11 +15,11 @@ examples/3dgs_reconstruction/
 │   ├── pose_estimation/         两视图几何、留出目标 PnP
 │   ├── gaussian_generation/     常驻 MVSplat、Gaussian → 渲染 ABI
 │   ├── rendering/               最佳已验收 CPU＋FPGA 后端
-│   │   └── package/             四路完整冻结包，保留源码/硬件/证据
+│   │   ├── render_main/         四路主线冻结包，保留源码/硬件/证据
+│   │   └── render_branch/       PipeGS HGR v4 独立候选，默认不调用
 │   ├── scene_preparation.py     组织视频和位姿交接，不藏数值算法
 │   ├── warm_pipeline.py         组织生成高斯与首帧，控制重叠及归档
-│   ├── npu/                    非默认候选
-│   └── render_branch/           PipeGS HGR v4 独立候选，默认不调用
+│   └── npu/                    MVSplat 高斯生成阶段的 NPU 候选
 └── modules/                     旧入口兼容与共用文件校验；不是第二套新主线
 archive/history_20261009/         历史实验 ZIP、原始路径与哈希索引
 releases/                        较早冻结后端回退包
@@ -49,6 +49,6 @@ python pipeline.py initialize --video INPUT.mp4 --out NEW_RUN \
 - 上述是已加载场景的相机到完整 RGB 时间，**不是视频结束到首帧时间**。
 - 整理后的 Python 调用链尚未重新运行；本轮只核对文件、源码搬迁和冻结资产，没有板测或加速新成绩。
 
-完整证据保留在 [主线包](examples/3dgs_reconstruction/mvsplat/rendering/package/README.md)
-和 [同轮比较](examples/3dgs_reconstruction/mvsplat/render_branch/validation/RESULTS.md)。
+完整证据保留在 [主线包](examples/3dgs_reconstruction/mvsplat/rendering/render_main/README.md)
+和 [同轮比较](examples/3dgs_reconstruction/mvsplat/rendering/render_branch/validation/RESULTS.md)。
 历史成功与负结果已 [单独归档](archive/history_20261009/README.md)，无需把它们展开到主线。

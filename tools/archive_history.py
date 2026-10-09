@@ -23,7 +23,8 @@ def git(*args):
 
 def selected_group(path):
     # Frozen packages are independently audited and must remain byte-identical.
-    if path.startswith("releases/") or "/rendering/package/" in path or "/render_branch/" in path:
+    if (path.startswith("releases/") or "/rendering/package/" in path
+            or "/rendering/render_main/" in path or "/render_branch/" in path):
         return None
     if path.startswith("examples/3dgs_reconstruction/mvsplat/results/"):
         return "frontend_history"

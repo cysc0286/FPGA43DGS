@@ -28,14 +28,14 @@ def verify_package(folder):
 
 
 def main():
-    stable = verify_package(MVS / "rendering/package")
-    candidate = verify_package(MVS / "render_branch")
+    stable = verify_package(MVS / "rendering/render_main")
+    candidate = verify_package(MVS / "rendering/render_branch")
     profile = json.loads((MVS / "rendering/mainline.json").read_text(encoding="utf-8"))
     if stable["boot_sha256"] != profile["required_hardware"]["accepted_boot_sha256"]:
         raise ValueError("Default profile does not select frozen four-lane hardware")
     if not stable["default_enabled"] or profile["required_hardware"]["lanes"] != 4 or candidate["default_enabled"]:
         raise ValueError("Incorrect default renderer selection")
-    frozen_profile = json.loads((MVS / "rendering/package/profile.json").read_text(encoding="utf-8"))
+    frozen_profile = json.loads((MVS / "rendering/render_main/profile.json").read_text(encoding="utf-8"))
     if frozen_profile != profile:
         raise ValueError("Frozen mainline profile has drifted from the runtime profile")
     if candidate["boot_sha256"] == stable["boot_sha256"]:
@@ -45,7 +45,7 @@ def main():
                  MVS / "pose_estimation", MVS / "gaussian_generation",
                  MVS.parent / "modules"):
         for path in base.rglob("*.py"):
-            if any(part in {"results", "package", "__pycache__"} for part in path.parts):
+            if any(part in {"results", "package", "render_main", "render_branch", "__pycache__"} for part in path.parts):
                 continue
             source = path.read_text(encoding="utf-8-sig")
             ast.parse(source, filename=str(path))

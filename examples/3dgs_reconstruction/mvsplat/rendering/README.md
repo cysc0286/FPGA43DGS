@@ -8,9 +8,9 @@ entrypoints and profile together. See [verification and backend NPU scope](PIPEL
 This is a locally tested integration fix, not a new video-to-frame board result.
 
 2026-10-09 packaging: the accepted four-lane implementation is frozen in
-[package/](package/README.md), including BOOT, PL bitstream, exact generated RTL,
+[render_main/](render_main/README.md), including BOOT, PL bitstream, exact generated RTL,
 HLS dependency closure and native CPU sources. The independently archived
-[render_branch](../render_branch/README.md) is never selected by this runtime.
+[render_branch](render_branch/README.md) is never selected by this runtime.
 The October 8 paired measurement is 43.575 ms vs 53.302 ms for the candidate;
 these are historical board measurements, not new packaging performance results.
 

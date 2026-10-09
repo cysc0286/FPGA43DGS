@@ -23,7 +23,7 @@ CPU 执行网络；NPU 仍是待数值验收的候选。
 
 2026-10-08 四路独立后端：32768 高斯、128×128、60 帧，换视角平均 43.575 ms。
 这与历史预热整链约 26–28 s 的场景准备时间是两个口径；统一最新后端的完整视频链尚未复验。
-完整后端 [冻结包](rendering/package/README.md)、[同轮画面与指标](render_branch/validation/RESULTS.md)。
+完整后端 [冻结包](rendering/render_main/README.md)、[同轮画面与指标](rendering/render_branch/validation/RESULTS.md)。
 
 历史报告 `VALIDATION.md`、`FAST_VALIDATION.md`、`BOARD_WARM_NPU_VALIDATION.md`
 按各自日期阅读；旧原始结果通过仓库根 [归档索引](../../../archive/history_20261009/README.md) 恢复，

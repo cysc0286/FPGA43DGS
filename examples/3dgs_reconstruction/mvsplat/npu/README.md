@@ -1,12 +1,41 @@
-# MVSplat NPU 子图迁移候选
+# NPU 候选：加速 MVSplat 高斯生成
 
-**实板更新：ARM ABI 2 已链接并实际执行七个 MVSplat 分区，但全部未通过原定 FP32 误差门槛；多会话还出现过非有限输出。暂不启用整网 NPU 路径。** [测试结果与失败证据](../BOARD_WARM_NPU_VALIDATION.md)。下文 v2 段落为离线阶段记录。
+`npu/` 是 **gaussian_generation 的可选硬件后端**，不是第五个业务阶段，也不是 FPGA 渲染器。
+它尝试把 MVSplat 里的图像特征提取、深度预测和高斯参数预测子图交给板上的 NPU。
 
-2026-09-29 部署 v2：顺序分区默认共用两块 IPC 映射，总容量 **36.375 MiB**；`--buffer-policy per_partition` 保留原 **79.5 MiB** 对照。两者逻辑 I/O 仍都是 79.5 MiB/前向。输入直接按编译布局写入映射，省去中间连续浮点数组；输出仍复制到独立 Tensor，避免下一任务覆盖。新增部署预检、真实输入分区测速及编译布局回归。详见 [v2 验证报告](../NPU_DEPLOYMENT_V2.md)。**本次仍为离线验证，尚未实板运行 NPU。**
+```text
+视频/位姿 → gaussian_generation（CPU，或验证通过后的 CPU＋NPU）
+          → Gaussian 场景 → rendering（CPU＋FPGA）
+```
 
-v2 使用协议/桥接 ABI 2，必须重新编译 `bridge.cpp`。旧 `.so` 会在创建设备前被拒绝，不自动降级。`initialize`、`verify`、`benchmark` 均可指定 `--buffer-limit-mib`（默认 128，只限制 IPC 文件容量，不是整进程内存）。
+高斯准备好之后切换相机，只调用后面的渲染器；当前这个 NPU 目录不参与换视角渲染。
+保留它是为了后续缩短场景准备时间。默认 `--backend cpu` 不创建 PartitionRuntime；
+只有显式选择 `--backend npu` 才尝试加载 NPU，并且必须先通过数值预检才能发布 READY。
 
-这是官方固定权重 MVSplat 内部网络的接入，不是旁路 YOLO，也不是旧 `npu_frontend` 的 SIFT 匹配。2026-09-29 已完成导出、ICraft 五阶段编译、映射审计、持久 worker、数值核验入口与离线包；**尚未在 NPU 上执行，也没有板端加速比**。
+## 当前状态
+
+七个真实 MVSplat 分区已经在板上执行过，但尚未通过既定逐元素数值门槛；
+还记录过权重预检错误和多会话非有限输出。因此当前可用主线仍为 CPU 生成高斯＋FPGA 渲染，
+不能把候选短耗时当成已实现的 NPU 加速。详见 [历史板端结果](../BOARD_WARM_NPU_VALIDATION.md)。
+本次只澄清目录职责，没有重新测试 NPU。
+
+## 这里保存的内容
+
+- `catalog.py`：七个子图与原 MVSplat 层名的对应关系。
+- `export_graphs.py`、`compile_graphs.py`：真实权重子图导出和 ICraft 编译。
+- `runtime.py`、`worker.py`、`bridge.cpp`：CPU Tensor/IPC/SDK 的调用、布局转换和会话管理。
+- `readiness.py`、`verify.py`、诊断脚本：数值检查、权重/布局问题定位。
+- `benchmark.py`：包含数据交接开销的分区对照计时。
+
+它不是 YOLO 演示，也不是旧 `npu_frontend/` 的 SIFT 匹配试验。
+下面保留原部署设计与复跑命令；其中编译/布局检查不等于真实 NPU 数值通过。
+
+### 历史部署 v2 设计
+
+顺序分区共用两块 IPC 映射，总容量 36.375 MiB；`per_partition` 保留 79.5 MiB 对照。
+全部边界的逻辑 I/O 仍为 79.5 MiB/前向，不是实测 DDR 流量。输出复制到独立 Tensor，
+避免下一任务覆盖。协议/桥接 ABI 为 2，旧 `.so` 不自动降级。
+详情见 [v2 报告](../NPU_DEPLOYMENT_V2.md)。这些设计的离线通过不能消除上述实板数值问题。
 
 ## 分工
 

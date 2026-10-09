@@ -29,5 +29,5 @@ python tools/archive_history.py restore --archive archive/history_20261009 --out
 
 恢复器先核对每个 ZIP、内部清单与每个文件的长度和 SHA256，再按原相对路径解包。
 历史源码若使用跨目录相对依赖，应将它与上述提交的独立 checkout 配套使用。
-日常主线不加载这些包。若只运行或复建当前渲染器，直接用 `rendering/package/`，
+日常主线不加载这些包。若只运行或复建当前渲染器，直接用 `rendering/render_main/`，
 不必恢复实验工作树。

@@ -8,7 +8,7 @@
   "clock_mhz": 200,
   "boot_sha256": "3a0001a432083b3c6bb32f4bb0656127d2d5ad1654c5d953f5fa286243f4229e",
   "native_binary_included": false,
-  "shared_runtime": "../rendering",
+  "shared_runtime": "..",
   "scope": "Frozen release assembly, no new board performance run",
   "files": [
     {
@@ -158,8 +158,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 2346,
-      "sha256": "f1de99ab963f17cbd1455b3b97ccc546767d033d264c9995c017bac5b234b0e2"
+      "bytes": 2380,
+      "sha256": "a38c673c6a705045aff78974282cc398fb62e58dea75e5d88ca69a935e514d39"
     },
     {
       "path": "rtl/dispatch.v",

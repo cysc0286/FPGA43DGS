@@ -1,7 +1,7 @@
 # 高斯到渲染
 
 当前交互渲染主线在 [mvsplat/rendering](../../mvsplat/rendering/README.md)，
-发布冻结包在 [rendering/package](../../mvsplat/rendering/package/README.md)。
+发布冻结包在 [rendering/render_main](../../mvsplat/rendering/render_main/README.md)。
 并列的 `render_branch` 只作实验归档，不由此模块调用。
 本模块原有显式冻结包适配器保留兼容。
 

@@ -2,9 +2,9 @@
 
 ## 2026-10-09 封装补充
 
-[四路冻结包](package/README.md) 是当前发布入口；[新版实验目录](../render_branch/README.md)
+[四路冻结包](render_main/README.md) 是当前发布入口；[新版实验目录](render_branch/README.md)
 独立保存，主线不引用。10 月 8 日最新配对 60 帧主线平均 **43.575 ms**，
-候选 **53.302 ms**；[完整对照](../render_branch/validation/RESULTS.md)。
+候选 **53.302 ms**；[完整对照](render_branch/validation/RESULTS.md)。
 本次只封装；以下 10 月 6 日数据是按日期保留的历史决定。
 
 
@@ -123,7 +123,7 @@ FLICKER 启发筛选/求值以及参数复用优化，不称完整复现 PipeGS�
 
 证据入口：
 
-- [软件最终验证](exact_workset/VALIDATION.md)
-- [硬件原始验收与效果图](../../../3dgs_flicker_hw/pipeline/resource_balance/BOARD_VALIDATION.md)
-- [10 月 6 日 A–B–B–A、资源和画面](../../../3dgs_flicker_hw/pipeline/resource_balance/results/20261006/pipegs_compact_request/BOARD_RESULTS.md)
-- [全部近期版本和失败原因](../../../3dgs_flicker_hw/pipeline/resource_balance/results/20261006/RENDER_ATTEMPTS_REVIEW.md)
+- 软件最终验证（原路径 `exact_workset/VALIDATION.md`，见[历史归档](../../../../archive/README.md)）
+- 硬件原始验收与效果图（原路径 `../../../3dgs_flicker_hw/pipeline/resource_balance/BOARD_VALIDATION.md`，见[历史归档](../../../../archive/history_20261009/README.md)）
+- 10 月 6 日 A–B–B–A、资源和画面（原路径 `../../../3dgs_flicker_hw/pipeline/resource_balance/results/20261006/pipegs_compact_request/BOARD_RESULTS.md`，见[历史归档](../../../../archive/history_20261009/README.md)）
+- 全部近期版本和失败原因（原路径 `../../../3dgs_flicker_hw/pipeline/resource_balance/results/20261006/RENDER_ATTEMPTS_REVIEW.md`，见[历史归档](../../../../archive/history_20261009/README.md)）

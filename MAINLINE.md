@@ -6,11 +6,11 @@
 ## 只保留一个推荐渲染配置
 
 - 软件配置：`examples/3dgs_reconstruction/mvsplat/rendering/mainline.json`。
-- 发布包：同目录 `package/`，含接受过实板验证的四路 grouped-shared 硬件、源码和证据。
+- 发布包：同目录 `render_main/`，含接受过实板验证的四路 grouped-shared 硬件、源码和证据。
 - 入口：独立交互用 `LiveRenderer.mainline(...)`；整链显式指定 `--live-renderer`，由 `PipelineRenderer(profile="mainline")` 调用同一配置。
 - CPU：常驻 C++、四线程、缓存场景、稳定深度基数排序、direct_collect、NEON 封装。
 - FPGA：四路、200 MHz、Dense mode 2、有序合成、精确指数 ROM；不额外抽点。
-- `render_branch/` 只保存 HGR v4 候选，默认不调用；`npu/` 不进入当前渲染后端。
+- `rendering/render_branch/` 只保存 HGR v4 候选，默认不调用；`npu/` 不进入当前渲染后端。
 
 ## 四模块与预热
 
@@ -34,7 +34,7 @@ SSIM 0.804464 / 0.785135 / 0.784232；LPIPS、连续路径闪烁与功耗未测�
 继承既有 AI 脉宽及 GT/CDC 限制，不能称全板无条件时序签核。
 这些均不是本轮新测；目录整理也不构成新的性能或画质收益。
 
-[完整同轮结果](examples/3dgs_reconstruction/mvsplat/render_branch/validation/RESULTS.md)。
+[完整同轮结果](examples/3dgs_reconstruction/mvsplat/rendering/render_branch/validation/RESULTS.md)。
 [历史试验索引](archive/history_20261009/index.json)。
 
 ## 当前整理的核验范围

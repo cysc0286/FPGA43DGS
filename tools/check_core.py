@@ -8,7 +8,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", ".venv", ".venv_mvsplat", "vendor", "build", "evidence", "runs", "data", "__pycache__",
-        "archive", "archives", "results", "package", "render_branch", "bounded", "npu_frontend"}
+        "archive", "archives", "results", "package", "render_main", "render_branch", "bounded", "npu_frontend"}
 
 
 def main():

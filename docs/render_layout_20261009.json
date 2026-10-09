@@ -1,0 +1,41 @@
+{
+  "scope": "Directory relocation and static file-integrity audit only; no compilation, algorithm tests or board execution",
+  "base_commit": "d96af8303f2598d1d22b87b018de9a86eac6d682",
+  "path_mapping": {
+    "rendering/package": "rendering/render_main",
+    "render_branch": "rendering/render_branch"
+  },
+  "frozen_tracked_files_byte_identical": 345,
+  "relocation_only_metadata_changes": [
+    {
+      "path": "examples/3dgs_reconstruction/mvsplat/rendering/render_main/README.md",
+      "old_sha256": "d8859c9d805d1e250a042df877f8b9d0e2543fa253722a5cf1e2a39b181fd833",
+      "new_sha256": "9ff644ec9bae1e9c3ea423f356865068d1664a36dbdfa54cf22396e31f570cf4"
+    },
+    {
+      "path": "examples/3dgs_reconstruction/mvsplat/rendering/render_main/manifest.json",
+      "old_sha256": "7787db7402a26603bd5281e1b0c715358aecfc4074fb223a1956fed268c1ab9a",
+      "new_sha256": "20264bc47e33bbe1c378f59a3501fa169e94918c208dc7e2f3acb1fa29a85d92"
+    },
+    {
+      "path": "examples/3dgs_reconstruction/mvsplat/rendering/render_main/profile.json",
+      "old_sha256": "ba2f570d0e66b25e72363984f542dfe816c8f5ac52e1e3abd19e47a30defc20a",
+      "new_sha256": "4710b89b8f4b9ec45238ad143e07c058101a39a4ca3fa452289f3debdfe3e93a"
+    },
+    {
+      "path": "examples/3dgs_reconstruction/mvsplat/rendering/render_branch/README.md",
+      "old_sha256": "f1de99ab963f17cbd1455b3b97ccc546767d033d264c9995c017bac5b234b0e2",
+      "new_sha256": "a38c673c6a705045aff78974282cc398fb62e58dea75e5d88ca69a935e514d39"
+    },
+    {
+      "path": "examples/3dgs_reconstruction/mvsplat/rendering/render_branch/manifest.json",
+      "old_sha256": "0361ed088dce79f2eb61ec2b1258905e2d8e50de5d7aa8d5168b4a042928c874",
+      "new_sha256": "972d65c7025882f7dbf47f85d434b608eea5f1a2e2dfb3b5ea4bee060b195acc"
+    }
+  ],
+  "runtime_configuration_unchanged": true,
+  "candidate_default_enabled": false,
+  "package_members_checked": 348,
+  "default_isolation_sources_checked": 36,
+  "current_document_links_resolved": 45
+}

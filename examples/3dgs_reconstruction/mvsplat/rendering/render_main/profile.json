@@ -34,12 +34,12 @@
   },
   "reference_artifacts": {
     "native_binary_sha256": "d1220d46d0cb6830077b973a2cfb2587664e36d28357bc79c18fb2eb6dfaa672",
-    "native_provenance_repo_relative": "examples/3dgs_reconstruction/mvsplat/rendering/package/validation/native_build_provenance.json",
+    "native_provenance_repo_relative": "examples/3dgs_reconstruction/mvsplat/rendering/render_main/validation/native_build_provenance.json",
     "hardware_validation_repo_relative": "examples/3dgs_flicker_hw/pipeline/resource_balance/BOARD_VALIDATION.md",
-    "latest_board_validation_repo_relative": "examples/3dgs_reconstruction/mvsplat/rendering/package/validation/board_20261008/paired_summary.json",
-    "attempts_review_repo_relative": "examples/3dgs_reconstruction/mvsplat/rendering/package/validation/history/RENDER_ATTEMPTS_REVIEW.md"
+    "latest_board_validation_repo_relative": "examples/3dgs_reconstruction/mvsplat/rendering/render_main/validation/board_20261008/paired_summary.json",
+    "attempts_review_repo_relative": "examples/3dgs_reconstruction/mvsplat/rendering/render_main/validation/history/RENDER_ATTEMPTS_REVIEW.md"
   },
   "validation_boundary": "This manifest selects software options and records accepted artifacts; it does not install or attest the running FPGA firmware. Rebuilt binaries require differential validation. Timing evidence is for 32768 Gaussians at 128x128, not all scenes or sizes.",
   "packaged_on": "2026-10-09",
-  "package_repo_relative": "examples/3dgs_reconstruction/mvsplat/rendering/package"
+  "package_repo_relative": "examples/3dgs_reconstruction/mvsplat/rendering/render_main"
 }

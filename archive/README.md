@@ -9,4 +9,4 @@
 
 当前四模块和推荐入口见 [代码结构](../docs/CODE_STRUCTURE.md)。
 当前验收硬件、配置和完整源码见
-[四路渲染冻结包](../examples/3dgs_reconstruction/mvsplat/rendering/package/README.md)。
+[四路渲染冻结包](../examples/3dgs_reconstruction/mvsplat/rendering/render_main/README.md)。

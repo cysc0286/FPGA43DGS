@@ -6,8 +6,8 @@
 旧 `modules/` 仅保留兼容和共用文件校验，勿把旧 OpenSplat 合同当作 MVSplat 新接口。
 历史试验通过 `archive/history_20261009/index.json` 定位，在新目录恢复；
 下文历史报告中的已归档路径不是当前活动源码路径，不要重新往那里混写结果。
-唯一渲染主线仍为 `rendering/mainline.json` 和 `rendering/package/`；
-`render_branch/` 是独立候选。用户当前要求板卡离线、不测试，本轮只做结构整理；
+唯一渲染主线仍为 `rendering/mainline.json` 和 `rendering/render_main/`；
+`rendering/render_branch/` 是独立候选。用户当前要求板卡离线、不测试，本轮只做结构整理；
 未经新的测试授权不要连接板卡或重新运行实验。完整整链接线尚待复验。
 目录整理不继承新的性能结论；历史用时/质量必须标出测量日期及范围。
 

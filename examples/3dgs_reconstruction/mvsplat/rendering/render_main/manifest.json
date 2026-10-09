@@ -223,13 +223,13 @@
     },
     {
       "path": "profile.json",
-      "bytes": 2133,
-      "sha256": "ba2f570d0e66b25e72363984f542dfe816c8f5ac52e1e3abd19e47a30defc20a"
+      "bytes": 2149,
+      "sha256": "4710b89b8f4b9ec45238ad143e07c058101a39a4ca3fa452289f3debdfe3e93a"
     },
     {
       "path": "README.md",
-      "bytes": 2154,
-      "sha256": "d8859c9d805d1e250a042df877f8b9d0e2543fa253722a5cf1e2a39b181fd833"
+      "bytes": 2151,
+      "sha256": "9ff644ec9bae1e9c3ea423f356865068d1664a36dbdfa54cf22396e31f570cf4"
     },
     {
       "path": "rtl/dispatch.v",

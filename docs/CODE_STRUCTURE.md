@@ -8,7 +8,7 @@
 | 视频输入 | `video_input/receipt.py`、`video_input/decode.py` | 接收已完成视频、选帧、缩放，保留原帧索引 | CPU |
 | 位姿估计 | `pose_estimation/geometry.py` | 两视图 SIFT/匹配/Essential/三角化，留出视角 PnP | CPU |
 | 高斯生成 | `gaussian_generation/runtime.py`、`adapter.py` | 固定权重前向、参数校验、协方差/SH/相机 ABI 转换 | 当前 CPU；NPU 另行验证 |
-| 渲染 | `rendering/runtime.py`、`live_renderer.cpp`、`package/` | 常驻场景、投影、排序、FPGA 求值合成、返回 RGB | CPU＋FPGA |
+| 渲染 | `rendering/runtime.py`、`live_renderer.cpp`、`render_main/` | 常驻场景、投影、排序、FPGA 求值合成、返回 RGB | CPU＋FPGA |
 
 这些是实际算法源码位置，不是再加一层同名包装。解码和几何从原 `video_input/prepare.py`
 拆出；ModelRuntime 从 `initialize` 移出；Gaussian 导出从根目录移入生成模块。
@@ -33,7 +33,7 @@
 |---|---|
 | `archive/history_20261009/` | 823 个历史文件条目的 ZIP 与哈希清单，含失败/负收益结果 |
 | `archive/local_workspace_20261009/` | 本机未跟踪原始实验、日志、生成物；忽略、不上传 |
-| `mvsplat/render_branch/` | 保留的 PipeGS HGR v4 独立冻结候选；主线不调用 |
+| `mvsplat/rendering/render_branch/` | 保留的 PipeGS HGR v4 独立冻结候选；主线不调用 |
 | `mvsplat/npu/` | 前馈网络 NPU 候选、编译与诊断；没有新的数值验收 |
 | `releases/3dgs_renderer_v1_20260928/` | 较早冻结回退及现有 CPU 契约依赖，不能当作最新位流 |
 | `reconstruction/modules/` | 原 COLMAP/OpenSplat 文件接口兼容；`contracts.py` 仍被导出/校验使用 |
@@ -47,7 +47,7 @@
 
 `tools/core_sources.json` 明确主线包含项。`package_core.py` 只选 Git 跟踪的合格源码，
 避免递归扫进本地实验。历史 ZIP、`render_branch`、旧训练实验、运行结果不进入主线源码包。
-主线源码包不含权重、SDK、模型、BOOT/bit；完整硬件复建/回退资产请另取 `rendering/package/`。
+主线源码包不含权重、SDK、模型、BOOT/bit；完整硬件复建/回退资产请另取 `rendering/render_main/`。
 历史恢复必须解压到新目录，按 [归档说明](../archive/history_20261009/README.md) 操作。
 
 本轮只有静态整理与文件完整性核对，未运行功能测试、编译或上板测速。

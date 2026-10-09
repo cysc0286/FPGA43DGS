@@ -2,7 +2,7 @@
 
 此包固定已经实板验证的 grouped-shared 四路、200 MHz、Dense mode 2 渲染器。
 调用入口保持 `rendering.runtime.LiveRenderer.mainline(...)`，配置在上一级
-`mainline.json`。实验版本单独保存在 `../../render_branch/`，主线不调用它。
+`mainline.json`。实验版本单独保存在 `../render_branch/`，主线不调用它。
 
 基准范围为场景已经加载后，相机请求到完整 RGB 返回。2026-10-08 同轮 60 帧
 平均 43.575 ms；本次封装不重新宣称产生性能收益，也不自动更新开发板。
