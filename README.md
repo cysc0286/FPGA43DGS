@@ -1,5 +1,8 @@
 # FPGA43DGS
 
+**2026-10-09 目录清理：已移除独立加法器和基础 ALU 测试，以及源码打包清单中的相关条目。**
+当前入口、模块职责和保留的平台依赖见 [代码结构说明](docs/CODE_STRUCTURE.md)。
+
 **2026-10-09 渲染发布：旧版四路是默认，新版独立保存且不调用。**
 
 | 目录 | 用途 |
@@ -70,10 +73,12 @@ examples/3dgs_reconstruction/
     ├── initialize/                     # 视频前权重/设备预热、常驻渲染候选
     ├── video_input/                    # 文件接收、抽帧、两视图与目标位姿
     ├── rendering/                      # 常驻原生换视角、帧交付、预览预算
+    │   └── package/                    # 已接受的四路主线冻结包
+    ├── render_branch/                  # 独立 PipeGS HGR v4 候选，不进入默认链
     ├── warm_pipeline.py                # 视频后推理/PnP 调度、导出、首帧
     ├── npu/                            # 导出、编译、运行、核验与离线打包
     ├── infer.py / export.py            # 冷推理参考与 Gaussian 格式转换
-    └── results/20260929/               # 小型指标、构建记录与效果图
+    └── results/                        # 按日期保存的指标、核验记录与效果图
 ```
 
 预热时间和视频输入时间仅记录。**场景准备时间**从 `VIDEO_COMPLETE` 到首张指定视角的 `FRAME_COMPLETE`，包含首次渲染；`SCENE_READY` 是中间点。
@@ -111,7 +116,7 @@ python examples/3dgs_reconstruction/pipeline.py --help
 
 默认检查使用自动生成的合成接口文件，验证16项接口、8项资源控制和3项主入口兼容行为；不连接板卡、不训练、不烧录。完整安装边界、固定第三方版本和重新打包命令见 [源码交付说明](docs/GITHUB_PACKAGE.md)，本次核验见 [CORE_VALIDATION.md](docs/CORE_VALIDATION.md)。
 
-检查预热、视频、原生帧协议与 NPU 数据合同（本轮共 71 项软件测试，无需权重或 SDK）：
+检查预热、视频、原生帧协议与 NPU 数据合同（无需权重或 SDK；上次整合共 86 项通过，本次目录清理未重跑）：
 
 ```text
 python -m pip install -r requirements-mvsplat-checks.txt
@@ -133,4 +138,7 @@ python tools/check_core.py --mvsplat
 
 四单元回退源码和接口见 [releases](releases/README.md)。后续候选应另建版本，不覆盖原 BOOT、位流或测量结果。FLICKER是当前渲染方法主线，整篇论文的所有机制尚未复现。
 
-仍被主线引用的 `examples/3dgs_compositor/board`、`3dgs_scene` 和 `3dgs_flicker_cat` 保留原路径。基础 ALU 源码在 [archive](archive/basic_demos_20260928/README.md)。第三方来源、版本及许可证见 [third_party/sources.json](third_party/sources.json)；仓库不包含设备密码或私钥。
+仍被主线引用的 `examples/3dgs_compositor/board`、`3dgs_scene` 和 `3dgs_flicker_cat` 保留原路径。
+独立基础 ALU 与加法器测试已删除，可从 Git 历史追溯。冻结渲染包和平台中的
+`adder_top/legacy_adder_top` 属于现有寄存器、DMA 兼容依赖，继续保留。
+第三方来源、版本及许可证见 [third_party/sources.json](third_party/sources.json)；仓库不包含设备密码或私钥。

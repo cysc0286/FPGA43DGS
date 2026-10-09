@@ -20,15 +20,13 @@ BOOT.bin
 *.pem
 *.key
 
-# Local-only planning documents and retired adder smoke test.
+# Local-only planning documents.
 /TEAM_MODULES.md
 /team_workplan_2026-09-22.md
-/archive/basic_demos_20260928/adder_smoke/
 
 # Reproducible simulation output.
-/examples/adder_smoke/build/
-/examples/basic_alu/build/
-/archive/basic_demos_20260928/*/build/
+# Removed demo sources; keep local generated output out of source releases.
+/archive/basic_demos_20260928/
 __pycache__/
 /examples/3dgs_fpga_eval/build/
 .Xil/

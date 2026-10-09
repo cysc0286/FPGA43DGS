@@ -123,7 +123,9 @@ RenderResult：frame.bin + frame.ppm + result.json
 
 ## 实验与共享依赖
 
-基础 ALU 源码与历史清单在 [archive/basic_demos_20260928](archive/basic_demos_20260928/README.md)；原始压缩包与实验输出仅保留在本地。
+2026-10-09：独立加法器与基础 ALU 测试目录及相关源码打包条目已删除，旧源码从 Git 历史追溯。
+冻结渲染包和平台中的 `adder_top/legacy_adder_top` 是当前寄存器及 DMA 兼容依赖，保留不动。
+当前源码位置与模块职责见 [代码结构说明](docs/CODE_STRUCTURE.md)。
 
 以下目录不作为主线入口，但暂不整目录移动：
 

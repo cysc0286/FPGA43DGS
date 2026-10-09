@@ -1,5 +1,13 @@
 # 核心源码交付（2026-09-28）
 
+## 2026-10-09 基础测试清理
+
+独立加法器 smoke test 和基础 ALU 测试源码已移除，`tools/core_sources.json`
+也不再打包这些目录及旧归档清单。当前模块位置见 [代码结构](CODE_STRUCTURE.md)。
+本地忽略的仿真生成物及历史证据未清空，不随源码发布；冻结渲染包、平台的
+寄存器/DMA 兼容逻辑和 3DGS 自身回归保留。本次按用户要求不运行测试或连接板卡。
+下文和 `core_release_receipt.json` 是按日期保存的旧发布记录，不是当前文件清单。
+
 ## 2026-09-29 预热与 NPU 候选更新
 
 新增 `mvsplat/initialize`、`video_input`、`warm_pipeline.py` 和 `npu` 完整候选源码、构建入口、核验工具、状态合同及小型结果。`reconstruct` 冷路径保留；`initialize` 在视频前加载固定权重和运行环境。计时按 `VIDEO_COMPLETE→FRAME_COMPLETE`，预热与采集耗时仅记录。
