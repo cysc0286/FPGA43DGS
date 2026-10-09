@@ -56,10 +56,12 @@ class WarmSession:
             import export
             if getattr(args, "live_renderer", None):
                 from rendering.pipeline_adapter import PipelineRenderer
+                configuration = {key: getattr(args, "render_" + key, None)
+                                 for key in ("threads", "max_gaussians", "batch", "uniform_preview")}
                 self.renderer = self.resources.enter_context(PipelineRenderer(args.renderer,
                     args.live_renderer, render_environment(), out / "renderer.log",
-                    threads=args.render_threads, max_gaussians=args.render_max_gaussians,
-                    batch=args.render_batch, uniform_preview=args.render_uniform_preview))
+                    profile=getattr(args, "render_profile", "mainline"),
+                    **{key: value for key, value in configuration.items() if value is not None}))
             else:
                 from initialize.renderer_runtime import RendererRuntime
                 self.renderer = self.resources.enter_context(RendererRuntime(args.renderer,

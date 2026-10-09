@@ -82,6 +82,7 @@ def main():
     if any(sequence!=sequences[0] for sequence in sequences[1:]):
         raise ValueError("Projection or reference differs across scene/viewport changes")
     with PipelineRenderer(a.renderer,a.binary,render_environment(),a.out/"adapter.log",
+                          profile="custom",
                           parallel_collect=a.parallel_collect,direct_collect=a.direct_collect,
                           neon_pack=a.neon_pack) as adapter:
         scene=adapter.load_rows(rows)

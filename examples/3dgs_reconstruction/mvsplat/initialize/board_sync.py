@@ -8,6 +8,14 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT.parent / "3dgs_compositor/board"))
 import remote
 
+SOURCE_FILES = ("common.py", "export.py", "initialize/model_runtime.py",
+                "initialize/renderer_runtime.py", "initialize/attributes_resident.cpp",
+                "initialize/validate_resident.py", "initialize/group_sort_resident.cpp",
+                "initialize/run.py", "initialize/session.py",
+                "rendering/__init__.py", "rendering/runtime.py",
+                "rendering/pipeline_adapter.py", "rendering/mainline.json",
+                "video_input/prepare.py", "warm_pipeline.py")
+
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
@@ -27,11 +35,10 @@ def main():
                        timeout=30)
         for name in ("deps", "input", "vendor", "weights"):
             remote.run(client, "ln -s " + qbase + "/" + name + " " + qdest + "/" + name)
-        files = ("common.py", "export.py", "initialize/model_runtime.py",
-                 "initialize/renderer_runtime.py", "initialize/attributes_resident.cpp",
-                 "initialize/validate_resident.py",
-                 "initialize/group_sort_resident.cpp",
-                 "video_input/prepare.py", "warm_pipeline.py")
+        files = SOURCE_FILES
+        directories = sorted({str(Path(name).parent).replace("\\", "/") for name in files})
+        remote.run(client, "mkdir -p " + " ".join(
+            shlex.quote(a.dest + "/mvsplat/" + directory) for directory in directories))
         sftp = client.open_sftp()
         try:
             for name in files:

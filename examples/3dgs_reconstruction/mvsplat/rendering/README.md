@@ -1,5 +1,12 @@
 # Live camera-to-frame renderer
 
+2026-10-09 integration: the warm video path's `PipelineRenderer` now defaults
+to `LiveRenderer.mainline(...)`, including direct collection and NEON packing.
+Explicit tuning uses `--render-profile custom`; the legacy renderer remains
+available when no native binary is supplied. Board staging now transfers the
+entrypoints and profile together. See [verification and backend NPU scope](PIPELINE_INTEGRATION_20261009.md).
+This is a locally tested integration fix, not a new video-to-frame board result.
+
 2026-10-09 packaging: the accepted four-lane implementation is frozen in
 [package/](package/README.md), including BOOT, PL bitstream, exact generated RTL,
 HLS dependency closure and native CPU sources. The independently archived

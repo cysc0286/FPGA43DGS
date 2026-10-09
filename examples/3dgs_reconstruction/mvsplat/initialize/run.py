@@ -18,11 +18,13 @@ def main(argv=None):
     p.add_argument("--resident-binary", type=Path, default=Path(__file__).with_name("render_resident"))
     p.add_argument("--live-renderer", type=Path,
                    help="Native camera-to-frame backend; replaces the three-process renderer")
-    p.add_argument("--render-threads", type=int, choices=(1, 2, 3, 4), default=4)
-    p.add_argument("--render-max-gaussians", type=int, default=0,
-                   help="Explicit lossy scene budget; 0 retains every Gaussian")
-    p.add_argument("--render-batch", type=int, choices=(1, 2, 4, 8, 16, 32), default=2)
-    p.add_argument("--render-uniform-preview", action="store_true",
+    p.add_argument("--render-profile", choices=("mainline", "custom"), default="mainline",
+                   help="Native renderer defaults to the accepted full-scene mainline; custom allows tuning")
+    p.add_argument("--render-threads", type=int, choices=(1, 2, 3, 4))
+    p.add_argument("--render-max-gaussians", type=int,
+                   help="Explicit lossy scene budget (custom profile); 0 retains every Gaussian")
+    p.add_argument("--render-batch", type=int, choices=(1, 2, 4, 8, 16, 32))
+    p.add_argument("--render-uniform-preview", action="store_true", default=None,
                    help="Uniform thinning with enlarged footprint; requires a Gaussian budget")
     p.add_argument("--size", type=int, default=128)
     p.add_argument("--threads", type=int, default=4, help="Torch intra-op threads; measured 30TAI CPU default")
@@ -44,12 +46,21 @@ def main(argv=None):
     p.add_argument("--buffer-policy", choices=("shared", "per_partition"), default="shared")
     p.add_argument("--buffer-limit-mib", type=int, default=128)
     a = p.parse_args(argv)
-    if not 0 <= a.render_max_gaussians <= 1000000:
+    if a.render_max_gaussians is not None and not 0 <= a.render_max_gaussians <= 1000000:
         p.error("--render-max-gaussians must be in [0, 1000000]")
     if a.render_max_gaussians and a.live_renderer is None:
         p.error("--render-max-gaussians requires --live-renderer")
     if a.render_uniform_preview and not a.render_max_gaussians:
         p.error("--render-uniform-preview requires --render-max-gaussians")
+    if a.live_renderer is not None:
+        from rendering.pipeline_adapter import validate_pipeline_configuration
+        configuration = {key: getattr(a, "render_" + key)
+                         for key in ("threads", "max_gaussians", "batch", "uniform_preview")}
+        try:
+            validate_pipeline_configuration(a.render_profile,
+                {key: value for key, value in configuration.items() if value is not None})
+        except ValueError as exc:
+            p.error(str(exc))
     if platform.machine().lower() not in ("aarch64", "arm64"):
         p.error("First FPGA frame acceptance requires the ARM board")
     if min(a.threads, a.prepare_threads) < 1 or (not a.serial_prepare and

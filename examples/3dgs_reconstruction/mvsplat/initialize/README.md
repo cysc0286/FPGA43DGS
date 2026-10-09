@@ -1,10 +1,20 @@
 # 视频前预热与常驻渲染候选
 
+2026-10-09：原生预热链已统一调用 `LiveRenderer.mainline(...)`，自动启用
+`direct_collect`、`parallel_collect`、`fused_collect`、`neon_pack` 等全部主线参数。
+参数仅从 `rendering/mainline.json` 读取；预热记录和帧记录保存实际配置及预期 BOOT
+身份。`board_sync.py` 同时上传这些入口和 JSON，避免板端残留旧调用。
+本次完成本地集成回归，未完成新视频实板复测；详见
+[整合核验与后端 NPU 评估](../rendering/PIPELINE_INTEGRATION_20261009.md)。
+
 2026-09-30：新增 [rendering 原生后端](../rendering/README.md)。
 initialize 仍负责视频前权重和设备预热；rendering 独立负责场景装载后的换视角。
 追加 --live-renderer 指定已构建的原生程序即可接回本视频链；首帧仍完成原归档核验。
-追加 --render-max-gaussians 16384 --render-uniform-preview 可显式启用近似预览，
+追加 --render-profile custom --render-max-gaussians 16384 --render-uniform-preview 可显式启用近似预览，
 其画质和时间必须单列，不能冒充完整高斯结果。
+使用主线时只需 `--live-renderer /path/to/matching/render_live`；无需手工补优化开关。
+没有 `--live-renderer` 时仍是原 `RendererRuntime` 回退路径，不会自动找到/安装新程序。
+主线入口不证明板上实际 BOOT 身份；部署时仍需核对主线包内的程序与硬件要求。
 
 状态：2026-09-29 已在 30TAI Lite 验证预热 CPU＋FPGA 首帧与连续换视角，详见 [实板结果](../BOARD_WARM_NPU_VALIDATION.md)。原离线证据见 [结果](../INITIALIZE_NPU_VALIDATION.md)。旧 `pipeline.py reconstruct` 保留冷启动对照；冻结 `releases/3dgs_renderer_v1_20260928` 未改。
 
@@ -31,7 +41,11 @@ warm_pipeline.py：汇合 → 高斯导出/校验 → 常驻场景装入
 
 当前预热加载权重、依赖及会话，不执行虚构视频推理；后端算子第一次执行的惰性开销仍计入场景准备。CLI 验收一次视频；运行时类可复用，但多视频服务循环尚未做板端验收。
 
-## 渲染驻留的确切范围
+## 旧回退渲染器的驻留范围
+
+本节仅描述未传 `--live-renderer` 的旧 `RendererRuntime`，不是当前原生主线性能。
+原生主线在一个 C++ 常驻进程内完成投影、分组排序、FPGA 提交与 RGB 封装，详见
+[主线合同](../rendering/MAINLINE.md)；两者的历史计时不可混用。
 
 `attributes_resident.cpp` 引用冻结投影源文件，通过 `LOAD` 原子替换完整 Gaussian rows，通过 `PROJECT` 改相机。场景只加载一次，后续投影复用数据。`render_resident.cpp` 保留 FPGA SDK 设备句柄和互斥锁，按有序命令处理帧。
 

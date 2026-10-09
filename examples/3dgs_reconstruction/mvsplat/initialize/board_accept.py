@@ -20,7 +20,8 @@ def main():
     p.add_argument("--threads", type=int, default=4)
     p.add_argument("--prepare-threads", type=int, default=1)
     p.add_argument("--live-renderer", help="Absolute board path to the native live renderer")
-    p.add_argument("--render-max-gaussians", type=int, default=0)
+    p.add_argument("--render-profile", choices=("mainline", "custom"), default="mainline")
+    p.add_argument("--render-max-gaussians", type=int)
     p.add_argument("--render-uniform-preview", action="store_true")
     schedule = p.add_mutually_exclusive_group()
     schedule.add_argument("--serial-prepare", dest="serial_prepare", action="store_true")
@@ -34,12 +35,14 @@ def main():
     p.add_argument("--buffer-policy", choices=("shared", "per_partition"), default="shared")
     p.add_argument("--buffer-limit-mib", type=int, default=128)
     a = p.parse_args()
-    if not 0 <= a.render_max_gaussians <= 1000000:
+    if a.render_max_gaussians is not None and not 0 <= a.render_max_gaussians <= 1000000:
         p.error("--render-max-gaussians must be in [0, 1000000]")
     if a.render_max_gaussians and not a.live_renderer:
         p.error("--render-max-gaussians requires --live-renderer")
     if a.render_uniform_preview and not a.render_max_gaussians:
         p.error("--render-uniform-preview requires --render-max-gaussians")
+    if a.live_renderer and a.render_profile == "mainline" and a.render_max_gaussians:
+        p.error("A lossy Gaussian budget requires --render-profile custom")
     if (PurePosixPath(a.run).is_absolute() or ".." in PurePosixPath(a.run).parts
             or not a.run or a.run == "."):
         p.error("Run must be a fresh relative board directory")
@@ -64,7 +67,9 @@ def main():
         args.append("--overlap-prepare")
     if a.live_renderer:
         args += ["--live-renderer", a.live_renderer,
-                 "--render-max-gaussians", str(a.render_max_gaussians)]
+                 "--render-profile", a.render_profile]
+        if a.render_max_gaussians is not None:
+            args += ["--render-max-gaussians", str(a.render_max_gaussians)]
         if a.render_uniform_preview:
             args.append("--render-uniform-preview")
     if a.backend == "npu":

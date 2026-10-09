@@ -6,13 +6,33 @@ import time
 import numpy as np
 
 from initialize.renderer_runtime import frozen_renderer_module
-from rendering.runtime import LiveRenderer
+from rendering.runtime import LiveRenderer, load_mainline_profile
+
+
+def validate_pipeline_configuration(profile, configuration):
+    """Keep the accepted profile fixed; tuning requires an explicit custom run."""
+    if profile not in ("mainline", "custom"):
+        raise ValueError("render profile must be mainline or custom")
+    if profile == "mainline":
+        accepted = load_mainline_profile()["runtime"]
+        changed = [key for key, value in configuration.items()
+                   if key not in accepted or type(value) is not type(accepted[key])
+                   or value != accepted[key]]
+        if changed:
+            raise ValueError("Mainline settings cannot be overridden: " + ", ".join(changed)
+                             + "; select --render-profile custom for experiments")
 
 
 class PipelineRenderer:
-    def __init__(self, renderer, binary, environment, log_path, **configuration):
+    def __init__(self, renderer, binary, environment, log_path, *, profile="mainline",
+                 **configuration):
+        validate_pipeline_configuration(profile, configuration)
         self.manifest = frozen_renderer_module(Path(renderer)).verify()
-        self.runtime = LiveRenderer(binary, environment, log_path, **configuration)
+        if profile == "mainline":
+            self.runtime = LiveRenderer.mainline(binary, environment, log_path)
+        else:
+            self.runtime = LiveRenderer(binary, environment, log_path, **configuration)
+            self.runtime.configuration["profile"] = "custom"
         self.scene = None
         self.last_rgb = None
 

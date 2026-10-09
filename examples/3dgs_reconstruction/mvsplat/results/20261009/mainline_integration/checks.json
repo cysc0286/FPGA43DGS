@@ -1,0 +1,23 @@
+{
+  "recorded_at": "2026-10-09T10:41:48.4157226+08:00",
+  "base_commit": "8e7f32e862cff9f835f67566b7a967e9a06d2866",
+  "scope": "local Python integration and deployment contract; native/model/SSH test doubles",
+  "complete_local": true,
+  "board_executed": false,
+  "board_probe": "192.168.126.49:22 TCP timeout at 3 seconds",
+  "tests_passed": 86.0,
+  "new_integration_tests": 11,
+  "frozen_mainline_files_verified": 151,
+  "frozen_candidate_files_verified": 197,
+  "firmware_changed": false,
+  "board_performance_measured": false,
+  "source_sha256": {
+    "initialize/run.py": "65cd828ad888a5fcfbcaad493269ade86433bc6b83e91b29dad6ca5590f5d813",
+    "initialize/session.py": "d4e82b7edf1b844ac2045777eadaf6c6a6df8885f5beaec70ea710d9a51665b1",
+    "initialize/board_sync.py": "faf2e4fac5f68d153258ea5b5d02b9a6bb9ea43ad42915b11b07fc3820fb9c0a",
+    "initialize/board_accept.py": "66c7a16fa81e2be57f2c28df2befbd82e998bc2c9f6928420e19f4177aa57a1e",
+    "rendering/pipeline_adapter.py": "6d6e67a27717837b4575a542fe2add24b020d6e5e6aa3fb26aac9c1670e3eb64",
+    "rendering/verify.py": "81ac480e5ce091071c1b0114b642aa833dfa9b6a89a9f99cf9f3078fe9212af5",
+    "test_pipeline_renderer.py": "097b477dfa69a49406b56d8d13e36ef18007b30d2eb460e0dcfe712467710536"
+  }
+}
