@@ -1,6 +1,30 @@
 # 3DGS 主线与目录入口
 
-当前换视角主线：`mvsplat/rendering` 的 C++ 三趟排序与四核 Tile 列表生成，
+## 2026-10-09 发布入口
+
+旧版四路 `grouped-shared` 固定在
+[rendering/package](examples/3dgs_reconstruction/mvsplat/rendering/package/README.md)，
+默认调用保持 `LiveRenderer.mainline(...)`。
+新版在并列目录 [render_branch](examples/3dgs_reconstruction/mvsplat/render_branch/README.md)，
+没有自动导入、构建或烧录。两者使用不同固件哈希；正常视频/预热/渲染均不选择新版。
+10 月 8 日最新配对：旧版 43.575 ms、新版 53.302 ms（32768 点、128×128），
+本次只封装既有结果。历史版本与证据继续保留。
+
+
+2026-10-06 已确定渲染主线：**四路 grouped-shared + 常驻 C++ + 完整点集 Dense**。
+交互调用统一用 `LiveRenderer.mainline(...)`；唯一配置清单为
+[mainline.json](examples/3dgs_reconstruction/mvsplat/rendering/mainline.json)，
+决策、职责、资源、产物身份及回退见
+[渲染主线](examples/3dgs_reconstruction/mvsplat/rendering/MAINLINE.md)。
+32,768 点、128×128，10 月 6 日主线两轮 120 帧平均 **43.9201 ms**；
+最后回退复测 60 帧 **42.9170 ms**，P95 **44.0654 ms**。
+软件最终配对曾测得 40.9671 ms；分别保留，不能拼成新收益。
+PipeGS/DPC/CTU 候选继续独立实验；有损抽点预览不代表完整点集主线速度。
+此次仅固定渲染选择和入口，未重测视频准备、NPU 或板端性能。
+
+## 前序版本记录（不是当前默认选择）
+
+2026-09-30 换视角主线：`mvsplat/rendering` 的 C++ 三趟排序与四核 Tile 列表生成，
 同轮旧程序 48.632→**45.212 ms**，P95 46.263 ms，三视角输出逐位不变。
 128×128、32,768 点、60 帧；已加载场景的新相机到完整 RGB 返回，不是视频
 准备时间。默认 `radix_bits=11, parallel_tiles=True`；旧程序显式用 8/False。

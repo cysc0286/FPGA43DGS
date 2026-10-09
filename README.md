@@ -1,8 +1,31 @@
 # FPGA43DGS
 
+**2026-10-09 渲染发布：旧版四路是默认，新版独立保存且不调用。**
+
+| 目录 | 用途 |
+|---|---|
+| [rendering](examples/3dgs_reconstruction/mvsplat/rendering/README.md) | 主线常驻 CPU＋FPGA 渲染，`LiveRenderer.mainline(...)` |
+| [rendering/package](examples/3dgs_reconstruction/mvsplat/rendering/package/README.md) | 旧版四路源码、固件、精确 RTL、哈希和验证冻结包 |
+| [render_branch](examples/3dgs_reconstruction/mvsplat/render_branch/README.md) | 新版两路 PipeGS HGR v4，独立实验目录，不进入默认链 |
+
+10 月 8 日同场景同轮各 60 帧：旧版 **43.575 ms**，新版 **53.302 ms**；
+32768 高斯、128×128、场景已加载后的新相机到完整 RGB。
+[完整对照与资源口径](examples/3dgs_reconstruction/mvsplat/render_branch/validation/RESULTS.md)。
+本次是封装发布，不是新增速度测试。仓库根目录运行 `python tools/check_render_packages.py`。
+
+
 面向悟净 30TAI Lite 的视频重建与 CPU＋FPGA 3DGS 渲染工程。当前研究目标是在画质合格的前提下缩短总耗时，充分使用板上资源。
 
-**当前换视角实测（2026-09-30）：45.212 ms，约 22.12 帧/秒，P95 46.263 ms。**
+**渲染主线已确定（2026-10-06）：四路 grouped-shared / 200 MHz + 常驻 C++ + 完整点集 Dense。**
+推荐入口 `LiveRenderer.mainline(...)` 固定四线程、batch=2、稳定排序、direct_collect 和 NEON；
+参数与产物身份集中在 `rendering/mainline.json`，交互基准默认测试 `mainline`。
+32,768 高斯、128×128 的最新回退复测平均 **42.9170 ms**，P95 **44.0654 ms**；
+同日原版两轮合计 120 帧平均 43.9201 ms。计时为已加载场景的新相机到完整 RGB，
+画面保持原版逐位一致。PipeGS 候选更慢、16k 预览有明显质量代价，均不作为默认。
+[主线配置、完整指标、资源、回退和版本选择理由](examples/3dgs_reconstruction/mvsplat/rendering/MAINLINE.md)。
+本次固定入口和文档，未新增板端性能测量；以下是按日期保存的历史结果。
+
+**历史换视角实测（2026-09-30）：45.212 ms，约 22.12 帧/秒，P95 46.263 ms。**
 场景已加载、128×128、32,768 点；同轮旧程序为 48.632 ms，延迟减少 7.03%。
 C++ 三趟排序与四核 Tile 列表生成已设为新接口默认，输出逐位不变。
 本轮只优化相机到完整 RGB 帧返回，没有重测视频准备或改变 FPGA 位流。

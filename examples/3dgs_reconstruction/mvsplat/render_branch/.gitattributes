@@ -1,0 +1,2 @@
+# Frozen source/tool receipts: preserve original bytes and whitespace.
+* -text -whitespace

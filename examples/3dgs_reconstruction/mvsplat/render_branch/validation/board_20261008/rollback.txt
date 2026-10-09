@@ -1,0 +1,6 @@
+Image: OK
+fmqlmp-verify.dtb: OK
+uEnv.txt: OK
+b4e6d4d238d8a33bbf77c4d18df43143fa4304f7c713f09b479c6d5ccd39f9c6  /root/fpga43dgs_flicker/boot_coord2lane_20261008T000257/fat/BOOT.bin
+b4e6d4d238d8a33bbf77c4d18df43143fa4304f7c713f09b479c6d5ccd39f9c6  /root/fpga43dgs_flicker/boot_coord2lane_20261008T000257/fat/BOOT.pre_20261008T000257.bin
+PASS: BOOT rollback verified after remount. Reboot separately.

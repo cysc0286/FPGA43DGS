@@ -1,0 +1,5 @@
+{
+  "boot_id": "26317dfe-cee6-4572-bc2b-7b27351f0db5",
+  "boot_sha256": "b4e6d4d238d8a33bbf77c4d18df43143fa4304f7c713f09b479c6d5ccd39f9c6",
+  "text": "26317dfe-cee6-4572-bc2b-7b27351f0db5\nb4e6d4d238d8a33bbf77c4d18df43143fa4304f7c713f09b479c6d5ccd39f9c6  /mnt/fpga_service_readonly/BOOT.bin\n              total        used        free      shared  buff/cache   available\nMem:            993         175         694           0         122         753\nSwap:             0           0           0\n"
+}

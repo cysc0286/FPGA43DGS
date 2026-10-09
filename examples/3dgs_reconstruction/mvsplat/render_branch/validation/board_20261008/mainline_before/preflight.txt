@@ -1,0 +1,5 @@
+55cf0b4e-6bd5-47ff-a4f6-bbd81ceb2037
+b4e6d4d238d8a33bbf77c4d18df43143fa4304f7c713f09b479c6d5ccd39f9c6  /mnt/fpga_service_readonly/BOOT.bin
+              total        used        free      shared  buff/cache   available
+Mem:            993         212          90           0         690         693
+Swap:             0           0           0

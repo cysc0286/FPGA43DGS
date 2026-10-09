@@ -1,0 +1,135 @@
+
+****** Vivado(TM) HLS - High-Level Synthesis from C, C++ and SystemC v2018.3 (64-bit)
+  **** SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+  **** IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source D:/Xilinx/Vivado/2018.3/scripts/vivado_hls/hls.tcl -notrace
+INFO: [HLS 200-10] Running 'D:/Xilinx/Vivado/2018.3/bin/unwrapped/win64.o/vivado_hls.exe'
+INFO: [HLS 200-10] For user '77822' on host 'cysc-0286' (Windows NT_amd64 version 6.2) on Fri Oct 09 10:11:25 +0800 2026
+INFO: [HLS 200-10] In directory 'D:/ADProjects/FPGA43DGS/examples/3dgs_reconstruction/mvsplat/render_branch'
+INFO: [HLS 200-10] Creating and opening project 'D:/ADProjects/FPGA43DGS/examples/3dgs_reconstruction/mvsplat/render_branch/build/csim_1791511886'.
+INFO: [HLS 200-10] Adding design file 'D:/ADProjects/FPGA43DGS/examples/3dgs_reconstruction/mvsplat/render_branch/fpga/pipegs_hgr_v4_coord_2lane/pipeline.cpp' to the project
+INFO: [HLS 200-10] Adding design file 'D:/ADProjects/FPGA43DGS/examples/3dgs_reconstruction/mvsplat/render_branch/fpga/pipegs_hgr_v4_coord_2lane/framed_ctu.cpp' to the project
+INFO: [HLS 200-10] Adding test bench file 'D:/ADProjects/FPGA43DGS/examples/3dgs_reconstruction/mvsplat/render_branch/fpga/hls/renderer.cpp' to the project
+INFO: [HLS 200-10] Adding test bench file 'D:/ADProjects/FPGA43DGS/examples/3dgs_reconstruction/mvsplat/render_branch/fpga/pipegs_hgr_v4_coord_2lane/tb.cpp' to the project
+INFO: [HLS 200-10] Creating and opening solution 'D:/ADProjects/FPGA43DGS/examples/3dgs_reconstruction/mvsplat/render_branch/build/csim_1791511886/solution1'.
+INFO: [HLS 200-10] Setting target device to 'xc7z030ffg676-2'
+INFO: [SYN 201-201] Setting up clock 'default' with a period of 5ns.
+INFO: [SIM 211-2] *************** CSIM start ***************
+INFO: [SIM 211-4] CSIM will launch GCC as the compiler.
+   Compiling ../../../../../fpga/pipegs_hgr_v4_coord_2lane/tb.cpp in release mode
+   Compiling ../../../../../fpga/hls/renderer.cpp in release mode
+   Compiling ../../../../../fpga/pipegs_hgr_v4_coord_2lane/framed_ctu.cpp in release mode
+   Compiling ../../../../../fpga/pipegs_hgr_v4_coord_2lane/pipeline.cpp in release mode
+   Generating csim.exe
+In file included from D:/Xilinx/Vivado/2018.3/include/floating_point_v7_0_bitacc_cmodel.h:143:0,
+                 from D:/Xilinx/Vivado/2018.3/include/hls_fpo.h:186,
+                 from D:/Xilinx/Vivado/2018.3/include/hls_half.h:44,
+                 from D:/Xilinx/Vivado/2018.3/include/etc/ap_private.h:90,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_common.h:641,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_int.h:54,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/../hls/renderer.hpp:2,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/pipeline.hpp:2,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/tb.cpp:1:
+D:/Xilinx/Vivado/2018.3/include/gmp.h:62:0: warning: "__GMP_LIBGMP_DLL" redefined
+ #define __GMP_LIBGMP_DLL  0
+ 
+In file included from D:/Xilinx/Vivado/2018.3/include/hls_fpo.h:186:0,
+                 from D:/Xilinx/Vivado/2018.3/include/hls_half.h:44,
+                 from D:/Xilinx/Vivado/2018.3/include/etc/ap_private.h:90,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_common.h:641,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_int.h:54,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/../hls/renderer.hpp:2,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/pipeline.hpp:2,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/tb.cpp:1:
+D:/Xilinx/Vivado/2018.3/include/floating_point_v7_0_bitacc_cmodel.h:135:0: note: this is the location of the previous definition
+ #define __GMP_LIBGMP_DLL 1
+ 
+In file included from D:/Xilinx/Vivado/2018.3/include/floating_point_v7_0_bitacc_cmodel.h:143:0,
+                 from D:/Xilinx/Vivado/2018.3/include/hls_fpo.h:186,
+                 from D:/Xilinx/Vivado/2018.3/include/hls_half.h:44,
+                 from D:/Xilinx/Vivado/2018.3/include/etc/ap_private.h:90,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_common.h:641,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_int.h:54,
+                 from ../../../../../fpga/hls/renderer.hpp:2,
+                 from ../../../../../fpga/hls/renderer.cpp:4:
+D:/Xilinx/Vivado/2018.3/include/gmp.h:62:0: warning: "__GMP_LIBGMP_DLL" redefined
+ #define __GMP_LIBGMP_DLL  0
+ 
+In file included from D:/Xilinx/Vivado/2018.3/include/hls_fpo.h:186:0,
+                 from D:/Xilinx/Vivado/2018.3/include/hls_half.h:44,
+                 from D:/Xilinx/Vivado/2018.3/include/etc/ap_private.h:90,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_common.h:641,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_int.h:54,
+                 from ../../../../../fpga/hls/renderer.hpp:2,
+                 from ../../../../../fpga/hls/renderer.cpp:4:
+D:/Xilinx/Vivado/2018.3/include/floating_point_v7_0_bitacc_cmodel.h:135:0: note: this is the location of the previous definition
+ #define __GMP_LIBGMP_DLL 1
+ 
+In file included from D:/Xilinx/Vivado/2018.3/include/floating_point_v7_0_bitacc_cmodel.h:143:0,
+                 from D:/Xilinx/Vivado/2018.3/include/hls_fpo.h:186,
+                 from D:/Xilinx/Vivado/2018.3/include/hls_half.h:44,
+                 from D:/Xilinx/Vivado/2018.3/include/etc/ap_private.h:90,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_common.h:641,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_int.h:54,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/../hls/renderer.hpp:2,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/pipeline.hpp:2,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/framed_ctu.cpp:3:
+D:/Xilinx/Vivado/2018.3/include/gmp.h:62:0: warning: "__GMP_LIBGMP_DLL" redefined
+ #define __GMP_LIBGMP_DLL  0
+ 
+In file included from D:/Xilinx/Vivado/2018.3/include/hls_fpo.h:186:0,
+                 from D:/Xilinx/Vivado/2018.3/include/hls_half.h:44,
+                 from D:/Xilinx/Vivado/2018.3/include/etc/ap_private.h:90,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_common.h:641,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_int.h:54,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/../hls/renderer.hpp:2,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/pipeline.hpp:2,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/framed_ctu.cpp:3:
+D:/Xilinx/Vivado/2018.3/include/floating_point_v7_0_bitacc_cmodel.h:135:0: note: this is the location of the previous definition
+ #define __GMP_LIBGMP_DLL 1
+ 
+In file included from D:/Xilinx/Vivado/2018.3/include/floating_point_v7_0_bitacc_cmodel.h:143:0,
+                 from D:/Xilinx/Vivado/2018.3/include/hls_fpo.h:186,
+                 from D:/Xilinx/Vivado/2018.3/include/hls_half.h:44,
+                 from D:/Xilinx/Vivado/2018.3/include/etc/ap_private.h:90,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_common.h:641,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_int.h:54,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/../hls/renderer.hpp:2,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/pipeline.hpp:2,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/pipeline.cpp:3:
+D:/Xilinx/Vivado/2018.3/include/gmp.h:62:0: warning: "__GMP_LIBGMP_DLL" redefined
+ #define __GMP_LIBGMP_DLL  0
+ 
+In file included from D:/Xilinx/Vivado/2018.3/include/hls_fpo.h:186:0,
+                 from D:/Xilinx/Vivado/2018.3/include/hls_half.h:44,
+                 from D:/Xilinx/Vivado/2018.3/include/etc/ap_private.h:90,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_common.h:641,
+                 from D:/Xilinx/Vivado/2018.3/include/ap_int.h:54,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/../hls/renderer.hpp:2,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/pipeline.hpp:2,
+                 from ../../../../../fpga/pipegs_hgr_v4_coord_2lane/pipeline.cpp:3:
+D:/Xilinx/Vivado/2018.3/include/floating_point_v7_0_bitacc_cmodel.h:135:0: note: this is the location of the previous definition
+ #define __GMP_LIBGMP_DLL 1
+ 
+PASS: all 131072 coordinate conversions exact
+WARNING: Hls::stream 'hls::stream<ap_uint<160> >.1' contains leftover data, which may result in RTL simulation hanging.
+WARNING: Hls::stream 'hls::stream<ap_uint<160> >.2' contains leftover data, which may result in RTL simulation hanging.
+WARNING: Hls::stream 'hls::stream<ap_uint<160> >.3' contains leftover data, which may result in RTL simulation hanging.
+WARNING: Hls::stream 'hls::stream<ap_uint<160> >.4' contains leftover data, which may result in RTL simulation hanging.
+WARNING: Hls::stream 'hls::stream<ap_uint<160> >.5' contains leftover data, which may result in RTL simulation hanging.
+WARNING: Hls::stream 'hls::stream<ap_uint<160> >.6' contains leftover data, which may result in RTL simulation hanging.
+WARNING: Hls::stream 'hls::stream<ap_uint<160> >.7' contains leftover data, which may result in RTL simulation hanging.
+WARNING: Hls::stream 'hls::stream<ap_uint<160> >.8' contains leftover data, which may result in RTL simulation hanging.
+WARNING: Hls::stream 'hls::stream<ap_uint<160> >.9' contains leftover data, which may result in RTL simulation hanging.
+WARNING: Hls::stream 'hls::stream<ap_uint<160> >.10' contains leftover data, which may result in RTL simulation hanging.
+WARNING: Hls::stream 'hls::stream<ap_uint<160> >.11' contains leftover data, which may result in RTL simulation hanging.
+WARNING: Hls::stream 'hls::stream<ap_uint<160> >.12' contains leftover data, which may result in RTL simulation hanging.
+WARNING: Hls::stream 'hls::stream<ap_uint<160> >.13' contains leftover data, which may result in RTL simulation hanging.
+WARNING: Hls::stream 'hls::stream<ap_uint<160> >.14' contains leftover data, which may result in RTL simulation hanging.
+PASS: pipeline mode 0 exact FLK0, six modes, seven tiles, edge/order/empty/drain/reset
+INFO: [SIM 211-1] CSim done with 0 errors.
+INFO: [SIM 211-3] *************** CSIM finish ***************
+RENDER_PACKAGE_PASS stage=csim project=csim_1791511886
+INFO: [Common 17-206] Exiting vivado_hls at Fri Oct  9 10:11:52 2026...
