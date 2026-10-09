@@ -47,12 +47,12 @@ class WarmSession:
             # NPU checks are in a separate SDK process. Import/load Torch before
             # OpenCV for the board's OpenMP environment; reject bad hardware
             # outputs before spending time and memory loading the full model.
-            from initialize.model_runtime import ModelRuntime
+            from gaussian_generation.runtime import ModelRuntime
             self.model = ModelRuntime(args.weights, args.vendor, args.threads, 16, out / "initialize")
             if self.partitions is not None:
                 self.model.attach_partitions(self.partitions)
             # Imports and package/device initialization are outside the video clock.
-            import video_input.prepare
+            import scene_preparation
             import export
             if getattr(args, "live_renderer", None):
                 from rendering.pipeline_adapter import PipelineRenderer

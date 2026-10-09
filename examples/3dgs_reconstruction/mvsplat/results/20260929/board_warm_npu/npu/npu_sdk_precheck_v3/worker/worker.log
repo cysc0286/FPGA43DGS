@@ -1,50 +1,0 @@
-[2026-03-13 04:13:15.439] [info] Device initialization successful, version information:
-[2026-03-13 04:13:15.440] [info] 	icore: FMSHZGV3TECH-AID - 24160628
-[2026-03-13 04:13:15.440] [info] 	device: 25122301
-[2026-03-13 04:13:15.440] [info] Device Protocol: axi
-[2026-03-13 04:13:15.440] [info] Device Name: zg330aiu
-[2026-03-13 04:13:15.440] [info] Device Parameters: 
-[2026-03-13 04:13:15.440] [info] 	dma: 0x80000000
-[2026-03-13 04:13:15.440] [info] 	npu: 0x40000000
-[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2KDIAGNOSTIC alloc_mode=0 initial_precheck=Traceback (most recent call last):
-  File "<frozen runpy>", line 198, in _run_module_as_main
-  File "<frozen runpy>", line 88, in _run_code
-  File "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat/npu/worker.py", line 111, in <module>
-    main()
-  File "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat/npu/worker.py", line 61, in main
-    raise RuntimeError(library.mgs_error().decode())
-RuntimeError: [37m[2mStack trace (most recent call last):
-#21   Object "/root/fpga43dgs_reconstruction/arm_env/bin/python3.11", at 0x558f0855af, in $x
-#20   Source "../csu/libc-start.c", line 308, in __libc_start_main
-#19   Source "/usr/local/src/conda/python-split-3.11.16/Modules/main.c", line 738, in Py_BytesMain
-#18 | Source "/usr/local/src/conda/python-split-3.11.16/Modules/main.c", line 684, in pymain_run_python
-      Source "/usr/local/src/conda/python-split-3.11.16/Modules/main.c", line 599, in Py_RunMain
-#17   Source "/usr/local/src/conda/python-split-3.11.16/Modules/main.c", line 300, in pymain_run_module
-#16 | Source "/usr/local/src/conda/python-split-3.11.16/Objects/call.c", line 393, in _PyEval_Vector
-    | Source "/usr/local/src/conda/python-split-3.11.16/Python/ceval.c", line 6434, in _PyEval_EvalFrame
-      Source "/usr/local/src/conda/python-split-3.11.16/Include/internal/pycore_ceval.h", line 73, in _PyFunction_Vectorcall
-#15   Source "/usr/local/src/conda/python-split-3.11.16/Python/ceval.c", line 4769, in _PyEval_EvalFrameDefault
-#14 | Source "/usr/local/src/conda/python-split-3.11.16/Objects/call.c", line 299, in _PyObject_VectorcallTstate
-      Source "/usr/local/src/conda/python-split-3.11.16/Include/internal/pycore_call.h", line 92, in PyObject_Vectorcall
-#13   Source "/usr/local/src/conda/python-split-3.11.16/Objects/methodobject.c", line 443, in cfunction_vectorcall_FASTCALL_KEYWORDS
-#12 | Source "/usr/local/src/conda/python-split-3.11.16/Python/clinic/bltinmodule.c.h", line 465, in builtin_exec_impl
-      Source "/usr/local/src/conda/python-split-3.11.16/Python/bltinmodule.c", line 1077, in builtin_exec
-#11   Source "/usr/local/src/conda/python-split-3.11.16/Python/ceval.c", line 1148, in PyEval_EvalCode
-#10 | Source "/usr/local/src/conda/python-split-3.11.16/Python/ceval.c", line 6434, in _PyEval_EvalFrame
-      Source "/usr/local/src/conda/python-split-3.11.16/Include/internal/pycore_ceval.h", line 73, in _PyEval_Vector
-#9    Source "/usr/local/src/conda/python-split-3.11.16/Python/ceval.c", line 4769, in _PyEval_EvalFrameDefault
-#8    Source "/usr/local/src/conda/python-split-3.11.16/Objects/call.c", line 214, in _PyObject_MakeTpCall
-#7    Source "/usr/local/src/conda/python-split-3.11.16/Modules/_ctypes/_ctypes.c", line 4201, in PyCFuncPtr_call
-#6  | Source "/usr/local/src/conda/python-split-3.11.16/Modules/_ctypes/callproc.c", line 1262, in _call_function_pointer
-      Source "/usr/local/src/conda/python-split-3.11.16/Modules/_ctypes/callproc.c", line 923, in _ctypes_callproc
-#5    Object "/root/fpga43dgs_reconstruction/arm_env/lib/libffi.so.8.4.0", at 0x7fb8cb061b, in ffi_call_int
-#4    Object "/root/fpga43dgs_reconstruction/arm_env/lib/libffi.so.8.4.0", at 0x7fb8cb1093, in ffi_call_SYSV
-#3    Object "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/arm_bridge/libmgs_npu_diagnostic.so", at 0x7fb1ac000f, in mgs_create
-#2    Object "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/arm_bridge/libmgs_npu_diagnostic.so", at 0x7fb1adf60b, in MgsContext::MgsContext(char const*, char const*, unsigned long, unsigned long)
-#1    Object "/root/heterogs_npu/sdk_3.36.1/usr/lib/aarch64-linux-gnu/libicraft_zg330backend.so", at 0x7fb1a16beb, in icraft::xrt::zg330::ZG330Backend::precheck()
-#0    Object "/root/heterogs_npu/sdk_3.36.1/usr/lib/aarch64-linux-gnu/libicraft_zg330backend.so", at 0x7fb1a0b5bf, in icraft::detail::LogExcept::~LogExcept() [clone .constprop.0]
-[0m
-[31mException occurs at line 1075 in file /home/gitlab-runner/builds/36oFVAdZ/0/icraft/Icraft-Build/build/linux-aarch64-release/_deps/icraft-zg330backend-src/source/zg330backend.cpp[0m
-[31m[7mException info : The Weight of opid:241 at PLDDR is incorrect...
- [0m
-

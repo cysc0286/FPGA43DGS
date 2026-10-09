@@ -1,2 +1,0 @@
- 03:33:16 up 5 min,  0 users,  load average: 0.19, 0.12, 0.05
-392 bash -c uptime; pgrep -af 'live_parallel|rendering.benchmark|rendering.verify' || true

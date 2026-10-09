@@ -1,7 +1,0 @@
-5dace0ce6ffd7ece5b8389598a938270aec784660e9eeed056e305ef9e9408c7  /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_parallel
-bab4681a-d5aa-433b-a90c-69b9eee25343
-    724 bash            bash -c sha256sum /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat/rendering/live_parallel; cat /proc/sys/kernel/random/boot_id; ps -eo pid,comm,args | grep -E '[l]ive_parallel|[l]ive_layout|[c]ompare_builds|[r]endering.verify'; cat /proc/meminfo | head -n 4
-MemTotal:        1017708 kB
-MemFree:          538928 kB
-MemAvailable:     771360 kB
-Buffers:           12880 kB

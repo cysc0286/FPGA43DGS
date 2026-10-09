@@ -1,2 +1,0 @@
-placement_seconds=797
-No routing or bitstream generated.

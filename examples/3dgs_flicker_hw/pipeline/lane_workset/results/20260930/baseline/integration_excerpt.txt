@@ -1,7 +1,0 @@
-MODE_PASS mode=          0 cycles=     28966 input=51 output=192
-MODE_PASS mode=          1 cycles=     26426 input=51 output=192
-MODE_PASS mode=          2 cycles=      4861 input=51 output=192
-MODE_PASS mode=          3 cycles=      4807 input=51 output=192
-MODE_PASS mode=          4 cycles=      4781 input=51 output=192
-MODE_PASS mode=          5 cycles=      4803 input=51 output=192
-PASS: CTU+VRU+DMA+CDC six real modes 4608 pixels, stalls, guards and ownership

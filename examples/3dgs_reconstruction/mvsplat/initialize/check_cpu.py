@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import time
 from common import new_directory, save, sha
-from initialize.model_runtime import ModelRuntime
+from gaussian_generation.runtime import ModelRuntime
 from warm_pipeline import overlap_prepare_infer
 
 
@@ -23,7 +23,7 @@ def main(argv=None):
     if ref_infer["threads"] != a.threads:
         raise ValueError("Exact-output comparison requires matching Torch thread counts")
     runtime = ModelRuntime(a.weights, a.vendor, a.threads, 16, out/"runtime")
-    from video_input.prepare import main as prepare
+    from scene_preparation import main as prepare
     from export import main as export
     inference, timings = overlap_prepare_infer(prepare,
         ["--video", str(a.video), "--out", str(out/"input"), "--threads", "1", "--size", "128"],

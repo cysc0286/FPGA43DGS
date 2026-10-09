@@ -1,3 +1,0 @@
-{
-  "command": "cd /root/fpga43dgs_reconstruction/live_render_20260930_v1/view_switch_v4/source/mvsplat && g++ -O3 -std=c++17 -mcpu=cortex-a53 rendering/tests/depth_sort_test.cpp -o rendering/depth_sort_test && rendering/depth_sort_test && sh rendering/build.sh /root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928 a53 rendering/live_radix"
-}

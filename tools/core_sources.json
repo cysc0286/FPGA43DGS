@@ -1,9 +1,12 @@
 {
   "files": [
-    ".gitignore", ".gitattributes", "README.md", "AGENTS.md", "MAINLINE.md",
-    "FLICKER_REPRODUCTION.md", "requirements-core.txt", "requirements-mvsplat-checks.txt",
-    "examples/3dgs_batch/board/batch.hpp",
-    "examples/3dgs_reconstruction/evidence/versions.csv",
+    ".gitignore",
+    ".gitattributes",
+    "README.md",
+    "AGENTS.md",
+    "MAINLINE.md",
+    "requirements-core.txt",
+    "requirements-mvsplat-checks.txt",
     "releases/README.md",
     "releases/3dgs_renderer_v1_20260928/README.md",
     "releases/3dgs_renderer_v1_20260928/INTERFACE.md",
@@ -11,20 +14,68 @@
     "releases/3dgs_renderer_v1_20260928/manifest.json",
     "releases/3dgs_renderer_v1_20260928/render.py",
     "releases/3dgs_renderer_v1_20260928/pack_camera.py",
-    "releases/3dgs_renderer_v1_20260928/rebuild_cpu.sh"
+    "releases/3dgs_renderer_v1_20260928/rebuild_cpu.sh",
+    "examples/3dgs_compositor/board/remote.py"
   ],
   "trees": [
-    "tools", "docs", "third_party",
-    "examples/3dgs_reconstruction", "examples/3dgs_flicker_hw",
-    "examples/3dgs_flicker_cat", "examples/3dgs_scene", "examples/3dgs_compositor",
+    "tools",
+    "docs",
+    "third_party",
+    "examples/3dgs_reconstruction",
     "releases/3dgs_renderer_v1_20260928/src"
   ],
   "skip_directories": [
-    ".git", ".venv", ".venv_mvsplat", "models", ".vendor", "vendor", "build", "data", "runs", "evidence",
-    "__pycache__", "generated", "results", "golden", "diagnostics", "previews", "archives"
+    ".git",
+    ".venv",
+    ".venv_mvsplat",
+    "models",
+    ".vendor",
+    "vendor",
+    "build",
+    "data",
+    "runs",
+    "evidence",
+    "__pycache__",
+    "generated",
+    "results",
+    "golden",
+    "diagnostics",
+    "previews",
+    "archives",
+    "archive",
+    "render_branch",
+    "bounded",
+    "npu_frontend",
+    "exact_workset",
+    "hardopLog"
   ],
   "extensions": [
-    ".py", ".c", ".cpp", ".h", ".hpp", ".v", ".sv", ".tcl", ".sh", ".ps1",
-    ".md", ".json", ".csv", ".patch", ".xdc", ".yaml", ".yml"
+    ".py",
+    ".c",
+    ".cpp",
+    ".h",
+    ".hpp",
+    ".v",
+    ".sv",
+    ".tcl",
+    ".sh",
+    ".ps1",
+    ".md",
+    ".json",
+    ".csv",
+    ".patch",
+    ".xdc",
+    ".yaml",
+    ".yml"
+  ],
+  "exclude_files": [
+    "examples/3dgs_reconstruction/run_cpu.py",
+    "examples/3dgs_reconstruction/run_cpu.ps1",
+    "examples/3dgs_reconstruction/build_opensplat.py",
+    "examples/3dgs_reconstruction/resource_estimates.json",
+    "examples/3dgs_reconstruction/runtime_paths.json",
+    "examples/3dgs_reconstruction/NPU_ACCELERATION_ANALYSIS_20260928.md",
+    "examples/3dgs_reconstruction/RESOURCE_STUDY_20260928.md",
+    "examples/3dgs_reconstruction/REPOSITORIES_AND_BACKPROP.md"
   ]
 }

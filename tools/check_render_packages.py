@@ -42,6 +42,7 @@ def main():
         raise ValueError("Mainline and candidate must have different firmware identities")
     checked = 0
     for base in (MVS / "rendering", MVS / "initialize", MVS / "video_input",
+                 MVS / "pose_estimation", MVS / "gaussian_generation",
                  MVS.parent / "modules"):
         for path in base.rglob("*.py"):
             if any(part in {"results", "package", "__pycache__"} for part in path.parts):
@@ -52,7 +53,8 @@ def main():
             if "render_branch" in source or "pipegs_hgr_v4_coord_2lane" in source:
                 raise ValueError(f"Default source references experimental branch: {path}")
             checked += 1
-    for name in ("pipeline.py", "mvsplat/run.py"):
+    for name in ("pipeline.py", "mvsplat/run.py", "mvsplat/warm_pipeline.py",
+                 "mvsplat/scene_preparation.py"):
         path = MVS.parent / name
         if path.exists() and "render_branch" in path.read_text(encoding="utf-8-sig"):
             raise ValueError(f"Pipeline entry invokes candidate: {path}")

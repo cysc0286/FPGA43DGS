@@ -1,0 +1,32 @@
+{
+  "scope": "Static source relocation only; no inference, board execution or performance measurement",
+  "unchanged_definitions": [
+    {
+      "name": "frame_indices",
+      "destination": "examples/3dgs_reconstruction/mvsplat/video_input/decode.py",
+      "source_sha256": "0da616c31ae02fc040bff0fac8b3cf3b2dda8e0efa73dd4ff0b3b23942f827cf"
+    },
+    {
+      "name": "decode_selected",
+      "destination": "examples/3dgs_reconstruction/mvsplat/video_input/decode.py",
+      "source_sha256": "6d75df5f86cd6b4679a977583abc05385ebcec4977dab368f400a91dabe73828"
+    },
+    {
+      "name": "mutual_ratio_matches",
+      "destination": "examples/3dgs_reconstruction/mvsplat/pose_estimation/geometry.py",
+      "source_sha256": "56fd2190406feab78df74bd3b4afc0be8d52fc12558f792a380c82667875650f"
+    },
+    {
+      "name": "estimate_pair",
+      "destination": "examples/3dgs_reconstruction/mvsplat/pose_estimation/geometry.py",
+      "source_sha256": "001d2fc2aa2ab6198d4a1efa70316a8643e1ff0cd74993eb6f1a2891297885ad"
+    },
+    {
+      "name": "estimate_target",
+      "destination": "examples/3dgs_reconstruction/mvsplat/pose_estimation/geometry.py",
+      "source_sha256": "d560c873b5e77952a8975afa33a143cd144094b181c08135209de1d4e66c5f26"
+    }
+  ],
+  "model_runtime_byte_identical_after_newline_normalization": true,
+  "gaussian_adapter_function_asts_unchanged": true
+}

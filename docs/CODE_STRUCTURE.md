@@ -1,103 +1,53 @@
-# 当前代码结构与入口
+# 当前代码结构
 
-更新：2026-10-09。这里描述实际主线和源码位置；历史报告按各自日期和输入范围阅读。
+更新：2026-10-09。**四个业务模块都在 `examples/3dgs_reconstruction/mvsplat/` 下。**
+`initialize` 是视频前预热；两个协调文件管理调用顺序。它们不是第五种重建算法。
 
-## 主线流程
+| 模块 | 实际实现 | 负责什么 | 推荐执行单元 |
+|---|---|---|---|
+| 视频输入 | `video_input/receipt.py`、`video_input/decode.py` | 接收已完成视频、选帧、缩放，保留原帧索引 | CPU |
+| 位姿估计 | `pose_estimation/geometry.py` | 两视图 SIFT/匹配/Essential/三角化，留出视角 PnP | CPU |
+| 高斯生成 | `gaussian_generation/runtime.py`、`adapter.py` | 固定权重前向、参数校验、协方差/SH/相机 ABI 转换 | 当前 CPU；NPU 另行验证 |
+| 渲染 | `rendering/runtime.py`、`live_renderer.cpp`、`package/` | 常驻场景、投影、排序、FPGA 求值合成、返回 RGB | CPU＋FPGA |
 
-```text
-initialize 视频前预热
-  → READY
-  → 接收已完成的视频 → VIDEO_COMPLETE
-  → 抽帧和相机位姿
-  → MVSplat 固定权重前向生成 Gaussian
-  → 格式转换与场景装入 → SCENE_READY
-  → CPU 投影/Tile 分组/排序 + FPGA 求值与有序合成
-  → 首帧 FRAME_COMPLETE
-  → 后续重复提交相机，返回新的完整 RGB 帧
-```
+这些是实际算法源码位置，不是再加一层同名包装。解码和几何从原 `video_input/prepare.py`
+拆出；ModelRuntime 从 `initialize` 移出；Gaussian 导出从根目录移入生成模块。
+原函数体保持不变；`export.py`、`initialize/model_runtime.py`、`video_input/prepare.py`
+仅保留旧命令/import 兼容，不再维护第二份实现。
 
-预热及视频输入时间只记录；场景准备从 VIDEO_COMPLETE 到首帧 FRAME_COMPLETE。
-已加载场景的后续换视角时间另计。此代码结构说明没有新增实时摄像头、逐场景训练
-或 NPU 真机验收结果。
+## 如何读代码
 
-## 目录树
+1. `pipeline.py initialize`：统一 CLI。视频前资源由 `initialize/session.py` 管理。
+2. `initialize/run.py`：接收视频与事件记录，驱动 `warm_pipeline.py`。
+3. `scene_preparation.py`：调用解码模块和位姿模块，发布上下文与首目标交接。
+4. `gaussian_generation/runtime.py`：复用已加载模型生成世界坐标 Gaussian。
+5. `gaussian_generation/adapter.py`：Gaussian 转 `N×62` rows，相机转 FLCAM001。
+6. `rendering/pipeline_adapter.py`：首帧合同连接到 `LiveRenderer.mainline(...)`。
+7. 后续视角直接调用 `LiveRenderer.render_camera(...)`，不重复前四个模块。
 
-```text
-FPGA43DGS/
-├── README.md / MAINLINE.md            主线和历史结果入口
-├── docs/                             结构、交付说明、历史发布记录
-├── examples/
-│   ├── 3dgs_reconstruction/
-│   │   ├── pipeline.py               统一 CLI：initialize / reconstruct / 分阶段入口
-│   │   ├── modules/
-│   │   │   ├── contracts.py          FrameSet/PoseSet/GaussianScene/RenderInput/RenderResult
-│   │   │   ├── INTERFACES.md          文件和数值交接合同
-│   │   │   ├── video_input/          视频模块适配层
-│   │   │   ├── pose_estimation/      位姿模块适配层
-│   │   │   ├── gaussian_generation/  旧训练链适配与对照，不是当前主线生成器
-│   │   │   └── rendering/           冻结渲染包的分阶段调用适配
-│   │   └── mvsplat/
-│   │       ├── initialize/          视频前加载固定权重、建立运行时
-│   │       │   ├── run.py           预热 CLI 与事件驱动入口
-│   │       │   ├── session.py       WarmSession，统一选主线渲染配置
-│   │       │   └── model_runtime.py 常驻 MVSplat 模型
-│   │       ├── video_input/         文件接收、抽帧、快速位姿准备
-│   │       ├── warm_pipeline.py     视频后准备、推理、导出和首帧调度
-│   │       ├── board_pipeline.py    reconstruct 冷启动路径
-│   │       ├── infer.py             模型前向参考入口
-│   │       ├── export.py            Gaussian 到渲染格式转换
-│   │       ├── rendering/           当前 CPU＋FPGA 渲染主线
-│   │       │   ├── mainline.json    唯一主线配置
-│   │       │   ├── runtime.py       LiveRenderer：加载场景、相机到 RGB
-│   │       │   ├── pipeline_adapter.py 视频首帧适配，默认 mainline
-│   │       │   ├── live_renderer.cpp  常驻原生计算与 FPGA 调用
-│   │       │   └── package/         四路主线冻结源码、固件和证据
-│   │       ├── render_branch/       两路 PipeGS HGR v4，独立保存，默认不调用
-│   │       ├── npu/                 MVSplat NPU 分区部署候选
-│   │       ├── test_*.py            3DGS 接口、生命周期及协议回归
-│   │       └── results/             按日期保存的结果与核验记录
-│   ├── 3dgs_flicker_hw/             FPGA 后端研发：HLS、RTL、流水、板端工具
-│   ├── 3dgs_flicker_cat/            3DGS 算法/数值参考与依赖
-│   ├── 3dgs_compositor/board/       主线仍使用的共享板卡工具
-│   └── 3dgs_scene/                  场景及渲染前处理的共享代码/历史对照
-├── releases/                        旧版回退包与发布入口
-├── tools/                           源码打包、合同检查、冻结包检查
-└── third_party/                     第三方版本、来源与许可记录
-```
+完整数据字段、数值含义和所有权见 [四模块接口](../examples/3dgs_reconstruction/modules/INTERFACES.md)。
 
-`platform/`、`build/`、`papers/`、原始数据及本地 `npu_3dgs/` 工作区不等于 GitHub
-发布内容；部分内容被 Git 忽略或未跟踪。不要按本机资源管理器的目录数量判断主线模块数。
+## 哪些目录不属于默认执行路径
 
-## 给前端与后端开发者的边界
+| 位置 | 定位 |
+|---|---|
+| `archive/history_20261009/` | 823 个历史文件条目的 ZIP 与哈希清单，含失败/负收益结果 |
+| `archive/local_workspace_20261009/` | 本机未跟踪原始实验、日志、生成物；忽略、不上传 |
+| `mvsplat/render_branch/` | 保留的 PipeGS HGR v4 独立冻结候选；主线不调用 |
+| `mvsplat/npu/` | 前馈网络 NPU 候选、编译与诊断；没有新的数值验收 |
+| `releases/3dgs_renderer_v1_20260928/` | 较早冻结回退及现有 CPU 契约依赖，不能当作最新位流 |
+| `reconstruction/modules/` | 原 COLMAP/OpenSplat 文件接口兼容；`contracts.py` 仍被导出/校验使用 |
+| `reconstruction/bounded/`、`npu_frontend/` | 历史训练/特征实验，不进入主线协作源码包 |
+| `examples/3dgs_flicker_hw/` | 旧硬件开发工作树与未提交工作；日常复建使用当前冻结包 |
+| `examples/3dgs_compositor/board/remote.py` | 现有板卡传输工具依赖，不是渲染算法 |
 
-| 部分 | 主要修改位置 | 当前执行位置/状态 |
-|---|---|---|
-| 视频和位姿 | `mvsplat/video_input`，传统路径对应 `modules/video_input`、`modules/pose_estimation` | ARM CPU；快速路径抽帧和位姿仍集中在 `prepare.py`，不是两个独立常驻服务 |
-| 高斯生成 | `mvsplat/initialize/model_runtime.py`、模型运行时及 `infer.py/export.py` | 当前主线为 ARM CPU 的预训练 MVSplat 前向；NPU 候选另行验证 |
-| 渲染 | `mvsplat/rendering` | CPU 投影/分组排序，FPGA 求值和有序合成；主线四路 grouped-shared |
-| FPGA 核研发 | `examples/3dgs_flicker_hw` | 构建与实验工作区；已接受产物在 rendering/package，实验修改不自动进入发布包 |
-| NPU | `mvsplat/npu` | 部署与数值问题待解决；不属于当前渲染必选项 |
+未提交硬件改动原地保留。本轮不把它们混入整理提交，也不把它们称为已验收主线。
 
-前端向主线渲染交付 PLY 或 `float32[N,62]` 高斯行和相机参数；原生相机协议为
-136 字节 FLCAM001。换场景装载一次，后续只更新相机并返回完整 RGB。首帧适配器
-继续保留归档核验，交互帧可以在完成返回之后显式归档。
+## 打包规则
 
-`modules/` 保留四个逻辑模块的文件接口，不代表暖启动链会逐个调用所有旧模块。
-特别是 `modules/gaussian_generation/training.py` 属于旧训练对照，当前高斯生成以
-`mvsplat` 为准。`3dgs_flicker_hw/frontend` 指渲染前处理，不是视频重建前端。
+`tools/core_sources.json` 明确主线包含项。`package_core.py` 只选 Git 跟踪的合格源码，
+避免递归扫进本地实验。历史 ZIP、`render_branch`、旧训练实验、运行结果不进入主线源码包。
+主线源码包不含权重、SDK、模型、BOOT/bit；完整硬件复建/回退资产请另取 `rendering/package/`。
+历史恢复必须解压到新目录，按 [归档说明](../archive/history_20261009/README.md) 操作。
 
-## 本次删除与保留
-
-- 删除 Git 中 26 个旧基础 ALU 源码、测试平台、板端脚本和归档元数据文件。
-- 删除本地已退出 Git 的 5 个独立加法器 smoke test 源码/入口文件。
-- 删除 `tools/core_sources.json` 的旧归档文件和 ALU 目录条目，并修正当前导航。
-- 本地忽略的旧生成物和实验证据保留，不再属于源码包。
-- 保留 3DGS 自身的正确性与协议回归，以及主线共享的板卡工具。
-- 保留冻结包和平台的 `adder_top/legacy_adder_top`：它们仍承载原厂寄存器/DMA
-  兼容接口，名字包含 adder 不等于可以当作独立测试删除；删掉会破坏现有构建或冻结包。
-- 历史发布回执及报告中的旧路径作为历史记录保留，不用于当前打包。
-
-递归清理整个本地旧目录被自动审批拦截，因此采用精确文件级源码删除，未强行清空
-生成物。用户要求板卡离线期间停止测试，本次仅清理源码、打包配置及文档；不运行
-软件测试、RTL 仿真、综合、布线或板端程序。算法与位流未修改，没有新的耗时、画质
-或资源指标；上一轮 86 项本地测试是前一次整合修复的结果，不作为本次清理后的新验收。
+本轮只有静态整理与文件完整性核对，未运行功能测试、编译或上板测速。

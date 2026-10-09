@@ -8,7 +8,11 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT.parent / "3dgs_compositor/board"))
 import remote
 
-SOURCE_FILES = ("common.py", "export.py", "initialize/model_runtime.py",
+SOURCE_FILES = ("common.py", "export.py", "scene_preparation.py",
+                "gaussian_generation/__init__.py", "gaussian_generation/runtime.py",
+                "gaussian_generation/adapter.py", "pose_estimation/__init__.py",
+                "pose_estimation/geometry.py", "video_input/decode.py",
+                "initialize/model_runtime.py",
                 "initialize/renderer_runtime.py", "initialize/attributes_resident.cpp",
                 "initialize/validate_resident.py", "initialize/group_sort_resident.cpp",
                 "initialize/run.py", "initialize/session.py",

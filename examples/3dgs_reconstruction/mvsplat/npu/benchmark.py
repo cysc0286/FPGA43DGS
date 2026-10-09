@@ -10,7 +10,7 @@ import platform
 import time
 import numpy as np
 from common import new_directory, save, sha
-from initialize.model_runtime import ModelRuntime
+from gaussian_generation.runtime import ModelRuntime
 from npu.catalog import PARTITIONS, locate
 from npu.runtime import PartitionRuntime
 from npu.verify import errors

@@ -7,7 +7,7 @@ import time
 import numpy as np
 
 from common import save, sha
-from initialize.model_runtime import ModelRuntime
+from gaussian_generation.runtime import ModelRuntime
 
 
 MODULES = ("corr_refine_net", "refine_unet")

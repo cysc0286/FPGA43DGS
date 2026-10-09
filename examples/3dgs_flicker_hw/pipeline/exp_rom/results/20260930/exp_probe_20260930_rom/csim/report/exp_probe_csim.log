@@ -1,8 +1,0 @@
-INFO: [SIM 2] *************** CSIM start ***************
-INFO: [SIM 4] CSIM will launch GCC as the compiler.
-   Compiling ../../../../../pipeline/exp_rom/tb.cpp in release mode
-   Compiling ../../../../../pipeline/exp_rom/probe.cpp in release mode
-   Generating csim.exe
-PASS exhaustive 31746 nonpositive FP16 inputs, exact HLS exp bits
-INFO: [SIM 1] CSim done with 0 errors.
-INFO: [SIM 3] *************** CSIM finish ***************

@@ -1,6 +1,7 @@
 # Keep frozen reference and patch bytes stable across collaborators.
 releases/3dgs_renderer_v1_20260928/** -text
 *.patch -text
+/archive/history_20261009/*.zip binary
 # Standalone board shell scripts must also work after a Windows checkout.
 *.sh text eol=lf
 # Preserve the exact bytes of the versioned NPU validation receipts and images.

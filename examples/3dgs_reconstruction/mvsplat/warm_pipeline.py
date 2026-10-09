@@ -70,7 +70,7 @@ def overlap_prepare_infer(prepare, prepare_args, infer, inference_out,
 
 def prepare_scene(video, out, runtime, renderer, events, size=128,
                   prepare_threads=1, focal_ratio=0.9, overlap=True):
-    from video_input.prepare import main as prepare
+    from scene_preparation import main as prepare
     from export import main as export
     out = Path(out)
     args = ["--video", str(video), "--out", str(out / "input"),

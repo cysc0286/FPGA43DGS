@@ -27,6 +27,9 @@ BOOT.bin
 # Reproducible simulation output.
 # Removed demo sources; keep local generated output out of source releases.
 /archive/basic_demos_20260928/
+# Packed tracked history is versioned; local raw runs/build leftovers stay local.
+/archive/local_workspace_20261009/
+!/archive/history_20261009/*.zip
 __pycache__/
 /examples/3dgs_fpga_eval/build/
 .Xil/

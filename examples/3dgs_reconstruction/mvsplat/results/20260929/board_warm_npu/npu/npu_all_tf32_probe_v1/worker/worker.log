@@ -1,16 +1,0 @@
-[2026-03-13 03:49:13.557] [info] Device initialization successful, version information:
-[2026-03-13 03:49:13.557] [info] 	icore: FMSHZGV3TECH-AID - 24160628
-[2026-03-13 03:49:13.557] [info] 	device: 25122301
-[2026-03-13 03:49:13.557] [info] Device Protocol: axi
-[2026-03-13 03:49:13.557] [info] Device Name: zg330aiu
-[2026-03-13 03:49:13.557] [info] Device Parameters: 
-[2026-03-13 03:49:13.557] [info] 	dma: 0x80000000
-[2026-03-13 03:49:13.557] [info] 	npu: 0x40000000
-[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2KTraceback (most recent call last):
-  File "<frozen runpy>", line 198, in _run_module_as_main
-  File "<frozen runpy>", line 88, in _run_code
-  File "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat/npu/worker.py", line 111, in <module>
-    main()
-  File "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat/npu/worker.py", line 91, in main
-    raise ValueError("Nonfinite output")
-ValueError: Nonfinite output

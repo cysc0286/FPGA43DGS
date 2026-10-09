@@ -1,0 +1,52 @@
+{
+  "scope": "Static source/asset audit only; no test suites, imports, compilation, inference, board access or new measurements",
+  "base_commit": "b55b95085a1eef965c951b3b73a4f2fa2daf02c1",
+  "archive_files": 823,
+  "archive_bytes": 19374888,
+  "active_history_files_removed": 814,
+  "frozen_packages": [
+    {
+      "path": "examples/3dgs_reconstruction/mvsplat/rendering/package",
+      "files": 151,
+      "boot_sha256": "b4e6d4d238d8a33bbf77c4d18df43143fa4304f7c713f09b479c6d5ccd39f9c6"
+    },
+    {
+      "path": "examples/3dgs_reconstruction/mvsplat/render_branch",
+      "files": 197,
+      "boot_sha256": "3a0001a432083b3c6bb32f4bb0656127d2d5ad1654c5d953f5fa286243f4229e"
+    }
+  ],
+  "mainline_profile_unchanged": true,
+  "relocated_algorithm_asts_equal": true,
+  "parsed_sources": [
+    "examples/3dgs_reconstruction/modules/__init__.py",
+    "examples/3dgs_reconstruction/mvsplat/deploy.py",
+    "examples/3dgs_reconstruction/mvsplat/export.py",
+    "examples/3dgs_reconstruction/mvsplat/gaussian_generation/__init__.py",
+    "examples/3dgs_reconstruction/mvsplat/gaussian_generation/adapter.py",
+    "examples/3dgs_reconstruction/mvsplat/gaussian_generation/runtime.py",
+    "examples/3dgs_reconstruction/mvsplat/initialize/board_sync.py",
+    "examples/3dgs_reconstruction/mvsplat/initialize/check_cpu.py",
+    "examples/3dgs_reconstruction/mvsplat/initialize/model_runtime.py",
+    "examples/3dgs_reconstruction/mvsplat/initialize/session.py",
+    "examples/3dgs_reconstruction/mvsplat/npu/benchmark.py",
+    "examples/3dgs_reconstruction/mvsplat/npu/depth_coverage.py",
+    "examples/3dgs_reconstruction/mvsplat/npu/export_graphs.py",
+    "examples/3dgs_reconstruction/mvsplat/npu/verify.py",
+    "examples/3dgs_reconstruction/mvsplat/pose_estimation/__init__.py",
+    "examples/3dgs_reconstruction/mvsplat/pose_estimation/geometry.py",
+    "examples/3dgs_reconstruction/mvsplat/scene_preparation.py",
+    "examples/3dgs_reconstruction/mvsplat/video_input/decode.py",
+    "examples/3dgs_reconstruction/mvsplat/video_input/prepare.py",
+    "examples/3dgs_reconstruction/mvsplat/warm_pipeline.py",
+    "examples/3dgs_reconstruction/pipeline.py",
+    "tools/archive_history.py",
+    "tools/check_core.py",
+    "tools/check_render_packages.py",
+    "tools/package_core.py"
+  ],
+  "board_sync_sources_present": 22,
+  "current_document_links_resolved": 29,
+  "functional_validation": "NOT_RUN_AT_USER_REQUEST",
+  "board_validation": "NOT_RUN_OFFLINE"
+}

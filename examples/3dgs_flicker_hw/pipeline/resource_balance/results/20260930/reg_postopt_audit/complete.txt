@@ -1,3 +1,0 @@
-read_only=true
-checkpoint=D:/ADProjects/FPGA43DGS/platform/flicker_group64reg_fpga/fpai_demo_vivado.runs/impl_1/ai7030_edif_top_opt.dcp
-No bitstream or board changes.

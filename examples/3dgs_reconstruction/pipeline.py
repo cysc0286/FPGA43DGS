@@ -1,4 +1,4 @@
-"""Reconstruct on the ARM board with MVSplat, or run individual legacy stages."""
+"""Resident MVSplat mainline (initialize), cold reference, and legacy compatibility."""
 import argparse
 import dataclasses
 import json

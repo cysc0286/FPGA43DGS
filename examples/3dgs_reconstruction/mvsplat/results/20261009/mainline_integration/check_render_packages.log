@@ -1,4 +1,0 @@
-PASS package: 151 hash-verified files
-PASS render_branch: 197 hash-verified files
-PASS default isolation: 33 runtime/module sources, four-lane profile
-No board test performed; saved validation dates remain unchanged.
