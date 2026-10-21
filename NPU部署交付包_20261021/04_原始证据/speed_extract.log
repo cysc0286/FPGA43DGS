@@ -1,0 +1,32 @@
+# COM7 1152008N1  2026-10-20 20:24:00
+for p in backbonne_cnn regressor_residual upsampler proj_feature to_gaussians to_disparity; do eccho @@$p; grep -m1 inference_seconds /root/fpga43dgs_reconstruction/npu_board_v2__20260929/sweep_$p/cpu/inference.json; grep -m1 inference_seconds /root/fpga43dgss_reconstruction/npu_board_v2_20260929/sweep_$p/hybrid/inference.json; grep -m1  total_partition_seconds /root/fpga43dgs_reconstruction/npu_board_v2_20260929/swe ep_$p/hybrid/inference.json; done; echo @@depth_head; grep -m1 inference_seconds  /root/fpga43dgs_reconstruction/npu_board_v2_20260929/npu_diag_depth/cpu/inferencce.json; grep -m1 inference_seconds /root/fpga43dgs_reconstruction/npu_board_v2_220260929/npu_diag_depth/hybrid/inference.json; grep -m1 total_partition_seconds  /root/fpga43dgs_reconstruction/npu_board_v2_20260929/npu_diag_depth/hybrid/infereence.json
+@@backbone_cnn
+  "[01;31m[Kinference_seconds[m[K": 20.496089470000243,
+  "[01;31m[Kinference_seconds[m[K": 18.579234429999815,
+    "[01;31m[Ktotal_partition_seconds[m[K": 0.023157569999966654,
+@@regressor_residual
+  "[01;31m[Kinference_seconds[m[K": 20.847890399999415,
+  "[01;31m[Kinference_seconds[m[K": 20.231259190000856,
+    "[01;31m[Ktotal_partition_seconds[m[K": 0.05968777999987651,
+@@upsampler
+  "[01;31m[Kinference_seconds[m[K": 20.588105269999687,
+  "[01;31m[Kinference_seconds[m[K": 20.45684948000053,
+    "[01;31m[Ktotal_partition_seconds[m[K": 0.5834211399997002,
+@@proj_feature
+  "[01;31m[Kinference_seconds[m[K": 20.586752890000753,
+  "[01;31m[Kinference_seconds[m[K": 19.967122499999277,
+    "[01;31m[Ktotal_partition_seconds[m[K": 0.36845137999989674,
+@@to_gaussians
+  "[01;31m[Kinference_seconds[m[K": 20.470826080000734,
+  "[01;31m[Kinference_seconds[m[K": 15.090474349999567,
+    "[01;31m[Ktotal_partition_seconds[m[K": 0.6748210899995684,
+@@to_disparity
+  "[01;31m[Kinference_seconds[m[K": 20.561978239999917,
+  "[01;31m[Kinference_seconds[m[K": 19.7699364099999,
+    "[01;31m[Ktotal_partition_seconds[m[K": 0.0692339000006541,
+@@depth_head
+  "[01;31m[Kinference_seconds[m[K": 20.78810057999999,
+  "[01;31m[Kinference_seconds[m[K": 19.66675112999974,
+    "[01;31m[Ktotal_partition_seconds[m[K": 0.034227350000037404,
+root@U:~/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat# 
+root@U:~/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat# 

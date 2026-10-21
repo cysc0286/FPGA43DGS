@@ -1,0 +1,31 @@
+# COM7 1152008N1  2026-10-21 18:38:21
+cat /root/fpga43dgs_reconstruction/npu_board_v2_20260929/combo_bg/oraclles.json
+{
+  "results": {
+    "backbone_cnn": {
+      "passed": false,
+      "max_abs": 0.0400121808052063,
+      "mean_abs": 0.003915512136146503,
+      "rmse": 0.005194630638224611
+    }
+  },
+  "hard_errors": {
+    "to_gaussians": "RuntimeError: ValueError: Nonfinite output"
+  }
+}root@U:~# 
+root@U:~# 
+tail -12 /root/fpga43dgs_reconstruction/npu_board_v2_20260929/combo_bg /worker/worker.log
+[2026-03-13 03:31:21.019] [info] Device Name: zg330aiu
+[2026-03-13 03:31:21.019] [info] Device Parameters: 
+[2026-03-13 03:31:21.019] [info] 	dma: 0x80000000
+[2026-03-13 03:31:21.019] [info] 	npu: 0x40000000
+[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2K[2KTraceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat/npu/worker.py", line 111, in <module>
+    main()
+  File "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/mvsplat/npu/worker.py", line 91, in main
+    raise ValueError("Nonfinite output")
+ValueError: Nonfinite output
+root@U:~# 
+root@U:~# 
