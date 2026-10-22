@@ -1,0 +1,17 @@
+# COM7 1152008N1  2026-10-20 18:52:07
+cd /root/heterogs_npu/harness
+root@U:~/heterogs_npu/harness# 
+root@U:~/heterogs_npu/harness# 
+./icraft_probe
+[2026-03-13 03:31:41.403] [info] Device initialization successful, version information:
+[2026-03-13 03:31:41.404] [info] 	icore: FMSHZGV3TECH-AID - 24160628
+[2026-03-13 03:31:41.404] [info] 	device: 25122301
+[2026-03-13 03:31:41.404] [info] Device Protocol: axi
+[2026-03-13 03:31:41.404] [info] Device Name: zg330aiu
+[2026-03-13 03:31:41.404] [info] Device Parameters: 
+[2026-03-13 03:31:41.404] [info] 	dma: 0x80000000
+[2026-03-13 03:31:41.404] [info] 	npu: 0x40000000
+icore=FMSHZGV3TECH-AID - 24160628
+device=25122301
+root@U:~/heterogs_npu/harness# 
+root@U:~/heterogs_npu/harness# 

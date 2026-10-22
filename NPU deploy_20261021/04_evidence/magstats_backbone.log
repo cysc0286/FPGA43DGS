@@ -1,0 +1,19 @@
+# COM7 1152008N1  2026-10-20 19:08:08
+base64 -d /tmp/ms.b64 > /tmp/ms.py
+root@U:~/heterogs_npu/harness# 
+root@U:~/heterogs_npu/harness# 
+wc -c /tmp/ms.py
+1012 /tmp/ms.py
+root@U:~/heterogs_npu/harness# 
+root@U:~/heterogs_npu/harness# 
+/root/fpga43dgs_reconstruction/arm_env/bin/python33 /tmp/ms.py /root/fpga43dgs_reconstruction/npu_board_v2_20260929/candidate/graphhs/backbone_cnn/oracle.npz /root/fpga43dgs_reconstruction/npu_board_v2_20260929/nnpu_backbone_cnn_alone_v4/backbone_cnn_0.npy
+shape expected (2, 128, 32, 32) actual (2, 128, 32, 32)
+|expected| mean 0.58544 max 5.7857 p99 2.2279
+|err|      mean 0.0039155 max 0.040012
+rel err    mean 0.047 p50 0.00648 p95 0.0847 p99.9 3.83
+corr(|expected|, |err|) 0.1104
+tf32-exact fraction 1.000000
+fp16-exact fraction 1.000000
+zero fraction 0.000057
+root@U:~/heterogs_npu/harness# 
+root@U:~/heterogs_npu/harness# 
