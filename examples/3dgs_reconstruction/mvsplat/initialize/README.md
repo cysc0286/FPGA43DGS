@@ -1,5 +1,30 @@
 # 视频前预热与常驻渲染候选
 
+2026-11-01：新增存储清理按钮，当前录像、最近成功场景和来源录像受保护，录制/重建期间拒绝清理。
+生命周期入口增加 `--resume-scene 场景目录 --resume-clip capture.json`，校验来源和保存文件后，
+调用 `python -m rendering.viewer --scene ... --renderer ... --live-renderer ...` 恢复已有模型，
+不重新推理；新查看器 token 从采集页面的“打开交互场景”取得。
+实际边界和验证见 [历史清理实测](../video_input/BOARD_HISTORY_CLEANUP_20261101.md)。
+
+2026-11-01：新增 `python -m initialize.camera_ui` 按钮控制入口，协调既有采集与 pipeline initialize。
+页面可自主开始/结束录制、保存后重建、打开查看器；采集实现在 video_input/recording.py，
+初始化模块只管进程、资源与运行状态。见 [按钮录制实测](../video_input/BOARD_CAMERA_BUTTONS_20261101.md)。
+同日后续增加 `--resume-clip capture.json`：受控重启时仅恢复当前录制目录内、完整且哈希和模式一致的短片。
+新录像默认最长 10 秒；几何失败显示拍摄建议，原始诊断折叠保留。
+真实长片的局部窗口回退、配额保护及恢复后的画质限制见 [长录像修复](../video_input/BOARD_LONG_RECORD_FIX_20261101.md)。
+
+2026-11-01：真实 UVC 短片经估算内参文件入口，已完成 CPU MVSplat＋冻结 FPGA 首帧和交互。
+内参未实测标定；本轮范围、几何/图像指标和计时见
+[摄像头全链路实测](../video_input/BOARD_CAMERA_CHAIN_20261101.md)。
+修正 measure 的进程树 RSS 统计，使其兼容没有 `/proc/PID/task/TID/children` 的板端内核，
+通过 PPid 关系累计子孙进程。已运行的本轮 watchdog 仍是旧内存统计版本，不能将其记录当作完整进程树峰值。
+
+2026-10-29：新增 UVC 短片输入与首帧后浏览器交互。`--camera` 要求真实标定，
+READY 后回车采集，完成文件校验后进入原链；`--interactive` 保持场景直到退出。
+摄像头相关事件在 READY 与 VIDEO_COMPLETE 之间，原四主事件计时定义保持不变。
+实现、命令及本地验证边界见 [摄像头输入说明](../video_input/CAMERA_INPUT.md)。
+下文 2026-09/10 的“真实视频采集没有接入”描述为当时状态；本轮仍未做新板端验证。
+
 2026-10-09：原生预热链已统一调用 `LiveRenderer.mainline(...)`，自动启用
 `direct_collect`、`parallel_collect`、`fused_collect`、`neon_pack` 等全部主线参数。
 参数仅从 `rendering/mainline.json` 读取；预热记录和帧记录保存实际配置及预期 BOOT

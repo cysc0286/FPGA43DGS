@@ -13,7 +13,15 @@ class EventLog:
         self.events = []
 
     def emit(self, name, **details):
-        if name not in ORDER or len(self.events) != ORDER.index(name):
+        primary = [item["event"] for item in self.events if item["event"] in ORDER]
+        capture = [item["event"] for item in self.events if item["event"].startswith("CAPTURE_")]
+        if name in ("CAPTURE_STARTED", "CAPTURE_COMPLETE"):
+            expected = [] if name == "CAPTURE_STARTED" else ["CAPTURE_STARTED"]
+            valid = primary == ["READY"] and capture == expected
+        else:
+            valid = (name in ORDER and len(primary) == ORDER.index(name)
+                     and (name != "VIDEO_COMPLETE" or not capture or capture[-1] == "CAPTURE_COMPLETE"))
+        if not valid:
             raise ValueError("Lifecycle event out of order: " + name)
         if set(details) & {"event", "epoch", "monotonic"}:
             raise ValueError("Reserved event fields")
@@ -29,7 +37,10 @@ class EventLog:
     def summary(self):
         by_name = {event["event"]: event for event in self.events}
         result = dict(complete="FRAME_COMPLETE" in by_name)
-        for before, after, field in (("READY", "VIDEO_COMPLETE", "ready_to_receipt_seconds_record_only"),
+        for before, after, field in (("CAPTURE_STARTED", "CAPTURE_COMPLETE", "capture_seconds_record_only"),
+                                     ("CAPTURE_COMPLETE", "FRAME_COMPLETE", "capture_complete_to_frame_seconds"),
+                                     ("CAPTURE_STARTED", "FRAME_COMPLETE", "capture_start_to_frame_seconds"),
+                                     ("READY", "VIDEO_COMPLETE", "ready_to_receipt_seconds_record_only"),
                                      ("VIDEO_COMPLETE", "SCENE_READY", "gaussian_scene_seconds"),
                                      ("SCENE_READY", "FRAME_COMPLETE", "first_render_seconds"),
                                      ("VIDEO_COMPLETE", "FRAME_COMPLETE", "scene_preparation_seconds")):

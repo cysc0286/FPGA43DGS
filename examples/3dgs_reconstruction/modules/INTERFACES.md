@@ -38,6 +38,19 @@
 场景准备时间为 VIDEO_COMPLETE → FRAME_COMPLETE；预热和视频输入只记录。
 后续视角只重复最后一个接口，单独统计相机请求到完整 RGB 的延迟。
 
+2026-10-29 摄像头适配：`video_input/capture.py` 在 READY 后录制并关闭 MJPEG 短片，
+增加 CAPTURE_STARTED / CAPTURE_COMPLETE 后仍通过原 receive_file 发布 VIDEO_COMPLETE。
+`--calibration` 对选中帧校正为主点居中的针孔图像，缩放、裁切、半像素与归一化内参同步变换；
+`--auto-select` 在最多 12 张候选中选两上下文和不同的留出目标，沿用同一 c2w/尺度合同。
+`--interactive` 首帧后复用 LiveRenderer，退出才释放资源；详见
+[摄像头输入](../mvsplat/video_input/CAMERA_INPUT.md)。本轮仅本地软件验证，未做新板测。
+
+2026-11-01 按钮入口：`video_input.recording.CameraRecorder` 独占一个 V4L2 输入，
+同源 MJPEG 分别送 MKV 和实时预览；用户开始/结束或达到边界后封装并检查，只有 complete 短片才交付。
+`initialize.camera_ui` 通过原 `--video --auto-select` 路径启动重建，不改四个数值接口或发布伪标定。
+本轮已按用户授权实测按钮与原实拍片段回归，范围见
+[按钮录制实测](../mvsplat/video_input/BOARD_CAMERA_BUTTONS_20261101.md)。
+
 ## 主线与独立开发
 
 - 视频/位姿优化：修改 `video_input/decode.py`、`pose_estimation/geometry.py`，保持上述上下文与目标相机合同。

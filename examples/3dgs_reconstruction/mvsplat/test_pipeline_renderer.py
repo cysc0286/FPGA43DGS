@@ -115,7 +115,7 @@ class PipelineRendererTests(unittest.TestCase):
         return SimpleNamespace(**defaults)
 
     def test_warm_session_records_mainline_and_closes_native_process(self):
-        with patch("initialize.model_runtime.ModelRuntime") as model:
+        with patch("gaussian_generation.runtime.ModelRuntime") as model:
             model.return_value.load_seconds = 0.
             with WarmSession(self.warm_args(), self.root) as session:
                 configuration = session.record["renderer_configuration"]
@@ -127,14 +127,14 @@ class PipelineRendererTests(unittest.TestCase):
     def test_warm_session_inherits_profile_changes_without_duplicate_defaults(self):
         profile = load_mainline_profile()
         profile["runtime"]["batch"] = 4
-        with patch("initialize.model_runtime.ModelRuntime") as model, \
+        with patch("gaussian_generation.runtime.ModelRuntime") as model, \
                 patch("rendering.runtime.load_mainline_profile", return_value=profile):
             model.return_value.load_seconds = 0.
             with WarmSession(self.warm_args(), self.root) as session:
                 self.assertEqual(session.record["renderer_configuration"]["batch"], 4)
 
     def test_legacy_renderer_remains_available_without_native_path(self):
-        with patch("initialize.model_runtime.ModelRuntime") as model, \
+        with patch("gaussian_generation.runtime.ModelRuntime") as model, \
                 patch("initialize.renderer_runtime.RendererRuntime") as legacy:
             model.return_value.load_seconds = 0.
             with WarmSession(self.warm_args(live_renderer=None), self.root) as session:

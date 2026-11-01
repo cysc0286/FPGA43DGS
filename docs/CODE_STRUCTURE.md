@@ -1,6 +1,6 @@
 # 当前代码结构
 
-更新：2026-10-09。**四个业务模块都在 `examples/3dgs_reconstruction/mvsplat/` 下。**
+更新：2026-11-01。**四个业务模块都在 `examples/3dgs_reconstruction/mvsplat/` 下。**
 `initialize` 是视频前预热；两个协调文件管理调用顺序。它们不是第五种重建算法。
 目录约束见 [项目要求](PROJECT_REQUIREMENTS.md)，执行规则同时写入根目录 `AGENTS.md`。
 
@@ -10,6 +10,14 @@
 | 位姿估计 | `pose_estimation/geometry.py` | 两视图 SIFT/匹配/Essential/三角化，留出视角 PnP | CPU |
 | 高斯生成 | `gaussian_generation/runtime.py`、`adapter.py` | 固定权重前向、参数校验、协方差/SH/相机 ABI 转换 | 当前 CPU；NPU 另行验证 |
 | 渲染 | `rendering/runtime.py`、`live_renderer.cpp`、`render_main/` | 常驻场景、投影、排序、FPGA 求值合成、返回 RGB | CPU＋FPGA |
+
+2026-10-29：视频输入内部新增 `capture.py`（Linux UVC 短片）与 `calibration.py`（针孔标定/校正）；
+位姿模块 `geometry.py` 增加候选对选择；`rendering/viewer.py` 提供常驻场景浏览器控制。
+原模块边界和冻结渲染主线不变。以上为 10 月 29 日范围；11 月 1 日已按用户授权使用估算内参实板试跑。
+11 月 1 日新增 `video_input/recording.py` 按钮开始/结束、预览同源、封装校验；
+`initialize/camera_ui.py` 只协调既有录制、重建子进程与查看器生命周期。
+本轮已做真实短片按钮和原实拍片段重建回归，详见
+[按钮录制实测](../examples/3dgs_reconstruction/mvsplat/video_input/BOARD_CAMERA_BUTTONS_20261101.md)。
 
 这些是实际算法源码位置，不是再加一层同名包装。解码和几何从原 `video_input/prepare.py`
 拆出；ModelRuntime 从 `initialize` 移出；Gaussian 导出从根目录移入生成模块。

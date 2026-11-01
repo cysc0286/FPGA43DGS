@@ -14,11 +14,14 @@ def mutual_ratio_matches(a, b, ratio=0.75):
             if m.distance < ratio * other.distance and reverse.get(m.trainIdx) == m.queryIdx]
 
 
-def estimate_pair(first, second, intrinsic, min_inliers, timing=None):
+def image_features(frame):
+    return cv2.SIFT_create(nfeatures=2048).detectAndCompute(
+        cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), None)
+
+
+def estimate_pair(first, second, intrinsic, min_inliers, timing=None, features=None):
     started = time.perf_counter()
-    sift = cv2.SIFT_create(nfeatures=2048)
-    k0, d0 = sift.detectAndCompute(cv2.cvtColor(first, cv2.COLOR_BGR2GRAY), None)
-    k1, d1 = sift.detectAndCompute(cv2.cvtColor(second, cv2.COLOR_BGR2GRAY), None)
+    (k0, d0), (k1, d1) = features or (image_features(first), image_features(second))
     if d0 is None or d1 is None:
         raise ValueError("No SIFT descriptors in context frames")
     if timing is not None:
@@ -57,6 +60,10 @@ def estimate_pair(first, second, intrinsic, min_inliers, timing=None):
     camera1 = np.eye(4)
     camera1[:3, :3] = rotation.T
     camera1[:3, 3] = (-rotation.T @ translation).ravel() * scale
+    ray0 = points[valid]
+    ray1 = ray0 - camera1[:3, 3]
+    cosine = np.sum(ray0*ray1, axis=1)/(np.linalg.norm(ray0, axis=1)*np.linalg.norm(ray1, axis=1))
+    parallax = np.degrees(np.arccos(np.clip(cosine, -1, 1)))
     landmark_by_keypoint = {m.queryIdx: xyz for m, xyz, good in
                             zip(chosen_matches, points, valid) if good}
     diagnostics = dict(context_features=[len(k0), len(k1)], mutual_matches=len(matches),
@@ -64,6 +71,7 @@ def estimate_pair(first, second, intrinsic, min_inliers, timing=None):
                        median_depth_before_normalization=median_depth,
                        translation_scale=scale, baseline_after_normalization=float(np.linalg.norm(camera1[:3, 3])),
                        median_context_disparity_px=float(np.median(np.linalg.norm(p0-p1, axis=1))))
+    diagnostics.update(positive_fraction=float(valid.mean()), median_parallax_deg=float(np.median(parallax)))
     if timing is not None:
         timing["context_pose_seconds"] = time.perf_counter()-pose_started
         timing["context_total_seconds"] = time.perf_counter()-started
@@ -71,10 +79,9 @@ def estimate_pair(first, second, intrinsic, min_inliers, timing=None):
 
 
 def estimate_target(frame, keypoints0, descriptors0, landmarks, intrinsic, min_inliers,
-                    timing=None, label="target"):
+                    timing=None, label="target", features=None):
     started = time.perf_counter()
-    sift = cv2.SIFT_create(nfeatures=2048)
-    keys, descriptors = sift.detectAndCompute(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), None)
+    keys, descriptors = features or image_features(frame)
     if descriptors is None:
         raise ValueError("No target descriptors")
     if timing is not None:
@@ -107,3 +114,61 @@ def estimate_target(frame, keypoints0, descriptors0, landmarks, intrinsic, min_i
     camera[:3, 3] = (-rotation.T @ tvec).ravel()
     return camera, dict(target_features=len(keys), landmark_matches=len(matches),
                         pnp_inliers=len(inliers), median_reprojection_px=float(np.median(error)))
+
+
+def select_views(frames, intrinsic, min_inliers=30, min_parallax=1., max_reprojection=2.):
+    """Select a usable pair AND distinct held-out target in one shared frame.
+
+    Feature extraction is cached for at most twelve reduced-resolution frames.
+    Pair ranking is geometric; pure rotation and failed target localization fail closed.
+    """
+    from itertools import combinations
+    indices = sorted(frames)
+    if not 3 <= len(indices) <= 12:
+        raise ValueError("Automatic selection needs 3..12 candidate frames")
+    features = {i: image_features(frames[i]) for i in indices}
+    sharpness = {i: float(cv2.Laplacian(cv2.cvtColor(frames[i], cv2.COLOR_BGR2GRAY),
+                                      cv2.CV_64F).var()) for i in indices}
+    rejected, pairs = [], []
+    for first, second in combinations(indices, 2):
+        middle = [i for i in indices if first < i < second]
+        if not middle:
+            continue
+        try:
+            if min(sharpness[first], sharpness[second]) < 15.:
+                raise ValueError("Blurred or textureless context")
+            pair = estimate_pair(frames[first], frames[second], intrinsic, min_inliers,
+                                 features=(features[first], features[second]))
+            info = pair[4]
+            if (not np.isfinite(info["median_parallax_deg"])
+                    or info["median_parallax_deg"] < min_parallax or info["positive_fraction"] < .75):
+                raise ValueError("Insufficient triangulation parallax or positive-depth fraction")
+            score = info["positive_points"] * min(info["median_parallax_deg"], 5.)
+            pairs.append((score, first, second, middle, pair))
+        except (ValueError, cv2.error) as exc:
+            rejected.append(dict(context=[first, second], error=str(exc)))
+    for _, first, second, middle, pair in sorted(pairs, key=lambda item: item[0], reverse=True):
+        # Prefer an interpolation view, but try other held-out candidates on failure.
+        for target in sorted(middle, key=lambda i: abs(i-(first+second)/2)):
+            try:
+                if sharpness[target] < 15.:
+                    raise ValueError("Blurred or textureless target")
+                pose, info = estimate_target(frames[target], pair[2], pair[3], pair[1],
+                    intrinsic, min_inliers, features=features[target])
+                if not np.isfinite(info["median_reprojection_px"]) or info["median_reprojection_px"] > max_reprojection:
+                    raise ValueError("Target reprojection error exceeds gate")
+                selection = dict(kind="geometric_candidates_v1", candidates=indices,
+                    sharpness=sharpness, rejected=rejected,
+                    thresholds=dict(min_inliers=min_inliers, min_parallax_deg=min_parallax,
+                                    min_positive_fraction=.75, max_target_median_reprojection_px=max_reprojection,
+                                    min_laplacian_variance=15.))
+                return [first, second], [target], pair, {target: (pose, info)}, selection
+            except (ValueError, cv2.error) as exc:
+                rejected.append(dict(context=[first, second], target=target, error=str(exc)))
+    raise ValueError("No valid context pair and held-out target; move slowly with translation and texture. "
+                     + json_diagnostics(rejected))
+
+
+def json_diagnostics(rejected):
+    import json
+    return json.dumps(rejected[-8:], ensure_ascii=False)

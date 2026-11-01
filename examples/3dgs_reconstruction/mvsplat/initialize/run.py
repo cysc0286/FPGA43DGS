@@ -1,6 +1,7 @@
 """Warm resources before video input, then prepare and render one scene."""
 import argparse
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -10,7 +11,23 @@ from initialize.events import EventLog
 
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--video", type=Path, help="Completed local video; omit to supply path after READY")
+    source = p.add_mutually_exclusive_group()
+    source.add_argument("--video", type=Path, help="Completed local video; omit to supply path after READY")
+    source.add_argument("--camera", type=Path, help="Linux UVC capture node, e.g. /dev/v4l/by-id/...")
+    p.add_argument("--calibration", type=Path)
+    p.add_argument("--capture-seconds", type=float, default=5.)
+    p.add_argument("--camera-width", type=int, default=1280)
+    p.add_argument("--camera-height", type=int, default=720)
+    p.add_argument("--camera-fps", type=float, default=30.)
+    p.add_argument("--capture-settle", type=float, default=1.)
+    p.add_argument("--capture-now", action="store_true", help="Start after READY without waiting for Enter")
+    p.add_argument("--auto-select", action="store_true", help="Always enabled for camera input")
+    p.add_argument("--candidates", type=int, default=8)
+    p.add_argument("--min-parallax", type=float, default=1.)
+    p.add_argument("--max-reprojection", type=float, default=2.)
+    p.add_argument("--interactive", action="store_true", help="Keep the scene resident and serve browser controls")
+    p.add_argument("--viewer-host", default="127.0.0.1")
+    p.add_argument("--viewer-port", type=int, default=8080)
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--weights", type=Path, required=True)
     p.add_argument("--vendor", type=Path, required=True)
@@ -46,6 +63,25 @@ def main(argv=None):
     p.add_argument("--buffer-policy", choices=("shared", "per_partition"), default="shared")
     p.add_argument("--buffer-limit-mib", type=int, default=128)
     a = p.parse_args(argv)
+    if a.camera is not None:
+        if a.calibration is None:
+            p.error("--camera requires --calibration for the selected capture mode")
+        from video_input.capture import validate_capture
+        try:
+            validate_capture(a.camera_width, a.camera_height, a.camera_fps, a.capture_seconds, a.capture_settle)
+        except ValueError as exc:
+            p.error(str(exc))
+    if a.calibration:
+        from video_input.calibration import Calibration
+        calibration = Calibration(a.calibration)
+        if a.camera and calibration.size != (a.camera_width, a.camera_height):
+            p.error("Calibration image size differs from camera capture mode")
+    if a.interactive and a.live_renderer is None:
+        p.error("--interactive requires --live-renderer")
+    if (not 0 <= a.viewer_port <= 65535 or not 3 <= a.candidates <= 12
+            or not math.isfinite(a.min_parallax) or a.min_parallax <= 0
+            or not math.isfinite(a.max_reprojection) or a.max_reprojection <= 0):
+        p.error("Invalid viewer port or selection thresholds")
     if a.render_max_gaussians is not None and not 0 <= a.render_max_gaussians <= 1000000:
         p.error("--render-max-gaussians must be in [0, 1000000]")
     if a.render_max_gaussians and a.live_renderer is None:
@@ -80,7 +116,15 @@ def main(argv=None):
         event = events.emit("READY", backend=a.backend, weight_sha256=sha(a.weights),
                             video_processed=False)
         print(json.dumps(event), flush=True)
-        if a.video is None:
+        if a.camera is not None:
+            from video_input.capture import capture_clip
+            if not a.capture_now:
+                input("摄像头已就绪，按回车开始采集；请缓慢平移摄像头：")
+            record["camera_capture"] = capture_clip(a.camera, out/"capture",
+                width=a.camera_width, height=a.camera_height, fps=a.camera_fps,
+                seconds=a.capture_seconds, settle=a.capture_settle, events=events)
+            a.video = Path(record["camera_capture"]["path"])
+        elif a.video is None:
             a.video = Path(input().strip())
         from video_input.receipt import receive_file
         receipt = receive_file(a.video, events)
@@ -88,7 +132,13 @@ def main(argv=None):
         from warm_pipeline import prepare_scene
         record.update(prepare_scene(receipt["path"], out, session.model, session.renderer, events,
             size=a.size, prepare_threads=a.prepare_threads, focal_ratio=a.focal_ratio,
-            overlap=not a.serial_prepare))
+            overlap=not a.serial_prepare, calibration=a.calibration,
+            auto_select=a.auto_select or a.camera is not None, candidates=a.candidates,
+            min_parallax=a.min_parallax, max_reprojection=a.max_reprojection))
+        if a.interactive:
+            from rendering.viewer import serve_scene
+            record["interactive"] = serve_scene(session.renderer.runtime, out/"input", out/"inference",
+                                                 host=a.viewer_host, port=a.viewer_port)
         record["complete"] = True
     except BaseException as exc:
         record["error"] = type(exc).__name__+": "+str(exc)

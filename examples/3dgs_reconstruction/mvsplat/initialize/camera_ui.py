@@ -1,0 +1,187 @@
+"""Coordinate button capture, the existing pipeline CLI and its live viewer."""
+import argparse
+import json
+import math
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import threading
+import time
+from urllib.parse import urlsplit
+
+from video_input.recording import CameraRecorder, make_server
+
+
+def reconstruction_error(detail):
+    if 'No valid context pair' in detail:
+        return '没有找到足够重叠且清晰的视角。请对准同一组静止物体，缓慢横向平移，录制 5～8 秒；避免绕物体大幅旋转或快速靠近。'
+    if 'rss_limit' in detail or 'host_reserve_limit' in detail:
+        return '本次重建触及内存保护，已停止。请结束其他任务后重试。'
+    if 'No space left' in detail:
+        return '板端存储空间不足，本次未完成。请点击“清理历史记录”后重试。'
+    return '本次重建未完成，请展开诊断详情查看原因，原录像已保留。'
+
+
+class ReconstructionJob:
+    def __init__(self,camera,args):
+        self.camera,self.args=camera,args
+        self.lock=threading.RLock()
+        self.phase,self.error,self.url='idle',None,None
+        self.process,self.worker,self.stopping=None,None,False
+        self.cancel=threading.Event()
+        self.clip_path=None
+        self.run_path=None
+        self.error_details=None
+
+    def status(self):
+        with self.lock: return dict(phase=self.phase,error=self.error,details=self.error_details,url=self.url,clip_path=self.clip_path,run_path=self.run_path)
+
+    def stop_viewer(self):
+        if self.process and self.process.poll() is None:
+            # measure forwards TERM to the isolated pipeline process group in finally.
+            try: os.killpg(self.process.pid,signal.SIGTERM)
+            except ProcessLookupError: return
+            try: self.process.wait(10)
+            except subprocess.TimeoutExpired:
+                raise RuntimeError('上次重建进程尚未退出，请先检查状态')
+
+    def start(self,clip,scene=None):
+        with self.lock:
+            if self.stopping or self.phase in ('initializing','reconstructing'):
+                raise ValueError('已有重建正在进行')
+            if scene is not None:
+                scene=Path(scene).resolve()
+                if scene.parent!=self.camera.storage_root or not scene.name.startswith('scene_') or not scene.is_dir():
+                    raise ValueError('恢复场景必须位于当前录制目录中')
+                events=json.loads((scene/'events.json').read_text(encoding='utf-8'))['events']
+                if not any(e.get('event')=='VIDEO_COMPLETE' and e.get('path')==str(clip) for e in events):
+                    raise ValueError('恢复场景与当前录像的来源不一致')
+            self.phase,self.error,self.url='initializing',None,None
+            self.error_details=None
+            self.clip_path=str(clip)
+            self.run_path=str(scene or self.args.out/('scene_'+time.strftime('%Y%m%d_%H%M%S')+'_'+os.urandom(3).hex()))
+            previous=self.worker
+            self.cancel.set()
+            self.cancel=threading.Event()
+            self.worker=threading.Thread(target=self.run,args=(clip,self.cancel,previous,scene),daemon=True)
+            self.worker.start()
+
+    def run(self,clip,cancel,previous=None,scene=None):
+        args=self.args
+        run=Path(self.run_path)
+        log_path=run/('viewer_resume_'+os.urandom(3).hex()+'.log') if scene else Path(str(run)+'.log')
+        measurement_path=Path(str(log_path)+'.measurement.json') if scene else Path(str(run)+'.measurement.json')
+        try:
+            if previous:
+                previous.join(12)
+                if previous.is_alive(): raise RuntimeError('上次查看器尚未退出，请检查状态')
+            with self.lock: self.phase,self.error,self.url='initializing',None,None
+            self.stop_viewer()
+            if self.stopping: return
+            self.camera.pause_preview()
+            cli=[sys.executable,str(Path(__file__).resolve().parents[2]/'pipeline.py'),'initialize',
+                '--video',str(clip),'--out',str(run),'--auto-select','--weights',str(args.weights),
+                '--vendor',str(args.vendor),'--renderer',str(args.renderer),'--live-renderer',str(args.live_renderer),
+                '--render-profile','mainline','--threads','4','--prepare-threads','1','--serial-prepare',
+                '--interactive','--viewer-host','127.0.0.1','--viewer-port',str(args.viewer_port)]
+            if args.calibration: cli+=['--calibration',str(args.calibration)]
+            else: cli+=['--focal-ratio',str(args.focal_ratio)]
+            if scene is not None:
+                cli=[sys.executable,'-m','rendering.viewer','--scene',str(scene),
+                     '--renderer',str(args.renderer),'--live-renderer',str(args.live_renderer),
+                     '--host','127.0.0.1','--port',str(args.viewer_port)]
+            command=['/usr/bin/python3',str(Path(__file__).resolve().parents[1]/'measure.py'),
+                '--out',str(measurement_path),'--rss-mib','650','--reserve-mib','128','--timeout','1800','--']+cli
+            env=dict(os.environ,PYTHONUNBUFFERED='1')
+            with log_path.open('xb') as log:
+                self.process=subprocess.Popen(command,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,
+                                              env=env,start_new_session=True)
+            while self.process.poll() is None and not self.stopping and not cancel.is_set():
+                events=run/'events.json'
+                if events.exists():
+                    names=[e['event'] for e in json.loads(events.read_text())['events']]
+                    if 'READY' in names:
+                        with self.lock:
+                            if self.phase=='initializing': self.phase='reconstructing'
+                if self.url is None:
+                    for line in log_path.read_text(errors='replace').splitlines():
+                        if '"event": "VIEWER_READY"' in line:
+                            event=json.loads(line)
+                            token=urlsplit(event['url']).fragment
+                            with self.lock: self.url=args.viewer_public_url.rstrip('/')+'/#'+token; self.phase='ready'
+                            self.camera.resume_preview()
+                            break
+                time.sleep(.3)
+            if self.stopping or cancel.is_set(): return
+            result=dict(complete=True) if scene else (json.loads((run/'warm_result.json').read_text()) if (run/'warm_result.json').exists() else {})
+            measurement=json.loads(measurement_path.read_text()) if measurement_path.exists() else {}
+            if not result.get('complete') or self.process.returncode or measurement.get('status')!='passed':
+                raise RuntimeError(result.get('error') or '重建进程退出，请查看 '+str(run)+'.log')
+            with self.lock: self.phase,self.url='complete',None
+        except (OSError,ValueError,RuntimeError,subprocess.SubprocessError) as exc:
+            self.stop_viewer()
+            with self.lock:
+                self.phase,self.error,self.url='error',reconstruction_error(str(exc)),None
+                self.error_details=str(exc)
+        finally:
+            try: self.camera.resume_preview()
+            except OSError as exc:
+                with self.lock: self.error='预览恢复失败：'+str(exc)
+
+    def close(self):
+        self.stopping=True
+        self.cancel.set()
+        self.stop_viewer()
+        if self.worker: self.worker.join(12)
+
+
+def main(argv=None):
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--device',default='/dev/video0')
+    p.add_argument('--width',type=int,default=1280)
+    p.add_argument('--height',type=int,default=720)
+    p.add_argument('--fps',type=float,default=60.)
+    p.add_argument('--max-seconds',type=float,default=10.)
+    p.add_argument('--host',default='127.0.0.1')
+    p.add_argument('--port',type=int,default=8081)
+    p.add_argument('--out',type=Path,required=True)
+    p.add_argument('--resume-clip',type=Path,help='Restore one verified completed capture.json after restarting UI')
+    p.add_argument('--resume-scene',type=Path,help='Reopen a saved scene without running reconstruction again')
+    p.add_argument('--weights',type=Path,required=True)
+    p.add_argument('--vendor',type=Path,required=True)
+    p.add_argument('--renderer',type=Path,required=True)
+    p.add_argument('--live-renderer',type=Path,required=True)
+    p.add_argument('--calibration',type=Path)
+    p.add_argument('--focal-ratio',type=float,default=None)
+    p.add_argument('--viewer-port',type=int,default=8080)
+    p.add_argument('--viewer-public-url',required=True,help='URL reachable in the user browser, without token')
+    a=p.parse_args(argv)
+    if a.resume_scene and not a.resume_clip:p.error('--resume-scene requires --resume-clip')
+    if bool(a.calibration)==bool(a.focal_ratio): p.error('Choose measured --calibration or explicit approximate --focal-ratio')
+    if a.focal_ratio is not None and (not math.isfinite(a.focal_ratio) or a.focal_ratio<=0): p.error('Invalid focal ratio')
+    public=urlsplit(a.viewer_public_url)
+    if public.scheme not in ('http','https') or not public.netloc or public.fragment or public.query:
+        p.error('Invalid public viewer URL')
+    for key in ('out','weights','vendor','renderer','live_renderer','calibration'):
+        value=getattr(a,key)
+        if value is not None: setattr(a,key,value.resolve())
+    def interrupted(signum,frame): raise KeyboardInterrupt
+    signal.signal(signal.SIGTERM,interrupted)
+    camera=CameraRecorder(a.device,a.width,a.height,a.fps,a.out,max_seconds=a.max_seconds)
+    camera.build=ReconstructionJob(camera,a)
+    server=None
+    try:
+        if a.resume_clip: camera.restore_clip(a.resume_clip)
+        if a.resume_scene: camera.build.start(camera.clip['path'],a.resume_scene)
+        server=make_server(camera,a.host,a.port)
+        print(json.dumps(dict(event='CAMERA_UI_READY',host=a.host,port=server.server_port)),flush=True)
+        server.serve_forever()
+    except KeyboardInterrupt: pass
+    finally:
+        if server: server.server_close()
+        camera.close()
+
+
+if __name__=='__main__': main()
