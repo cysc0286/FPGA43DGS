@@ -10,7 +10,7 @@ from unittest.mock import patch
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
-from video_input.recording import CameraRecorder, make_server
+from video_input.recording import CameraRecorder, make_server,prune_stream_candidate
 
 
 class FakePreview:
@@ -245,6 +245,116 @@ class RecordingTests(unittest.TestCase):
                     if expected=='recorded': self.assertEqual(camera.clip['stop_reason'],'time_limit')
                     else: self.assertIn('断流',camera.error)
                 finally: camera.close()
+
+    def stream(self,root,name):
+        from common import sha
+        path=Path(root)/name;path.mkdir()
+        (path/'stream.json').write_text('{"phase":"stopped"}')
+        frame=path/'slot_b/board/first_frame/frame.bin';frame.parent.mkdir(parents=True);frame.write_bytes(b'latest')
+        (path/'latest.json').write_text(json.dumps(dict(complete=True,slot='slot_b',frame_sha256=sha(frame))))
+        spare=path/'slot_a';spare.mkdir();(spare/'old').write_bytes(b'old candidate')
+        return path
+
+    def test_finished_stream_prunes_only_spare_after_latest_hash_check(self):
+        with tempfile.TemporaryDirectory() as root:
+            stream=self.stream(root,'stream_20261101_100000_aaaaaa')
+            frame=stream/'slot_b/board/first_frame/frame.bin'
+            frame.write_bytes(b'corrupt')
+            with self.assertRaises(ValueError):prune_stream_candidate(stream,root)
+            self.assertTrue((stream/'slot_a/old').exists())
+            frame.write_bytes(b'latest')
+            result=prune_stream_candidate(stream,root)
+            self.assertEqual(result['removed'],['slot_a']);self.assertGreater(result['freed_bytes'],0)
+            self.assertEqual(frame.read_bytes(),b'latest')
+            self.assertEqual(prune_stream_candidate(stream,root)['removed'],[])
+
+    def test_restart_reclaims_old_streams_and_candidates_but_keeps_latest_and_clips(self):
+        with tempfile.TemporaryDirectory() as root:
+            camera=self.camera(root);calls=[]
+            try:
+                old=self.stream(root,'stream_20261101_100000_aaaaaa')
+                current=self.stream(root,'stream_20261101_110000_bbbbbb')
+                clip=self.clip(root,'clip_20261101_090000_cccccc')
+                camera.build=SimpleNamespace(status=lambda:dict(phase='complete',mode='streaming',run_path=str(current)),
+                    start_stream=lambda:calls.append('start'),close=lambda:None)
+                free_before=123*1024**2
+                def disk(path):
+                    return SimpleNamespace(free=free_before+(21*1024**2 if not (current/'slot_a').exists() else 0))
+                with patch('video_input.recording.shutil.disk_usage',side_effect=disk):camera.start_stream()
+                self.assertEqual(calls,['start']);self.assertFalse(old.exists())
+                self.assertFalse((current/'slot_a').exists());self.assertTrue((current/'slot_b').exists());self.assertTrue(clip.exists())
+            finally:camera.close()
+
+    def test_clear_all_deletes_current_latest_and_orphans_but_preserves_unknown_files(self):
+        with tempfile.TemporaryDirectory() as root:
+            camera=self.camera(root)
+            try:
+                clip=self.clip(root,'clip_20261101_100000_aaaaaa');scene=self.scene(root,'scene_20261101_100100_aaaaaa',clip)
+                stream=self.stream(root,'stream_20261101_110000_bbbbbb')
+                camera.restore_clip(clip/'capture.json');resets=[]
+                camera.build=SimpleNamespace(status=lambda:dict(phase='ready'),reset=lambda:resets.append(True),close=lambda:None)
+                orphan=Path(root)/'stream_20261101_120000_cccccc.log';orphan.write_bytes(b'failed launch')
+                keep=Path(root)/'weights';keep.mkdir();(keep/'keep').write_bytes(b'weights')
+                unknown=Path(root)/'clip_20261101_080000_dddddd';unknown.mkdir();(unknown/'notes').write_bytes(b'user notes')
+                result=camera.clear_all_history()
+                self.assertEqual(resets,[True]);self.assertFalse(clip.exists());self.assertFalse(scene.exists());self.assertFalse(stream.exists());self.assertFalse(orphan.exists())
+                self.assertTrue((keep/'keep').exists());self.assertTrue((unknown/'notes').exists())
+                self.assertIsNone(camera.clip);self.assertEqual(camera.state,'idle');self.assertEqual(camera.elapsed,0)
+                self.assertFalse(camera.maintenance);self.assertEqual(result['kept'],[])
+                self.assertEqual(camera.clear_all_history()['removed'],[])
+            finally:camera.close()
+
+    def test_clear_all_rejects_busy_and_releases_camera_lock_while_resetting_viewer(self):
+        with tempfile.TemporaryDirectory() as root:
+            camera=self.camera(root)
+            try:
+                camera.state='recording'
+                with self.assertRaises(ValueError):camera.clear_all_history()
+                camera.state='idle'
+                camera.build=SimpleNamespace(status=lambda:dict(phase='streaming'),close=lambda:None)
+                with self.assertRaises(ValueError):camera.clear_all_history()
+                entered=threading.Event();release=threading.Event();errors=[]
+                def reset():
+                    camera.resume_preview();entered.set();release.wait(2)
+                camera.build=SimpleNamespace(status=lambda:dict(phase='ready'),reset=reset,close=lambda:None)
+                def clear():
+                    try:camera.clear_all_history()
+                    except Exception as exc:errors.append(str(exc))
+                thread=threading.Thread(target=clear,daemon=True);thread.start()
+                self.assertTrue(entered.wait(1));self.assertTrue(camera.status()['maintenance'])
+                with self.assertRaises(ValueError):camera.start_stream()
+                with self.assertRaises(ValueError):camera.cleanup_history()
+                release.set();thread.join(2);self.assertFalse(thread.is_alive());self.assertEqual(errors,[])
+            finally:camera.close()
+
+    def test_clear_all_never_follows_internal_links(self):
+        with tempfile.TemporaryDirectory() as root,tempfile.TemporaryDirectory() as outside:
+            camera=self.camera(root)
+            try:
+                clip=self.clip(root,'clip_20261101_100000_aaaaaa');target=Path(outside)/'keep';target.write_bytes(b'outside')
+                try:(clip/'linked').symlink_to(target)
+                except OSError:self.skipTest('Symlink creation unavailable in this Windows session')
+                result=camera.clear_all_history()
+                self.assertIn(clip.name,result['skipped']);self.assertTrue(clip.exists());self.assertEqual(target.read_bytes(),b'outside')
+            finally:camera.close()
+
+    def test_clear_all_http_requires_token_and_explicit_confirmation(self):
+        with tempfile.TemporaryDirectory() as root:
+            camera=self.camera(root);server=make_server(camera,port=0)
+            thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+            url=f'http://127.0.0.1:{server.server_port}'
+            try:
+                clip=self.clip(root,'clip_20261101_100000_aaaaaa');camera.restore_clip(clip/'capture.json')
+                token=json.loads(urlopen(url).read().decode().split('const token=',1)[1].split(';',1)[0])
+                def post(headers):return urlopen(Request(url+'/api/cleanup/all',method='POST',headers=headers))
+                with self.assertRaises(HTTPError) as error:post({})
+                self.assertEqual(error.exception.code,403)
+                with self.assertRaises(HTTPError) as error:post({'X-Session-Token':token})
+                self.assertEqual(error.exception.code,409);self.assertTrue(clip.exists())
+                with post({'X-Session-Token':token,'X-Confirm-Delete':'all-session-records'}) as response:
+                    self.assertEqual(response.status,200);self.assertIn(clip.name,json.load(response)['removed'])
+                self.assertFalse(clip.exists());self.assertIsNone(camera.status()['clip'])
+            finally:server.shutdown();server.server_close();thread.join();camera.close()
 
 
 if __name__=='__main__': unittest.main()

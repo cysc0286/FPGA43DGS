@@ -22,7 +22,7 @@ from rendering.streaming import SceneExchange
 from rendering.runtime import LiveFrame
 from rendering.viewer import make_server
 from rendering.test_viewer import BASE
-from initialize.camera_ui import ReconstructionJob
+from initialize.camera_ui import ReconstructionJob,main as camera_ui_main
 from initialize.streaming import LivePipeline
 
 
@@ -170,6 +170,7 @@ class StreamingTests(unittest.TestCase):
                 run=Path(job.run_path);run.mkdir()
                 camera.stop_stream();self.assertTrue((run/'stop.requested').exists())
                 self.assertEqual(job.status()['phase'],'stopping')
+                job.phase='streaming'
                 (run/'stream.json').write_text('{"phase":"stopped"}')
                 self.assertEqual(job.status()['phase'],'ready')
                 job.worker=None
@@ -178,6 +179,65 @@ class StreamingTests(unittest.TestCase):
                 (run/'latest.json').write_text(json.dumps(dict(slot='slot_a',frame_sha256=sha(frame))))
                 self.assertIn(old.name,camera.cleanup_history()['removed']);self.assertTrue(frame.exists())
             finally:camera.close()
+
+    def test_repeated_start_stops_previous_owner_and_launches_another_worker(self):
+        with tempfile.TemporaryDirectory() as root:
+            camera=CameraRecorder('/dev/video0',1280,720,60,root,factory=FakePreview)
+            args=SimpleNamespace(out=Path(root),weights='weights',vendor='vendor',renderer='renderer',
+                                 live_renderer='live',viewer_port=8080,port=8081,calibration=None,
+                                 focal_ratio=.52,viewer_public_url='http://127.0.0.1:18434')
+            job=ReconstructionJob(camera,args);camera.build=job;children=[]
+            def popen(command,**kwargs):
+                child=SimpleNamespace(returncode=None)
+                child.poll=lambda:child.returncode
+                run=Path(command[command.index('--out',command.index('--source-url'))+1]);run.mkdir()
+                kwargs['stdout'].write(b'{"event": "VIEWER_READY", "url": "http://127.0.0.1:8080/#token=test"}\n')
+                kwargs['stdout'].flush();children.append(child)
+                return child
+            def stop():
+                if job.process:job.process.returncode=0
+            def wait_for(test):
+                deadline=time.monotonic()+3
+                while not test() and time.monotonic()<deadline:time.sleep(.01)
+                self.assertTrue(test(),job.status())
+            try:
+                with patch('initialize.camera_ui.subprocess.Popen',side_effect=popen),patch.object(job,'stop_viewer',side_effect=stop):
+                    camera.start_stream();wait_for(lambda:job.phase=='streaming')
+                    first=job.run_path
+                    (Path(first)/'stream.json').write_text('{"phase":"stopped"}')
+                    self.assertEqual(job.status()['phase'],'ready')
+                    camera.start_stream();wait_for(lambda:len(children)==2 and job.phase=='streaming')
+                    self.assertIsNotNone(children[0].returncode)
+                    self.assertNotEqual(first,job.run_path)
+                    camera.stop_stream();(Path(job.run_path)/'stream.json').write_text('{"phase":"stopped"}')
+                    camera.clear_all_history()
+                    self.assertEqual(job.status()['phase'],'idle');self.assertIsNone(job.process)
+                    self.assertIsNone(camera.clip)
+            finally:camera.close()
+
+    def test_restoring_stopped_metadata_is_not_ready_before_viewer_launch(self):
+        with tempfile.TemporaryDirectory() as root:
+            camera=CameraRecorder('/dev/video0',1280,720,60,root,factory=FakePreview)
+            job=ReconstructionJob(camera,SimpleNamespace(out=Path(root)));camera.build=job
+            try:
+                job.mode='streaming';job.phase='initializing';job.run_path=root
+                (Path(root)/'stream.json').write_text('{"phase":"stopped"}')
+                self.assertEqual(job.status()['phase'],'initializing')
+            finally:camera.close()
+
+    def test_ui_restart_ignores_restore_paths_removed_by_clear_all(self):
+        with tempfile.TemporaryDirectory() as root:
+            for option in ('--resume-scene','--resume-stream'):
+                args=['--out',root,'--weights',root+'/weights','--vendor',root+'/vendor',
+                      '--renderer',root+'/renderer','--live-renderer',root+'/live',
+                      '--focal-ratio','.52','--viewer-public-url','http://127.0.0.1:18434',
+                      '--resume-clip',root+'/deleted/capture.json',option,root+'/deleted_scene']
+                with patch('initialize.camera_ui.CameraRecorder') as camera,patch('initialize.camera_ui.make_server') as server,patch('builtins.print'):
+                    server.return_value.server_port=8081
+                    server.return_value.serve_forever.side_effect=KeyboardInterrupt
+                    camera_ui_main(args)
+                    camera.return_value.restore_clip.assert_not_called()
+                    self.assertEqual(camera.return_value.build.status()['phase'],'idle')
 
     def test_failed_geometry_preserves_successful_slot_and_pointer(self):
         with tempfile.TemporaryDirectory() as root:

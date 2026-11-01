@@ -144,6 +144,9 @@ def main(argv=None):
                 sampler.close()
                 if server.stats.get('fatal_error'):raise RuntimeError(server.stats['fatal_error'])
                 pipeline.progress(phase='stopped',message=('采集已结束；可继续查看最后一个有效场景。' if exchange.base is not None else '采集已结束；尚未生成有效场景，可重新开始。'))
+                from video_input.recording import prune_stream_candidate
+                storage=prune_stream_candidate(a.out,a.out.resolve().parent)
+                pipeline.progress(storage=storage)
                 # Keep the final scene interactive until closed/replaced by the UI.
                 while not server.stopping:time.sleep(.2)
                 if server.stats.get('fatal_error'):raise RuntimeError(server.stats['fatal_error'])

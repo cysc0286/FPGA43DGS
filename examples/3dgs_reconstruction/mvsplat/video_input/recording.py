@@ -23,6 +23,7 @@ PAGE = '''<!doctype html><html lang="zh-CN"><meta charset="utf-8">
 img{display:block;width:100%;aspect-ratio:16/9;object-fit:contain;background:#111827;border-radius:10px}
 .controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}.toolbar{background:white;padding:8px 0 16px;margin:0}button,a.button{font:inherit;border:0;border-radius:9px;padding:12px 20px;background:#e6ebf2;color:#17212f;text-decoration:none;cursor:pointer}
 #start,#rebuild,a.button{background:#1764cf;color:white}#stop{background:#d83344;color:white}button:disabled{opacity:.4;cursor:default}
+#clear-all{background:#b21e2f;color:white}
 #time{font-size:30px;font-variant-numeric:tabular-nums}#record-status{font-weight:600}#error{color:#b21e2f;white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:800px){.workspace{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:480px){body{padding:0 10px;margin:16px auto}.card{padding:12px}button{flex:1;padding:12px 8px}.toolbar button{flex:1 1 calc(50% - 10px)}h1{font-size:23px}}</style>
@@ -39,15 +40,18 @@ img{display:block;width:100%;aspect-ratio:16/9;object-fit:contain;background:#11
 <p id="build-status" role="status">等待短片</p><p id="error" role="alert"></p>
 <details id="diagnostics" hidden><summary>查看诊断详情</summary><pre id="error-detail" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details></section>
 <section class="card"><h2>板端存储</h2><p class="hint">清理本页面产生的旧录像、失败记录和旧重建文件，保留当前短片及最近成功的场景和来源录像。删除后不可恢复；模型权重和系统文件保留。</p>
-<div class="controls"><button id="cleanup" disabled>清理历史记录（保留最新）</button></div><p id="cleanup-status" class="hint" role="status"></p></section>
-<script>const token=__TOKEN__;let active=true,busy=false,last=null;const $=id=>document.getElementById(id);
-async function command(action){if(busy)return;busy=true;buttons();$('error').textContent='';try{
-const r=await fetch('/api/'+action,{method:'POST',headers:{'X-Session-Token':token}});const d=await r.json();if(!r.ok)throw Error(d.error);if(action==='cleanup')$('cleanup-status').textContent='已清理 '+d.removed.length+' 项，释放 '+(d.freed_bytes/1048576).toFixed(1)+' MiB；当前可用 '+d.free_mib.toFixed(0)+' MiB。';
-}catch(e){$('error').textContent=e.message}finally{busy=false;await status()}}
-function buttons(){if(!last)return;const building=['initializing','reconstructing','streaming','stopping'].includes(last.build.phase);
+<div class="controls"><button id="cleanup" disabled>清理历史记录（保留最新）</button><button id="clear-all" disabled>清空全部记录（含最新结果）</button></div>
+<p class="hint">清空全部记录会关闭当前场景，并删除本页面的全部录像、重建结果和会话日志，无法恢复。</p><p id="cleanup-status" class="hint" role="status"></p></section>
+<script>const token=__TOKEN__;let active=true,busy=false,last=null,actionError='';const $=id=>document.getElementById(id);
+async function command(action){if(busy)return;busy=true;actionError='';buttons();$('error').textContent='';try{
+const headers={'X-Session-Token':token};if(action==='cleanup/all')headers['X-Confirm-Delete']='all-session-records';
+const r=await fetch('/api/'+action,{method:'POST',headers});const d=await r.json();if(!r.ok)throw Error(d.error);if(action==='cleanup'||action==='cleanup/all')$('cleanup-status').textContent=(action==='cleanup/all'?'已清空 ':'已清理 ')+d.removed.length+' 项，释放 '+(d.freed_bytes/1048576).toFixed(1)+' MiB；当前可用 '+d.free_mib.toFixed(0)+' MiB。'+(d.skipped&&d.skipped.length?' 有 '+d.skipped.length+' 项因路径或链接异常而保留。':'');
+}catch(e){actionError=e.message;$('error').textContent=actionError}finally{busy=false;await status()}}
+function buttons(){if(!last)return;const building=last.maintenance||['initializing','reconstructing','streaming','stopping'].includes(last.build.phase);
 $('start').disabled=busy||building||['starting','recording','stopping'].includes(last.state);
 $('stop').disabled=busy||!['starting','recording'].includes(last.state);$('rebuild').disabled=busy||building||!last.clip||['starting','recording','stopping'].includes(last.state);
 $('cleanup').disabled=busy||building||['starting','recording','stopping'].includes(last.state);
+$('clear-all').disabled=$('cleanup').disabled;
 $('live-start').disabled=busy||building||['starting','recording','stopping'].includes(last.state);
 $('live-stop').disabled=busy||last.build.mode!=='streaming'||!['initializing','streaming'].includes(last.build.phase)}
 async function status(){try{const r=await fetch('/api/status',{cache:'no-store'});if(!r.ok)throw Error('状态连接中断');last=await r.json();
@@ -61,15 +65,53 @@ $('build-status').textContent=last.build.mode==='streaming'&&last.build.phase===
 const live=last.build.live||{},liveLabels={warming:'模型预热中',sampling:'等待有效视角',geometry:'估计位姿与点云',inference:'生成高斯模型',publishing:'校验并切换场景',stopped:'采集已结束',error:'更新已停止'};
 $('live-status').textContent=last.build.mode==='streaming'?(last.build.phase==='stopping'?phases.stopping:(liveLabels[live.phase]||phases[last.build.phase]))+' · 已更新 '+(live.version||0)+' 次'+(live.last_result?' · 最近窗口到首帧 '+live.last_result.window_to_frame_seconds.toFixed(1)+' 秒':'')+(live.message?' · '+live.message:'')+(live.source&&live.source.error?' · 采集异常：'+live.source.error:''):'等待开始';
 const liveUrl=last.build.mode==='streaming'&&last.build.url?last.build.url:'';$('live-viewer').hidden=!liveUrl;if(liveUrl&&$('live-viewer').getAttribute('src')!==liveUrl)$('live-viewer').src=liveUrl;else if(!liveUrl)$('live-viewer').removeAttribute('src');
-if(last.error||last.build.error)$('error').textContent=last.error||last.build.error;else $('error').textContent='';
+$('error').textContent=last.error||last.build.error||actionError;
 $('diagnostics').hidden=!last.build.details;$('error-detail').textContent=last.build.details||'';buttons();
-}catch(e){$('record-status').textContent=e.message;for(const id of ['start','stop','rebuild','live-start','live-stop','cleanup'])$(id).disabled=true}}
+}catch(e){$('record-status').textContent=e.message;for(const id of ['start','stop','rebuild','live-start','live-stop','cleanup','clear-all'])$(id).disabled=true}}
 async function frame(){if(active){try{const r=await fetch('/frame.jpg?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error(await r.text());
 const old=$('camera').src;$('camera').src=URL.createObjectURL(await r.blob());if(old.startsWith('blob:'))URL.revokeObjectURL(old);
 $('preview-status').textContent='实时预览 · '+r.headers.get('X-Capture-Fps')+' fps 采集';}catch(e){$('preview-status').textContent=e.message}}setTimeout(frame,250)}
 $('start').onclick=()=>command('start');$('stop').onclick=()=>command('stop');$('rebuild').onclick=()=>command('reconstruct');
 $('cleanup').onclick=()=>command('cleanup');$('live-start').onclick=()=>command('live/start');$('live-stop').onclick=()=>command('live/stop');$('pause').onclick=e=>{active=!active;e.target.textContent=active?'暂停显示':'继续显示'};
+$('clear-all').onclick=()=>{if(confirm('确定清空全部记录（包括最新结果）？将关闭当前场景，删除本页面的全部录像、重建结果和会话日志。此操作无法恢复。'))command('cleanup/all')};
 status();setInterval(status,500);frame();</script></html>'''
+
+
+def checked_path(path,root):
+    """Only regular files/directories within the verified root, without links."""
+    if path.is_symlink() or getattr(path,'is_junction',lambda:False)():return False
+    if root not in path.resolve().parents:return False
+    if path.is_dir():return all(checked_path(p,root) for p in path.iterdir())
+    return path.is_file()
+
+
+def remove_path(path,root):
+    if not checked_path(path,root):raise ValueError('历史记录路径已改变，未执行删除')
+    if path.is_dir():
+        total=sum(remove_path(p,root) for p in path.iterdir())
+        path.rmdir();return total
+    size=path.stat().st_size;path.unlink();return size
+
+
+def prune_stream_candidate(folder,root):
+    """An ended stream needs only its hash-verified latest slot, not its spare."""
+    folder,root=Path(folder),Path(root).resolve()
+    if (folder.is_symlink() or getattr(folder,'is_junction',lambda:False)()
+            or folder.resolve().parent!=root or not re.fullmatch(r'stream_\d{8}_\d{6}_[0-9a-f]{6}',folder.name)):
+        raise ValueError('连续会话目录边界不一致')
+    try:
+        state=json.loads((folder/'stream.json').read_text(encoding='utf-8'))
+        latest=json.loads((folder/'latest.json').read_text(encoding='utf-8'))
+    except FileNotFoundError:return dict(removed=[],freed_bytes=0)
+    if state.get('phase')!='stopped':return dict(removed=[],freed_bytes=0)
+    slot=latest.get('slot')
+    if slot not in ('slot_a','slot_b') or not latest.get('complete'):raise ValueError('连续结果指针无效，未回收候选')
+    frame=folder/slot/'board/first_frame/frame.bin'
+    if (not checked_path(frame,root) or sha(frame)!=latest.get('frame_sha256')):
+        raise ValueError('最新结果校验失败，未回收候选')
+    spare=folder/('slot_b' if slot=='slot_a' else 'slot_a')
+    if not spare.exists() and not spare.is_symlink():return dict(removed=[],freed_bytes=0)
+    return dict(removed=[spare.name],freed_bytes=remove_path(spare,root))
 
 
 class CameraRecorder:
@@ -83,6 +125,7 @@ class CameraRecorder:
         self.state, self.error, self.clip = 'idle', None, None
         self.preview, self.worker, self.build = None, None, None
         self.stop_event, self.closed = threading.Event(), False
+        self.maintenance=False
         self.started, self.elapsed = None, 0.
         self.resume_preview()
 
@@ -111,10 +154,18 @@ class CameraRecorder:
 
     def start_stream(self):
         with self.lock:
-            if self.closed or self.state in ('starting','recording','stopping'):
+            if self.closed or self.maintenance or self.state in ('starting','recording','stopping'):
                 raise ValueError('请先结束当前录制并等待保存完成')
             if not self.build:raise ValueError('连续重建入口尚未配置')
+            build=self.build.status()
+            if build['phase'] in ('initializing','reconstructing','streaming','stopping'):
+                raise ValueError('请先结束当前采集或重建')
             self.packet()
+            # Finished sessions otherwise accumulate another pair of ~20 MiB
+            # slots per restart. Keep the latest usable result and current run.
+            retained=self.cleanup_history(stream_only=True)
+            for name in retained['kept']:
+                if name.startswith('stream_'):prune_stream_candidate(self.storage_root/name,self.storage_root)
             if shutil.disk_usage(self.out).free<128*1024**2:
                 raise OSError('连续模式需至少 128 MiB 可用空间，请先清理历史记录')
             self.build.start_stream()
@@ -133,11 +184,11 @@ class CameraRecorder:
             build['matches_clip']=bool(self.clip and build.get('clip_path')==self.clip['path'])
             return dict(state=self.state, elapsed_seconds=max(0.,elapsed), max_seconds=self.max_seconds,
                         free_mib=shutil.disk_usage(self.out).free/1024**2, clip=clip, error=self.error,
-                        build=build)
+                        build=build,maintenance=self.maintenance)
 
     def start(self):
         with self.lock:
-            if self.closed or self.state in ('starting','recording','stopping'):
+            if self.closed or self.maintenance or self.state in ('starting','recording','stopping'):
                 raise ValueError('已有录制正在进行，请先结束')
             if self.build and self.build.status()['phase'] in ('initializing','reconstructing','streaming','stopping'):
                 raise ValueError('请等待当前重建完成')
@@ -229,6 +280,7 @@ class CameraRecorder:
 
     def reconstruct(self):
         with self.lock:
+            if self.maintenance:raise ValueError('正在清理记录，请稍候')
             if not self.build: raise ValueError('重建入口尚未配置')
             if self.state!='recorded' or not self.clip: raise ValueError('请先结束录制并等待短片检查完成')
             self.build.start(self.clip['path'])
@@ -250,10 +302,10 @@ class CameraRecorder:
             self.clip,self.state,self.error=record,'recorded',None
             self.elapsed=record['duration_seconds']
 
-    def cleanup_history(self):
+    def cleanup_history(self, *, stream_only=False):
         """Delete only owned inactive sessions; retain current and last usable result."""
         with self.lock:
-            if self.closed or self.state in ('starting','recording','stopping'):
+            if self.closed or self.maintenance or self.state in ('starting','recording','stopping'):
                 raise ValueError('请先结束录制并等待保存完成，再清理历史记录')
             build=self.build.status() if self.build else {}
             if build.get('phase') in ('initializing','reconstructing','streaming','stopping'):
@@ -311,7 +363,8 @@ class CameraRecorder:
                     # Without provenance we cannot know which clip the last
                     # model depends on; leave clips intact rather than guess.
                     protected.update(p.name for p in clips)
-            selected=[p for name,p in sorted(entries.items()) if name not in protected]
+            selected=[p for name,p in sorted(entries.items()) if name not in protected
+                      and (not stream_only or name.startswith('stream_'))]
             # Inspect every target before deleting any, never follow links.
             # A symlink/junction inside a candidate causes that entry to be kept.
             def checked(path):
@@ -342,6 +395,44 @@ class CameraRecorder:
                 remove(path);removed.append(path.name)
             return dict(removed=removed,freed_bytes=total,kept=sorted(protected),
                         free_mib=shutil.disk_usage(root).free/1024**2)
+
+    def clear_all_history(self):
+        """Close the inactive viewer and delete all recognized owned sessions."""
+        with self.lock:
+            if self.closed or self.maintenance or self.state in ('starting','recording','stopping'):
+                raise ValueError('请先结束录制并等待保存完成')
+            if self.build and self.build.status()['phase'] in ('initializing','reconstructing','streaming','stopping'):
+                raise ValueError('请先结束连续采集或等待重建完成，再清空全部记录')
+            root=self.storage_root
+            if self.out.is_symlink() or getattr(self.out,'is_junction',lambda:False)() or self.out.resolve()!=root:
+                raise ValueError('录制目录边界不一致，未执行清空')
+            self.maintenance=True
+        try:
+            # The worker's finally resumes preview under camera.lock. Do not
+            # hold that lock while cancelling/joining it or closing its viewer.
+            if self.build:self.build.reset()
+            with self.lock:
+                if self.out.resolve()!=root or self.out.is_symlink():raise ValueError('目录已改变，未执行清空')
+                pattern=r'(clip|scene|stream)_\d{8}_\d{6}_[0-9a-f]{6}'
+                selected=[];skipped=[]
+                for path in sorted(root.iterdir()):
+                    if not re.fullmatch(pattern,path.name):continue
+                    marker='capture.json' if path.name.startswith('clip_') else ('stream.json' if path.name.startswith('stream_') else 'events.json')
+                    if not path.is_dir() or not (path/marker).is_file():continue
+                    if checked_path(path,root):selected.append(path)
+                    else:skipped.append(path.name)
+                # Pair receipts/logs also cover failed launches with no folder.
+                for path in sorted(root.iterdir()):
+                    if re.fullmatch(pattern+r'\.(log|measurement\.json)',path.name):
+                        if checked_path(path,root):selected.append(path)
+                        else:skipped.append(path.name)
+                self.clip=None;self.state='idle';self.error=None;self.started=None;self.elapsed=0.
+                total=0;removed=[]
+                for path in selected:
+                    total+=remove_path(path,root);removed.append(path.name)
+                return dict(removed=removed,skipped=skipped,freed_bytes=total,kept=[],free_mib=shutil.disk_usage(root).free/1024**2)
+        finally:
+            with self.lock:self.maintenance=False
 
     def close(self):
         with self.lock: self.closed=True; self.stop_event.set()
@@ -384,6 +475,10 @@ def make_server(camera, host='127.0.0.1', port=8081):
             try:
                 if self.path=='/api/cleanup':
                     self.reply(200,json.dumps(camera.cleanup_history(),ensure_ascii=False).encode());return
+                if self.path=='/api/cleanup/all':
+                    if self.headers.get('X-Confirm-Delete')!='all-session-records':
+                        raise ValueError('清空全部记录需要明确确认')
+                    self.reply(200,json.dumps(camera.clear_all_history(),ensure_ascii=False).encode());return
                 action={'/api/start':camera.start,'/api/stop':camera.stop,'/api/reconstruct':camera.reconstruct,
                         '/api/live/start':camera.start_stream,'/api/live/stop':camera.stop_stream}.get(self.path)
                 if action is None: self.reply(404,b'{}'); return

@@ -49,7 +49,7 @@ class ReconstructionJob:
                 except (OSError,ValueError):pass
             phase=self.phase
             if self.mode=='streaming' and phase in ('initializing','streaming'):
-                if live.get('phase')=='stopped':phase='ready'
+                if phase=='streaming' and live.get('phase')=='stopped':phase='ready'
                 elif self.stream_stop_requested:phase='stopping'
             return dict(phase=phase,error=self.error,details=self.error_details,url=self.url,
                         clip_path=self.clip_path,run_path=self.run_path,mode=self.mode,
@@ -81,6 +81,42 @@ class ReconstructionJob:
             try: self.process.wait(10)
             except subprocess.TimeoutExpired:
                 raise RuntimeError('上次重建进程尚未退出，请先检查状态')
+
+    def reset(self):
+        """Release an idle/ended viewer before its saved files are removed."""
+        with self.lock:
+            if self.status()['phase'] in ('initializing','reconstructing','streaming','stopping'):
+                raise ValueError('请先结束当前采集或重建')
+            self.cancel.set();worker=self.worker
+        self.stop_viewer()
+        if worker:
+            worker.join(12)
+            if worker.is_alive():raise RuntimeError('上次查看器尚未退出，未清空记录')
+        with self.lock:
+            self.phase,self.error,self.url='idle',None,None
+            self.process,self.worker=None,None
+            self.clip_path,self.run_path,self.error_details=None,None,None
+            self.mode='clip';self.stream_stop_requested=False;self.cancel=threading.Event()
+
+    def restore_stream(self,folder):
+        from common import sha
+        folder=Path(folder).resolve()
+        if folder.parent!=self.camera.storage_root or not folder.name.startswith('stream_'):
+            raise ValueError('恢复连续结果必须位于当前录制目录中')
+        latest=json.loads((folder/'latest.json').read_text(encoding='utf-8'))
+        if latest.get('slot') not in ('slot_a','slot_b'):raise ValueError('无效的连续结果指针')
+        scene=folder/latest['slot'];frame=scene/'board/first_frame/frame.bin'
+        if scene.is_symlink() or scene.resolve().parent!=folder or sha(frame)!=latest.get('frame_sha256'):
+            raise ValueError('连续结果校验失败')
+        with self.lock:
+            if self.stopping or self.status()['phase'] in ('initializing','reconstructing','streaming','stopping'):
+                raise ValueError('请先结束当前采集或重建')
+            self.phase,self.error,self.url='initializing',None,None
+            self.mode='streaming';self.stream_stop_requested=False;self.error_details=None;self.clip_path=None
+            self.run_path=str(folder)
+            previous=self.worker;self.cancel.set();self.cancel=threading.Event()
+            self.worker=threading.Thread(target=self.run,args=(None,self.cancel,previous,scene),daemon=True)
+            self.worker.start()
 
     def start(self,clip,scene=None):
         with self.lock:
@@ -195,6 +231,7 @@ def main(argv=None):
     p.add_argument('--out',type=Path,required=True)
     p.add_argument('--resume-clip',type=Path,help='Restore one verified completed capture.json after restarting UI')
     p.add_argument('--resume-scene',type=Path,help='Reopen a saved scene without running reconstruction again')
+    p.add_argument('--resume-stream',type=Path,help='Reopen the verified latest slot of an ended continuous session')
     p.add_argument('--weights',type=Path,required=True)
     p.add_argument('--vendor',type=Path,required=True)
     p.add_argument('--renderer',type=Path,required=True)
@@ -204,6 +241,7 @@ def main(argv=None):
     p.add_argument('--viewer-port',type=int,default=8080)
     p.add_argument('--viewer-public-url',required=True,help='URL reachable in the user browser, without token')
     a=p.parse_args(argv)
+    if a.resume_scene and a.resume_stream:p.error('Choose one saved scene or stream')
     if a.resume_scene and not a.resume_clip:p.error('--resume-scene requires --resume-clip')
     if bool(a.calibration)==bool(a.focal_ratio): p.error('Choose measured --calibration or explicit approximate --focal-ratio')
     if a.focal_ratio is not None and (not math.isfinite(a.focal_ratio) or a.focal_ratio<=0): p.error('Invalid focal ratio')
@@ -219,8 +257,11 @@ def main(argv=None):
     camera.build=ReconstructionJob(camera,a)
     server=None
     try:
-        if a.resume_clip: camera.restore_clip(a.resume_clip)
-        if a.resume_scene: camera.build.start(camera.clip['path'],a.resume_scene)
+        # A user may intentionally have cleared every record since the launch
+        # command was saved. Missing restore paths then mean an empty UI.
+        if a.resume_clip and a.resume_clip.is_file():camera.restore_clip(a.resume_clip)
+        if a.resume_scene and a.resume_scene.is_dir() and camera.clip:camera.build.start(camera.clip['path'],a.resume_scene)
+        if a.resume_stream and (a.resume_stream/'latest.json').is_file():camera.build.restore_stream(a.resume_stream)
         server=make_server(camera,a.host,a.port)
         a.port=server.server_port
         print(json.dumps(dict(event='CAMERA_UI_READY',host=a.host,port=server.server_port)),flush=True)
