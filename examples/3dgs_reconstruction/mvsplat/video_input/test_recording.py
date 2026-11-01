@@ -22,6 +22,7 @@ class FakePreview:
             self.records.append(self)
             Path(kwargs['recording']).write_bytes(b'stub clip')
     def snapshot(self): return b'jpeg',60,60.
+    def packet(self):return self.snapshot()+(time.monotonic(),)
     def finish_recording(self): self.finished=True
     def close(self): self.closed=True
 

@@ -16,6 +16,11 @@
 原模块边界和冻结渲染主线不变。以上为 10 月 29 日范围；11 月 1 日已按用户授权使用估算内参实板试跑。
 11 月 1 日新增 `video_input/recording.py` 按钮开始/结束、预览同源、封装校验；
 `initialize/camera_ui.py` 只协调既有录制、重建子进程与查看器生命周期。
+11 月 1 日后续获准实现连续框架：`video_input/streaming.py` 为有界近期 JPEG 窗口及上下文序列化；
+`pose_estimation/streaming.py` 固定初始参考并复用地标定位；`rendering/streaming.py` 串行交换模型和相机请求；
+`initialize/streaming.py` 协调一个常驻 CPU 模型、采样器和 FPGA 所有者。
+局部点云随有效窗口更新，高斯按批更新，均不构成全局 SLAM 或全局高斯融合。
+操作和当前验证见 [连续框架](../examples/3dgs_reconstruction/mvsplat/video_input/STREAMING.md)。
 本轮已做真实短片按钮和原实拍片段重建回归，详见
 [按钮录制实测](../examples/3dgs_reconstruction/mvsplat/video_input/BOARD_CAMERA_BUTTONS_20261101.md)。
 

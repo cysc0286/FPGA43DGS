@@ -119,13 +119,17 @@ class Preview:
                 self.error = str(exc)
 
     def snapshot(self):
+        return self.packet()[:3]
+
+    def packet(self):
+        """JPEG, counter, rate and host receive time, sampled under one lock."""
         with self.lock:
             if self.error:
                 raise RuntimeError(self.error)
             if self.latest is None or time.monotonic()-self.last > 3:
                 raise RuntimeError('Waiting for fresh camera frames')
             fps = (self.count-1)/(self.last-self.first) if self.count > 1 else 0
-            return self.latest, self.count, fps
+            return self.latest, self.count, fps, self.last
 
     def close(self):
         if self.process.poll() is None:

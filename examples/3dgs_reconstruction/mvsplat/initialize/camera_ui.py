@@ -15,6 +15,8 @@ from video_input.recording import CameraRecorder, make_server
 
 
 def reconstruction_error(detail):
+    if 'timeout' in detail:
+        return '会话达到 30 分钟保护上限，已保存的场景仍保留。可重新开始会话。'
     if 'No valid context pair' in detail:
         return '没有找到足够重叠且清晰的视角。请对准同一组静止物体，缓慢横向平移，录制 5～8 秒；避免绕物体大幅旋转或快速靠近。'
     if 'rss_limit' in detail or 'host_reserve_limit' in detail:
@@ -34,9 +36,42 @@ class ReconstructionJob:
         self.clip_path=None
         self.run_path=None
         self.error_details=None
+        self.mode='clip'
+        self.stream_stop_requested=False
 
     def status(self):
-        with self.lock: return dict(phase=self.phase,error=self.error,details=self.error_details,url=self.url,clip_path=self.clip_path,run_path=self.run_path)
+        with self.lock:
+            live={}
+            if self.mode=='streaming' and self.run_path:
+                try:
+                    path=Path(self.run_path)/'stream.json'
+                    if path.stat().st_size<=1024**2:live=json.loads(path.read_text(encoding='utf-8'))
+                except (OSError,ValueError):pass
+            phase=self.phase
+            if self.mode=='streaming' and phase in ('initializing','streaming'):
+                if live.get('phase')=='stopped':phase='ready'
+                elif self.stream_stop_requested:phase='stopping'
+            return dict(phase=phase,error=self.error,details=self.error_details,url=self.url,
+                        clip_path=self.clip_path,run_path=self.run_path,mode=self.mode,
+                        live={k:v for k,v in live.items() if k not in ('points','trajectory')})
+
+    def start_stream(self):
+        with self.lock:
+            if self.stopping or self.status()['phase'] in ('initializing','reconstructing','streaming','stopping'):
+                raise ValueError('已有采集或重建正在进行')
+            self.phase,self.error,self.url='initializing',None,None
+            self.mode='streaming';self.stream_stop_requested=False;self.error_details=None;self.clip_path=None
+            self.run_path=str(self.args.out/('stream_'+time.strftime('%Y%m%d_%H%M%S')+'_'+os.urandom(3).hex()))
+            previous=self.worker;self.cancel.set();self.cancel=threading.Event()
+            self.worker=threading.Thread(target=self.run,args=(None,self.cancel,previous,None,True),daemon=True)
+            self.worker.start()
+
+    def stop_stream(self):
+        with self.lock:
+            if self.mode!='streaming' or self.status()['phase'] not in ('initializing','streaming','stopping'):
+                raise ValueError('当前没有连续采集任务')
+            self.stream_stop_requested=True
+            if Path(self.run_path).is_dir():(Path(self.run_path)/'stop.requested').touch()
 
     def stop_viewer(self):
         if self.process and self.process.poll() is None:
@@ -49,7 +84,7 @@ class ReconstructionJob:
 
     def start(self,clip,scene=None):
         with self.lock:
-            if self.stopping or self.phase in ('initializing','reconstructing'):
+            if self.stopping or self.status()['phase'] in ('initializing','reconstructing','streaming','stopping'):
                 raise ValueError('已有重建正在进行')
             if scene is not None:
                 scene=Path(scene).resolve()
@@ -60,6 +95,7 @@ class ReconstructionJob:
                     raise ValueError('恢复场景与当前录像的来源不一致')
             self.phase,self.error,self.url='initializing',None,None
             self.error_details=None
+            self.mode='clip';self.stream_stop_requested=False
             self.clip_path=str(clip)
             self.run_path=str(scene or self.args.out/('scene_'+time.strftime('%Y%m%d_%H%M%S')+'_'+os.urandom(3).hex()))
             previous=self.worker
@@ -68,7 +104,7 @@ class ReconstructionJob:
             self.worker=threading.Thread(target=self.run,args=(clip,self.cancel,previous,scene),daemon=True)
             self.worker.start()
 
-    def run(self,clip,cancel,previous=None,scene=None):
+    def run(self,clip,cancel,previous=None,scene=None,stream=False):
         args=self.args
         run=Path(self.run_path)
         log_path=run/('viewer_resume_'+os.urandom(3).hex()+'.log') if scene else Path(str(run)+'.log')
@@ -80,7 +116,7 @@ class ReconstructionJob:
             with self.lock: self.phase,self.error,self.url='initializing',None,None
             self.stop_viewer()
             if self.stopping: return
-            self.camera.pause_preview()
+            if not stream:self.camera.pause_preview()
             cli=[sys.executable,str(Path(__file__).resolve().parents[2]/'pipeline.py'),'initialize',
                 '--video',str(clip),'--out',str(run),'--auto-select','--weights',str(args.weights),
                 '--vendor',str(args.vendor),'--renderer',str(args.renderer),'--live-renderer',str(args.live_renderer),
@@ -92,6 +128,12 @@ class ReconstructionJob:
                 cli=[sys.executable,'-m','rendering.viewer','--scene',str(scene),
                      '--renderer',str(args.renderer),'--live-renderer',str(args.live_renderer),
                      '--host','127.0.0.1','--port',str(args.viewer_port)]
+            if stream:
+                cli=[sys.executable,'-m','initialize.streaming','--source-url',f'http://127.0.0.1:{args.port}/frame.jpg',
+                     '--out',str(run),'--weights',str(args.weights),'--vendor',str(args.vendor),
+                     '--renderer',str(args.renderer),'--live-renderer',str(args.live_renderer),
+                     '--host','127.0.0.1','--port',str(args.viewer_port)]
+                cli+=['--calibration',str(args.calibration)] if args.calibration else ['--focal-ratio',str(args.focal_ratio)]
             command=['/usr/bin/python3',str(Path(__file__).resolve().parents[1]/'measure.py'),
                 '--out',str(measurement_path),'--rss-mib','650','--reserve-mib','128','--timeout','1800','--']+cli
             env=dict(os.environ,PYTHONUNBUFFERED='1')
@@ -99,6 +141,7 @@ class ReconstructionJob:
                 self.process=subprocess.Popen(command,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,
                                               env=env,start_new_session=True)
             while self.process.poll() is None and not self.stopping and not cancel.is_set():
+                if stream and self.stream_stop_requested and run.is_dir():(run/'stop.requested').touch()
                 events=run/'events.json'
                 if events.exists():
                     names=[e['event'] for e in json.loads(events.read_text())['events']]
@@ -110,15 +153,18 @@ class ReconstructionJob:
                         if '"event": "VIEWER_READY"' in line:
                             event=json.loads(line)
                             token=urlsplit(event['url']).fragment
-                            with self.lock: self.url=args.viewer_public_url.rstrip('/')+'/#'+token; self.phase='ready'
+                            with self.lock:self.url=args.viewer_public_url.rstrip('/')+'/#'+token;self.phase='streaming' if stream else 'ready'
                             self.camera.resume_preview()
                             break
                 time.sleep(.3)
             if self.stopping or cancel.is_set(): return
-            result=dict(complete=True) if scene else (json.loads((run/'warm_result.json').read_text()) if (run/'warm_result.json').exists() else {})
+            result=(dict(complete=True) if scene or stream else (json.loads((run/'warm_result.json').read_text()) if (run/'warm_result.json').exists() else {}))
             measurement=json.loads(measurement_path.read_text()) if measurement_path.exists() else {}
+            if stream and (run/'stream.json').exists():
+                live=json.loads((run/'stream.json').read_text())
+                if live.get('phase')=='error':raise RuntimeError(live.get('message','Continuous session failed'))
             if not result.get('complete') or self.process.returncode or measurement.get('status')!='passed':
-                raise RuntimeError(result.get('error') or '重建进程退出，请查看 '+str(run)+'.log')
+                raise RuntimeError(result.get('error') or '重建进程退出（'+measurement.get('status','no receipt')+'），请查看 '+str(run)+'.log')
             with self.lock: self.phase,self.url='complete',None
         except (OSError,ValueError,RuntimeError,subprocess.SubprocessError) as exc:
             self.stop_viewer()
@@ -176,6 +222,7 @@ def main(argv=None):
         if a.resume_clip: camera.restore_clip(a.resume_clip)
         if a.resume_scene: camera.build.start(camera.clip['path'],a.resume_scene)
         server=make_server(camera,a.host,a.port)
+        a.port=server.server_port
         print(json.dumps(dict(event='CAMERA_UI_READY',host=a.host,port=server.server_port)),flush=True)
         server.serve_forever()
     except KeyboardInterrupt: pass

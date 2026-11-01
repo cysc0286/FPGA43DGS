@@ -17,18 +17,23 @@ from video_input.preview import Preview
 PAGE = '''<!doctype html><html lang="zh-CN"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>摄像头采集与重建</title>
 <style>:root{font-family:system-ui;color:#17212f;background:#eef2f6;color-scheme:light}
-*{box-sizing:border-box}body{max-width:1000px;margin:24px auto;padding:0 16px}h1{font-size:26px;margin-bottom:8px}
+*{box-sizing:border-box}body{max-width:1320px;margin:24px auto;padding:0 16px}h1{font-size:26px;margin-bottom:8px}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}.workspace>.card{margin:0;min-width:0}#capture-card{order:1}#continuous-card{order:2}
 .hint{color:#526175;line-height:1.6}.card{background:white;border-radius:16px;padding:16px;margin:16px 0;box-shadow:0 4px 20px #17212f0a}
 img{display:block;width:100%;aspect-ratio:16/9;object-fit:contain;background:#111827;border-radius:10px}
-.controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}.toolbar{position:sticky;top:0;background:white;z-index:2;padding:8px 0 16px;margin:0}button,a.button{font:inherit;border:0;border-radius:9px;padding:12px 20px;background:#e6ebf2;color:#17212f;text-decoration:none;cursor:pointer}
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}.toolbar{background:white;padding:8px 0 16px;margin:0}button,a.button{font:inherit;border:0;border-radius:9px;padding:12px 20px;background:#e6ebf2;color:#17212f;text-decoration:none;cursor:pointer}
 #start,#rebuild,a.button{background:#1764cf;color:white}#stop{background:#d83344;color:white}button:disabled{opacity:.4;cursor:default}
 #time{font-size:30px;font-variant-numeric:tabular-nums}#record-status{font-weight:600}#error{color:#b21e2f;white-space:pre-wrap;overflow-wrap:anywhere}
-@media(max-width:480px){body{padding:0 10px;margin:16px auto}.card{padding:12px}button{flex:1}h1{font-size:23px}}</style>
-<h1>摄像头采集与重建</h1><p class="hint">先调清焦点，再开始录制。缓慢横向移动摄像头约 5～8 秒，保持场景静止。</p>
-<section class="card"><div class="controls toolbar"><button id="start" disabled>开始录制</button><button id="stop" disabled>结束录制</button><button id="rebuild" disabled>重建场景</button><button id="pause">暂停显示</button></div>
+@media(max-width:800px){.workspace{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:480px){body{padding:0 10px;margin:16px auto}.card{padding:12px}button{flex:1;padding:12px 8px}.toolbar button{flex:1 1 calc(50% - 10px)}h1{font-size:23px}}</style>
+<h1>摄像头采集与重建</h1><p class="hint">先调清焦点，保持场景静止。连续模式下缓慢横向平移，并保持对准起始区域。</p>
+<div class="workspace"><section class="card" id="continuous-card"><h2>连续采集与渲染</h2><p class="hint">持续预览、更新局部点云，后台分批生成高斯场景；更新期间可继续操作上一个场景。使用估算内参、128×128 输出。只保留近期窗口和最新结果，不保存整段录像。单次会话含预热和查看最多 30 分钟；关闭页面不会停止采集。</p>
+<div class="controls"><button id="live-start" disabled>开始连续重建</button><button id="live-stop" disabled>结束连续采集</button></div>
+<p id="live-status" role="status">等待开始</p><iframe id="live-viewer" title="连续点云与高斯场景" hidden style="border:0;width:100%;height:850px"></iframe></section>
+<section class="card" id="capture-card"><h2>原始预览与短片录制</h2><div class="controls toolbar"><button id="start" disabled>开始录制</button><button id="stop" disabled>结束录制</button><button id="rebuild" disabled>重建场景</button><button id="pause">暂停显示</button></div>
 <img id="camera" alt="摄像头实时预览"><p id="preview-status" class="hint">正在连接摄像头…</p>
 <div id="time">00:00.0</div><p id="record-status" role="status">正在读取状态…</p>
-<p id="limits" class="hint"></p><p id="clip" class="hint"></p></section>
+<p id="limits" class="hint"></p><p id="clip" class="hint"></p></section></div>
 <section class="card"><h2>重建场景</h2><p class="hint">录制结束后可重建，也可以重新录制。当前使用估算内参，输出为 128×128。</p>
 <div class="controls"><a id="viewer" class="button" hidden target="_blank">打开交互场景</a></div>
 <p id="build-status" role="status">等待短片</p><p id="error" role="alert"></p>
@@ -39,26 +44,31 @@ img{display:block;width:100%;aspect-ratio:16/9;object-fit:contain;background:#11
 async function command(action){if(busy)return;busy=true;buttons();$('error').textContent='';try{
 const r=await fetch('/api/'+action,{method:'POST',headers:{'X-Session-Token':token}});const d=await r.json();if(!r.ok)throw Error(d.error);if(action==='cleanup')$('cleanup-status').textContent='已清理 '+d.removed.length+' 项，释放 '+(d.freed_bytes/1048576).toFixed(1)+' MiB；当前可用 '+d.free_mib.toFixed(0)+' MiB。';
 }catch(e){$('error').textContent=e.message}finally{busy=false;await status()}}
-function buttons(){if(!last)return;const building=['initializing','reconstructing'].includes(last.build.phase);
+function buttons(){if(!last)return;const building=['initializing','reconstructing','streaming','stopping'].includes(last.build.phase);
 $('start').disabled=busy||building||['starting','recording','stopping'].includes(last.state);
 $('stop').disabled=busy||!['starting','recording'].includes(last.state);$('rebuild').disabled=busy||building||!last.clip||['starting','recording','stopping'].includes(last.state);
-$('cleanup').disabled=busy||building||['starting','recording','stopping'].includes(last.state)}
+$('cleanup').disabled=busy||building||['starting','recording','stopping'].includes(last.state);
+$('live-start').disabled=busy||building||['starting','recording','stopping'].includes(last.state);
+$('live-stop').disabled=busy||last.build.mode!=='streaming'||!['initializing','streaming'].includes(last.build.phase)}
 async function status(){try{const r=await fetch('/api/status',{cache:'no-store'});if(!r.ok)throw Error('状态连接中断');last=await r.json();
 const labels={idle:'准备就绪',starting:'正在启动录制，请稍候…',recording:'● 正在录制',stopping:'正在保存和检查短片…',recorded:'短片已保存',error:'本次录制未完成'};
 $('record-status').textContent=labels[last.state]||last.state;const t=last.elapsed_seconds;
 $('time').textContent=String(Math.floor(t/60)).padStart(2,'0')+':'+(t%60).toFixed(1).padStart(4,'0');
-$('limits').textContent='单段最长 '+last.max_seconds+' 秒；可用空间 '+last.free_mib.toFixed(0)+' MiB。达到时长或空间上限会自动结束。暂停显示和关闭页面均不会停止录制。';
+$('limits').textContent='短片模式：单段最长 '+last.max_seconds+' 秒；可用空间 '+last.free_mib.toFixed(0)+' MiB。达到时长或空间上限会自动结束。暂停显示和关闭页面均不会停止录制。';
 $('clip').textContent=last.clip?last.clip.frames+' 帧 · '+last.clip.duration_seconds.toFixed(2)+' 秒 · '+last.clip.measured_fps.toFixed(2)+' fps · '+last.clip.stop_label:'';
-const phases={idle:'等待短片',initializing:'正在加载模型和 FPGA…',reconstructing:'正在选帧、重建与渲染，请稍候…',ready:'场景已就绪，可以交互查看',complete:'重建会话已结束',error:'重建失败，可查看原因后重新录制'};
-$('build-status').textContent=last.build.phase==='ready'&&!last.build.matches_clip?'上次场景已就绪；当前短片尚未重建':phases[last.build.phase]||last.build.phase;$('viewer').hidden=!last.build.url;$('viewer').href=last.build.url||'#';
+const phases={idle:'等待短片',initializing:'正在加载模型和 FPGA…',reconstructing:'正在选帧、重建与渲染，请稍候…',streaming:'连续更新中',stopping:'已请求停止采样，正在完成当前更新…',ready:'场景已就绪，可以交互查看',complete:'重建会话已结束',error:'重建失败，可查看原因后重新录制'};
+$('build-status').textContent=last.build.mode==='streaming'&&last.build.phase==='ready'&&!last.build.live.has_scene?'本次采集已结束，尚无有效场景':(last.build.mode!=='streaming'&&last.build.phase==='ready'&&!last.build.matches_clip?'上次场景已就绪；当前短片尚未重建':phases[last.build.phase]||last.build.phase);$('viewer').hidden=!last.build.url;$('viewer').href=last.build.url||'#';
+const live=last.build.live||{},liveLabels={warming:'模型预热中',sampling:'等待有效视角',geometry:'估计位姿与点云',inference:'生成高斯模型',publishing:'校验并切换场景',stopped:'采集已结束',error:'更新已停止'};
+$('live-status').textContent=last.build.mode==='streaming'?(last.build.phase==='stopping'?phases.stopping:(liveLabels[live.phase]||phases[last.build.phase]))+' · 已更新 '+(live.version||0)+' 次'+(live.last_result?' · 最近窗口到首帧 '+live.last_result.window_to_frame_seconds.toFixed(1)+' 秒':'')+(live.message?' · '+live.message:'')+(live.source&&live.source.error?' · 采集异常：'+live.source.error:''):'等待开始';
+const liveUrl=last.build.mode==='streaming'&&last.build.url?last.build.url:'';$('live-viewer').hidden=!liveUrl;if(liveUrl&&$('live-viewer').getAttribute('src')!==liveUrl)$('live-viewer').src=liveUrl;else if(!liveUrl)$('live-viewer').removeAttribute('src');
 if(last.error||last.build.error)$('error').textContent=last.error||last.build.error;else $('error').textContent='';
 $('diagnostics').hidden=!last.build.details;$('error-detail').textContent=last.build.details||'';buttons();
-}catch(e){$('record-status').textContent=e.message;$('start').disabled=true;$('stop').disabled=true;$('rebuild').disabled=true}}
+}catch(e){$('record-status').textContent=e.message;for(const id of ['start','stop','rebuild','live-start','live-stop','cleanup'])$(id).disabled=true}}
 async function frame(){if(active){try{const r=await fetch('/frame.jpg?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error(await r.text());
 const old=$('camera').src;$('camera').src=URL.createObjectURL(await r.blob());if(old.startsWith('blob:'))URL.revokeObjectURL(old);
 $('preview-status').textContent='实时预览 · '+r.headers.get('X-Capture-Fps')+' fps 采集';}catch(e){$('preview-status').textContent=e.message}}setTimeout(frame,250)}
 $('start').onclick=()=>command('start');$('stop').onclick=()=>command('stop');$('rebuild').onclick=()=>command('reconstruct');
-$('cleanup').onclick=()=>command('cleanup');$('pause').onclick=e=>{active=!active;e.target.textContent=active?'暂停显示':'继续显示'};
+$('cleanup').onclick=()=>command('cleanup');$('live-start').onclick=()=>command('live/start');$('live-stop').onclick=()=>command('live/stop');$('pause').onclick=e=>{active=!active;e.target.textContent=active?'暂停显示':'继续显示'};
 status();setInterval(status,500);frame();</script></html>'''
 
 
@@ -94,6 +104,26 @@ class CameraRecorder:
                 raise RuntimeError('重建期间预览已暂停，完成后自动恢复')
             return self.preview.snapshot()
 
+    def packet(self):
+        with self.lock:
+            if self.preview is None:raise RuntimeError('摄像头预览尚未就绪')
+            return self.preview.packet()
+
+    def start_stream(self):
+        with self.lock:
+            if self.closed or self.state in ('starting','recording','stopping'):
+                raise ValueError('请先结束当前录制并等待保存完成')
+            if not self.build:raise ValueError('连续重建入口尚未配置')
+            self.packet()
+            if shutil.disk_usage(self.out).free<128*1024**2:
+                raise OSError('连续模式需至少 128 MiB 可用空间，请先清理历史记录')
+            self.build.start_stream()
+
+    def stop_stream(self):
+        with self.lock:
+            if not self.build:raise ValueError('连续重建入口尚未配置')
+            self.build.stop_stream()
+
     def status(self):
         with self.lock:
             elapsed = time.monotonic()-self.started if self.started and self.state in ('recording','stopping') else self.elapsed
@@ -109,7 +139,7 @@ class CameraRecorder:
         with self.lock:
             if self.closed or self.state in ('starting','recording','stopping'):
                 raise ValueError('已有录制正在进行，请先结束')
-            if self.build and self.build.status()['phase'] in ('initializing','reconstructing'):
+            if self.build and self.build.status()['phase'] in ('initializing','reconstructing','streaming','stopping'):
                 raise ValueError('请等待当前重建完成')
             self.snapshot()  # Refuse to start on a disconnected camera.
             available = shutil.disk_usage(self.out).free-64*1024**2
@@ -226,17 +256,17 @@ class CameraRecorder:
             if self.closed or self.state in ('starting','recording','stopping'):
                 raise ValueError('请先结束录制并等待保存完成，再清理历史记录')
             build=self.build.status() if self.build else {}
-            if build.get('phase') in ('initializing','reconstructing'):
+            if build.get('phase') in ('initializing','reconstructing','streaming','stopping'):
                 raise ValueError('请等待当前重建完成，再清理历史记录')
             root=self.storage_root
             # Refuse a substituted root. Deletion must stay inside the configured
             # session directory, including on Windows junction/reparse surfaces.
             if self.out.is_symlink() or self.out.resolve()!=root:
                 raise ValueError('录制目录边界不一致，未执行清理')
-            pattern=r'(clip|scene)_\d{8}_\d{6}_[0-9a-f]{6}'
+            pattern=r'(clip|scene|stream)_\d{8}_\d{6}_[0-9a-f]{6}'
             entries={p.name:p for p in root.iterdir() if re.fullmatch(pattern,p.name)
                      and p.is_dir() and not p.is_symlink() and p.resolve().parent==root
-                     and (p/('capture.json' if p.name.startswith('clip_') else 'events.json')).is_file()}
+                     and (p/('capture.json' if p.name.startswith('clip_') else ('stream.json' if p.name.startswith('stream_') else 'events.json'))).is_file()}
             protected=set()
             def retain(path):
                 if not path:return
@@ -246,13 +276,18 @@ class CameraRecorder:
                 if name in entries:protected.add(name)
             if self.clip:retain(self.clip['path'])
             retain(build.get('clip_path'));retain(build.get('run_path'))
-            clips=[];scenes=[]
+            clips=[];scenes=[];streams=[]
             for name,path in entries.items():
                 try:
                     if name.startswith('clip_'):
                         data=json.loads((path/'capture.json').read_text(encoding='utf-8'))
                         if data.get('complete') and data.get('path')==str(path/'capture.mkv') and (path/'capture.mkv').is_file():
                             clips.append(path)
+                    elif name.startswith('stream_'):
+                        data=json.loads((path/'latest.json').read_text(encoding='utf-8'))
+                        if data.get('slot') not in ('slot_a','slot_b'):continue
+                        frame=path/data['slot']/'board/first_frame/frame.bin'
+                        if not frame.is_symlink() and path in frame.resolve().parents and sha(frame)==data.get('frame_sha256'):streams.append(path)
                     elif (path/'renderer_input/model.ply').is_file():
                         data=json.loads((path/'inference/inference.json').read_text(encoding='utf-8'))
                         events=json.loads((path/'events.json').read_text(encoding='utf-8'))['events']
@@ -262,6 +297,7 @@ class CameraRecorder:
                         if data.get('complete') and verified:scenes.append(path)
                 except (OSError,ValueError,KeyError,TypeError,AttributeError):continue
             if clips:retain(max(clips,key=lambda p:(p.stat().st_mtime_ns,p.name)))
+            if streams:retain(max(streams,key=lambda p:((p/'latest.json').stat().st_mtime_ns,p.name)))
             if scenes:
                 last=max(scenes,key=lambda p:((p/'renderer_input/model.ply').stat().st_mtime_ns,p.name));retain(last)
                 # The receipt records the original video path independently of
@@ -337,8 +373,9 @@ def make_server(camera, host='127.0.0.1', port=8081):
                 self.reply(200,json.dumps(camera.status(),ensure_ascii=False).encode())
             elif self.path.startswith('/frame.jpg'):
                 try:
-                    frame,count,fps=camera.snapshot()
-                    self.reply(200,frame,'image/jpeg',{'X-Frame-Id':str(count),'X-Capture-Fps':f'{fps:.2f}'})
+                    frame,count,fps,captured=camera.packet()
+                    self.reply(200,frame,'image/jpeg',{'X-Frame-Id':str(count),'X-Capture-Fps':f'{fps:.2f}',
+                        'X-Capture-Monotonic':str(captured)})
                 except RuntimeError as exc: self.reply(503,str(exc).encode(),'text/plain; charset=utf-8')
             else: self.reply(404,b'{}')
         def do_POST(self):
@@ -347,7 +384,8 @@ def make_server(camera, host='127.0.0.1', port=8081):
             try:
                 if self.path=='/api/cleanup':
                     self.reply(200,json.dumps(camera.cleanup_history(),ensure_ascii=False).encode());return
-                action={'/api/start':camera.start,'/api/stop':camera.stop,'/api/reconstruct':camera.reconstruct}.get(self.path)
+                action={'/api/start':camera.start,'/api/stop':camera.stop,'/api/reconstruct':camera.reconstruct,
+                        '/api/live/start':camera.start_stream,'/api/live/stop':camera.stop_stream}.get(self.path)
                 if action is None: self.reply(404,b'{}'); return
                 action()
                 self.reply(202,b'{"accepted":true}')

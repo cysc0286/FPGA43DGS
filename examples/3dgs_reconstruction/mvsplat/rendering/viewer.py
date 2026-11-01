@@ -16,17 +16,20 @@ PAGE = r'''<!doctype html><html lang="zh-CN"><meta charset="utf-8">
 canvas{display:block;width:100%;max-width:640px;background:#555;touch-action:none;image-rendering:auto}
 .controls{display:flex;flex-wrap:wrap;gap:16px;margin:16px 0}label{display:flex;align-items:center;gap:8px}
 button,input{font:inherit}button{padding:8px 14px}#status{min-height:2em}input{max-width:160px}
+body.streaming #view{width:256px;max-width:100%;margin:auto}body.streaming #cloud{max-width:480px;margin:auto}body.streaming h1{font-size:22px}
 </style><h1>3DGS 场景</h1><p>拖动画面旋转；滚轮缩放；按住 Shift 拖动平移。</p>
 <canvas id="view" width="128" height="128" aria-label="重建场景；也可使用下方滑块调整视角"></canvas>
 <div class="controls"><label>水平角度<input id="yaw" type="range" min="-30" max="30" value="0"></label>
 <label>俯仰角度<input id="pitch" type="range" min="-20" max="20" value="0"></label>
 <label>远近<input id="distance" type="range" min="0.6" max="1.5" step="0.01" value="1"></label>
 <button id="reset">初始视角</button><button id="quit">结束会话</button></div><p id="status" role="status"></p>
+<section id="live-panel" hidden><p id="live-status" role="status"></p><p>局部稀疏点云与轨迹（拖动旋转；尺度为单目相对单位）</p><canvas id="cloud" width="480" height="270"></canvas></section>
 <script>
 const token=new URLSearchParams(location.hash.slice(1)).get('token')||'';
 const canvas=document.getElementById('view'), ctx=canvas.getContext('2d'), status=document.getElementById('status');
 const fields=['yaw','pitch','distance'], state={yaw:0,pitch:0,distance:1,pan_x:0,pan_y:0};
 let revision=0, busy=false, stopped=false, pointer=null;
+let liveVersion=0,cloudState=null,cloudYaw=0,cloudPitch=0,cloudPointer=null;
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
 function sync(){for(const key of fields)document.getElementById(key).value=state[key];}
 async function request(path,body){const r=await fetch(path,{method:'POST',headers:{'Authorization':'Bearer '+token,
@@ -38,6 +41,23 @@ async function draw(){if(busy||stopped)return;busy=true;const id=revision;
       ' · 本次渲染 '+response.headers.get('X-Render-Ms')+' ms';
   }catch(error){status.textContent=error.message;}finally{busy=false;if(id!==revision&&!stopped)draw();}}
 function changed(){revision++;sync();draw();}
+function cloudDraw(){if(!cloudState)return;const c=document.getElementById('cloud'),g=c.getContext('2d');g.fillStyle='#111827';g.fillRect(0,0,c.width,c.height);
+ const points=cloudState.points||[],trajectory=cloudState.trajectory||[],all=points.concat(trajectory);if(!all.length)return;
+ const center=[0,1,2].map(k=>all.reduce((s,p)=>s+p[k],0)/all.length),cs=Math.cos(cloudYaw),sn=Math.sin(cloudYaw),cp=Math.cos(cloudPitch),sp=Math.sin(cloudPitch);
+ const xy=p=>{const x=p[0]-center[0],y=p[1]-center[1],z=p[2]-center[2],rx=cs*x+sn*z,rz=-sn*x+cs*z;return [rx,cp*y-sp*rz]};
+ const projected=all.map(xy),extent=Math.max(1e-5,...projected.flat().map(Math.abs)),scale=110/extent;
+ const screen=p=>{const q=xy(p);return [240+q[0]*scale,135+q[1]*scale]};g.fillStyle='#62b8ff';
+ for(const p of points){const q=screen(p);g.fillRect(q[0],q[1],2,2)}g.strokeStyle='#ffc052';g.beginPath();
+ trajectory.forEach((p,i)=>{const q=screen(p);i?g.lineTo(...q):g.moveTo(...q)});g.stroke();}
+const cloud=document.getElementById('cloud');cloud.onpointerdown=e=>{cloudPointer=[e.clientX,e.clientY];cloud.setPointerCapture(e.pointerId)};
+cloud.onpointermove=e=>{if(!cloudPointer)return;cloudYaw+=(e.clientX-cloudPointer[0])*.01;cloudPitch+=(e.clientY-cloudPointer[1])*.01;cloudPointer=[e.clientX,e.clientY];cloudDraw()};cloud.onpointerup=()=>cloudPointer=null;
+async function livePoll(){if(stopped)return;try{const r=await fetch('/state',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
+ if(r.ok){cloudState=await r.json();document.body.classList.add('streaming');document.getElementById('live-panel').hidden=false;
+ const labels={warming:'模型预热中',sampling:'等待下一组有效视角',geometry:'估计位姿与点云',inference:'生成高斯模型',publishing:'校验并更新场景',stopping:'正在完成当前更新',stopped:'采集已结束',error:'更新已停止'};
+ document.getElementById('live-status').textContent=(labels[cloudState.phase]||cloudState.phase)+' · 模型版本 '+cloudState.version+
+ (cloudState.model_age_seconds===null?'':' · 数据滞后 '+cloudState.model_age_seconds.toFixed(1)+' 秒')+(cloudState.message?' · '+cloudState.message:'');cloudDraw();
+ if(cloudState.has_scene&&cloudState.version!==liveVersion){liveVersion=cloudState.version;changed()}}}catch(e){document.getElementById('live-status').textContent=e.message}setTimeout(livePoll,1000)}
+livePoll();
 for(const key of fields)document.getElementById(key).addEventListener('input',e=>{state[key]=Number(e.target.value);changed();});
 canvas.addEventListener('pointerdown',e=>{pointer={id:e.pointerId,x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);});
 canvas.addEventListener('pointermove',e=>{if(!pointer||pointer.id!==e.pointerId)return;
@@ -89,13 +109,13 @@ def orbit_view(base, controls, focus_distance):
     return dict(base, c2w=c2w.tolist())
 
 
-def make_server(renderer, base, focus_distance, host="127.0.0.1", port=8080):
+def make_server(renderer, base, focus_distance, host="127.0.0.1", port=8080, *, live=None):
     """One renderer owner and one active request. Browser coalesces pending views."""
-    if not np.isfinite(focus_distance) or focus_distance <= 0:
+    if live is None and (not np.isfinite(focus_distance) or focus_distance <= 0):
         raise ValueError("Invalid scene focus distance")
     from gaussian_generation.adapter import camera_bytes
     # Validate the initial view before publishing a URL or accepting clients.
-    camera_bytes(base)
+    if live is None:camera_bytes(base)
     token = secrets.token_urlsafe(24)
     stats = dict(frames=0, errors=0, render_ms_total=0.)
 
@@ -120,6 +140,10 @@ def make_server(renderer, base, focus_distance, host="127.0.0.1", port=8080):
         def do_GET(self):
             if self.path == "/":
                 self.reply(200, PAGE.encode("utf-8"), "text/html; charset=utf-8")
+            elif self.path=='/state' and live is not None:
+                if not secrets.compare_digest(self.headers.get('Authorization',''),'Bearer '+token):
+                    self.reply(403,b'Invalid session token');return
+                self.reply(200,json.dumps(live.snapshot(),allow_nan=False).encode(),'application/json; charset=utf-8')
             else:
                 self.reply(404, b"Not found")
 
@@ -136,9 +160,12 @@ def make_server(renderer, base, focus_distance, host="127.0.0.1", port=8080):
                     self.reply(200, b"Session closed")
                     self.server.stopping = True
                 elif self.path == "/render":
-                    camera = camera_bytes(orbit_view(base, payload, focus_distance))
+                    if live is not None:live.validate_controls(payload)
+                    camera = None if live is not None else camera_bytes(orbit_view(base, payload, focus_distance))
                     try:
-                        frame = renderer.render_camera(camera)
+                        if live is not None and not live.snapshot()['has_scene']:
+                            self.reply(503,'等待首个有效场景'.encode('utf-8'));return
+                        frame = live.render_view(payload) if live is not None else renderer.render_camera(camera)
                     except (RuntimeError, TimeoutError, OSError, ValueError) as exc:
                         # A timed-out framed pipe cannot safely be retried: the
                         # delayed reply could otherwise be labelled as the next view.
@@ -151,7 +178,7 @@ def make_server(renderer, base, focus_distance, host="127.0.0.1", port=8080):
                     stats["frames"] += 1
                     stats["render_ms_total"] += frame.metadata["wall_ms"]
                     self.reply(200, png.tobytes(), "image/png", X_Render_Ms=f'{frame.metadata["wall_ms"]:.2f}',
-                               X_Request_Id=payload.get("request_id", 0))
+                               X_Request_Id=payload.get("request_id", 0),X_Scene_Version=frame.metadata.get('live_version',0))
                 else:
                     self.reply(404, b"Not found")
             except (ValueError, KeyError, TypeError) as exc:
