@@ -1,0 +1,186 @@
+{
+  "schema": "uvc_pinhole_v1",
+  "image_size": [
+    1280,
+    720
+  ],
+  "K": [
+    [
+      1097.7097124541992,
+      0.0,
+      703.8405641064838
+    ],
+    [
+      0.0,
+      1098.5849350468222,
+      352.8416939244168
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "D": [
+    0.1543683445343303,
+    -0.2742415132929021,
+    -0.007466670424701057,
+    0.014526558749010095,
+    0.11235578516971473
+  ],
+  "rms_px": 0.6071469317778431,
+  "per_view_rms_px": [
+    0.5113374590873718,
+    0.5769156217575073,
+    0.4861052930355072,
+    0.5131688714027405,
+    0.5556594729423523,
+    0.5949510931968689,
+    0.5435777306556702,
+    0.5062689781188965,
+    0.5818214416503906,
+    0.5177232027053833,
+    0.5630422830581665,
+    0.6852696537971497,
+    0.6025446057319641,
+    0.9467204809188843,
+    0.8592258095741272,
+    0.542035698890686,
+    0.7049938440322876,
+    0.6268799901008606,
+    0.49409782886505127,
+    0.49536800384521484
+  ],
+  "pattern_inner_corners": [
+    9,
+    6
+  ],
+  "square_mm": 20.0,
+  "images": [
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_01.jpg",
+      "sha256": "5a3808b7a2e371eec1d69f5484ef3e1701ccffa0bf49f64b86dcb40ca364f82a"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_02.jpg",
+      "sha256": "64e58c4b3d3ef85e045a11c46432ac59caa85f4a5b89b77b617f8197232f380f"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_03.jpg",
+      "sha256": "d449f6fcb1a2d7637dbffa58c6e06beb51c75a132db114e8e65ec66061d194cd"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_04.jpg",
+      "sha256": "3868786be916bc8390afa511f78f0e13652f300ddd38c734351e7baa7d5d8c52"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_05.jpg",
+      "sha256": "676e1016e1ae870c4626eb5b696965dc3a4880bf87bcb5cb1f9f5c9bd35352cd"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_06.jpg",
+      "sha256": "395cc12c73e5242c2f5c68b11c67f3f75493a0c36dd3cba0f2ac1d26e778320e"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_07.jpg",
+      "sha256": "b5a3332f02742e75424ced40c71eb833bec548c8f4b3ce6cf19e1716f5d001e0"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_08.jpg",
+      "sha256": "c8fc96312eac5a69337d6084e18c136e97db65d5fb4c3dc0f1e067af8cc04743"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_09.jpg",
+      "sha256": "5ff994c0030c62c4082cfe537f72b61ca75fd2f323994a4004b409a521f28fbd"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_10.jpg",
+      "sha256": "f7e6afa04e74e3743af42d546836ef86c67456da4534f0fbeec496733a68a9a9"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_11.jpg",
+      "sha256": "293e7f3e4e411139d2c433e24aeee5dfdb5c6fb2aafb942d46493a65ff7f57ee"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_12.jpg",
+      "sha256": "2812cb15296c947de5d5ddbb68b5941b212c7559a59c7bfbaae1ab3fb3c4be84"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_13.jpg",
+      "sha256": "70e81b00380ad9600c7eb219455ff5cc34720e1c06cae3234aaa7b183a521a85"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_14.jpg",
+      "sha256": "a01e3425a7d4e35e84e84862ce46ae1e423e01e7452205f6673500e4bdd8f76b"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_15.jpg",
+      "sha256": "d5333c193a764da2c7ed947ed43a1723f7ab69a6bb1c01ca2d7985e116880f53"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_16.jpg",
+      "sha256": "8d78eea410f375e52ca7c2a79443d7a2e9d5cad6c98df02de35cd9dfb809e23e"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_17.jpg",
+      "sha256": "89b7c6f93bba32ff96762661731b474aa0b60ec97232ad182f1efc1990d4d8a6"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_18.jpg",
+      "sha256": "106216b84623a17a3690edee44b45cab562274885075715198fd295f684a319f"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_19.jpg",
+      "sha256": "89b1b44d59c6e6bc6f216ec491c4feb31b4df21cffbcc1d852db8918c10947a9"
+    },
+    {
+      "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\fit\\board_20.jpg",
+      "sha256": "50f770694fc12355ad511c83aa3a4c344da24d6ad1fa28459c11e54af2bf3103"
+    }
+  ],
+  "validation_scope": "fit images only; inspect independent images and edge residuals",
+  "independent_validation": {
+    "scope": "K/D fixed, each held-out board pose fitted; no reconstruction quality measurement",
+    "views": [
+      {
+        "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\validation\\board_21.jpg",
+        "sha256": "d2127863c96ddc6a8e568682021850aac6f394a31984bf9e5be07866c0871fc8",
+        "rms_px": 0.5275449156761169,
+        "max_px": 1.2382906675338745
+      },
+      {
+        "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\validation\\board_22.jpg",
+        "sha256": "057b2a493d50f14ef4984013ade87a5569948ccd3e537120e78ef2f895a0b40f",
+        "rms_px": 0.5426619648933411,
+        "max_px": 1.1398956775665283
+      },
+      {
+        "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\validation\\board_23.jpg",
+        "sha256": "1aabce6e9851d444b1347dd759c720bfebf4eaf1444870e176c1ddfc3f5aaaf1",
+        "rms_px": 0.7011461853981018,
+        "max_px": 1.8527699708938599
+      },
+      {
+        "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\validation\\board_24.jpg",
+        "sha256": "993bbc2415c921ab22df0c8ccd09079915d86945ace5e4b12bd314dd79760dfa",
+        "rms_px": 0.5391514301300049,
+        "max_px": 1.2923201322555542
+      },
+      {
+        "path": "D:\\SyncFiles\\1_Workspace\\FPGA3DGS\\camera_calibration\\hf868_1280x720_20261102\\validation\\board_25.jpg",
+        "sha256": "c78eee1eb4122fa6fc8d828507997a6bf20e9e02ab8b2c189258ce39e5177b04",
+        "rms_px": 0.48788872361183167,
+        "max_px": 1.2158268690109253
+      }
+    ],
+    "mean_rms_px": 0.5596786439418793,
+    "max_view_rms_px": 0.7011461853981018
+  },
+  "quality_review": {
+    "status": "geometric_checks_passed",
+    "warnings": [],
+    "tilt_span_degrees": 56.02437461901247,
+    "applied_to_board": false,
+    "scope": "checkerboard geometry only; lens flatness, edge residuals and scene quality require review"
+  }
+}

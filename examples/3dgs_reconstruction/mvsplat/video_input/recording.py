@@ -459,7 +459,10 @@ def make_server(camera, host='127.0.0.1', port=8081):
             except (BrokenPipeError,ConnectionResetError): pass
         def do_GET(self):
             if self.path=='/':
-                self.reply(200,PAGE.replace('__TOKEN__',json.dumps(token)).encode(),'text/html; charset=utf-8')
+                calibration=getattr(getattr(camera.build,'args',None),'calibration',None)
+                label='实测标定内参' if calibration else '估算内参'
+                page=PAGE.replace('估算内参',label)
+                self.reply(200,page.replace('__TOKEN__',json.dumps(token)).encode(),'text/html; charset=utf-8')
             elif self.path=='/api/status':
                 self.reply(200,json.dumps(camera.status(),ensure_ascii=False).encode())
             elif self.path.startswith('/frame.jpg'):
