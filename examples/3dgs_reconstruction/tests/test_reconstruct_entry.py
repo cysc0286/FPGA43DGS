@@ -12,7 +12,7 @@ import pipeline
 
 
 class ReconstructEntry(unittest.TestCase):
-    def test_legacy_bundle_does_not_require_mvsplat(self):
+    def test_public_help_does_not_load_model_or_expose_opensplat(self):
         source = Path(__file__).resolve().parents[1]
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
@@ -20,10 +20,12 @@ class ReconstructEntry(unittest.TestCase):
             shutil.copytree(source / "modules", root / "modules",
                             ignore=shutil.ignore_patterns("__pycache__"))
             result = subprocess.run([sys.executable, str(root / "pipeline.py"),
-                                     "gaussian", "--help"],
+                                     "--help"],
                                     cwd=root, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("--opensplat", result.stdout)
+        self.assertIn("initialize", result.stdout)
+        self.assertNotIn("OpenSplat", result.stdout)
+        self.assertNotIn("--opensplat", result.stdout)
 
     def test_forwards_board_options(self):
         args = ["--video", "input.mp4", "--out", "new_run", "--pose-mode", "fast_pair", "--fused"]

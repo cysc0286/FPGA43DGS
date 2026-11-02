@@ -1,4 +1,4 @@
-"""Resident MVSplat mainline (initialize), cold reference, and legacy compatibility."""
+"""Resident MVSplat mainline, cold SfM reference, and artifact validation."""
 import argparse
 import dataclasses
 import json
@@ -22,8 +22,9 @@ def main(argv=None):
     commands.add_parser("reconstruct",
                         help="Board video-to-image path using pretrained MVSplat (default: full SfM)")
     commands.add_parser("initialize", help="Warm MVSplat before video and run one fast-pair scene")
-    for name in ("video", "pose", "gaussian", "export", "render", "validate"):
-        s = commands.add_parser(name, help="Legacy OpenSplat stage" if name == "gaussian" else None)
+    for name in ("video", "pose", "render", "validate"):
+        s = commands.add_parser(name, help=("Check existing artifact contracts" if name == "validate"
+                                           else "Cold-reference utility; not the NPU mainline"))
         s.add_argument("--run", required=True, type=Path)
         if name == "video":
             s.add_argument("--video", required=True, type=Path)
@@ -36,10 +37,6 @@ def main(argv=None):
             s.add_argument("--threads", type=int, default=2)
             s.add_argument("--max-features", type=int, default=2048)
             s.add_argument("--overlap", type=int, default=10)
-        if name == "gaussian":
-            s.add_argument("--opensplat", required=True, type=Path)
-            s.add_argument("--profile", choices=("arm_candidate", "cpu_control"), default="arm_candidate")
-            s.add_argument("--plan", action="store_true")
         if name == "render":
             s.add_argument("--renderer", required=True, type=Path)
             s.add_argument("--out", required=True, type=Path)
@@ -78,12 +75,6 @@ def main(argv=None):
         from modules.pose_estimation import sfm
         cv2.setNumThreads(a.threads)
         result = sfm(a)
-    elif a.stage == "gaussian":
-        from modules.gaussian_generation.training import train
-        result = train(a.run, a.opensplat, a.profile, a.plan)
-    elif a.stage == "export":
-        from modules.gaussian_generation import export
-        result = export(a)
     elif a.stage == "render":
         from modules.rendering import render
         result = render(a.run / "renderer_input", a.renderer, a.out, a.camera, a.backend, a.work_root, a.plan)

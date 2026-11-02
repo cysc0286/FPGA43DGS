@@ -1,3 +1,9 @@
+# 历史接口记录：旧训练入口已删除
+
+本页保留旧 OpenSplat 产物的历史格式，下面的训练/导出命令不再属于活动 CLI。
+2026-11-02 已删除对应实现；复看旧工程需从 archive/history_20261102_cleanup 恢复到新目录。
+当前主线与可用入口见仓库 README。历史合同校验器保留，不代表训练仍可用。
+
 # 四模块文件接口 v1
 
 当前整链主入口是 `python examples/3dgs_reconstruction/pipeline.py reconstruct --video INPUT.mp4 --out NEW_RUN`。它在 ARM 上调用 MVSplat，默认完整 SfM 位姿，输出 `renderer_input/model.ply`、相机、`manifest.json`、各视角图像和 `pipeline_result.json`。`reconstruct` 使用 `--video/--out`，以下 `--run` 分阶段示例属于旧 OpenSplat 对照。MVSplat 的 `context.npz`、`input.json` 和网络中间产物见 [MVSplat 接口](../mvsplat/README.md)；它不生成本页旧训练合同中的 `splat.ply`/`training_request.json`，因此不能对其直接运行旧 `validate --through gaussian`。

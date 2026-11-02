@@ -1,21 +1,29 @@
 # 视频重建主入口
 
-统一 CLI 是 `pipeline.py`。当前推荐 `initialize`：视频前预热，然后使用已有视频完成场景准备与首帧。
-必须显式传入 `--live-renderer` 才会选择当前常驻原生后端；该后端默认使用 mainline 配置。
+推荐入口是 pipeline.py initialize：视频前预热，随后运行视频→位姿→NPU 高斯生成→FPGA→网页。
+推荐显式 --backend npu --partitions backbone_cnn depth_head，并提供匹配的资产和图像验收记录；
+显式 --live-renderer 才调用当前常驻原生后端。完整命令见仓库 README。
 
-当前四模块源码均在 `mvsplat/` 下：
+四个业务模块保留在 mvsplat/：
 
 | 模块 | 位置 |
 |---|---|
-| 视频接收、解码、选帧 | `mvsplat/video_input/` |
-| 两视图位姿与目标 PnP | `mvsplat/pose_estimation/` |
-| 固定权重高斯生成及 ABI 转换 | `mvsplat/gaussian_generation/` |
-| 常驻 CPU＋FPGA 渲染 | `mvsplat/rendering/` |
+| 接收、解码、选帧、标定 | mvsplat/video_input/ |
+| 两视图位姿与目标 PnP | mvsplat/pose_estimation/ |
+| 固定权重 CPU/NPU 高斯生成 | mvsplat/gaussian_generation/ |
+| 常驻 CPU＋FPGA 渲染与网页 | mvsplat/rendering/ |
 
-参见 [模块接口](modules/INTERFACES.md)、[具体架构](mvsplat/ARCHITECTURE.md)、
-[仓库当前结构](../../docs/CODE_STRUCTURE.md) 和 [当前主线指标](../../MAINLINE.md)。
+initialize/ 只协调预热和资源生命周期。结构、接口和数值政策见
+[代码结构](../../docs/CODE_STRUCTURE.md)、[接口](modules/INTERFACES.md) 和 [主线指标](../../MAINLINE.md)。
 
-`reconstruct` 是保留的冷启动/完整 SfM 对照；旧 `modules/`、`bounded/` 和 `npu_frontend/`
-分别提供兼容合同、历史 OpenSplat 训练、旧特征 NPU 试验，均不代表当前推荐链路。
-旧说明、源码试验和原始结果按日期保存到 [归档](../../archive/history_20261009/README.md)。
-当前接口重整尚未进行新功能或实板回归，不能把旧测量当作本轮测试。
+## 保留的对照与工具
+
+reconstruct 保留完整 SfM/冷启动 CPU 对照；其内部仍调用 video、pose 辅助阶段。
+render 用于已有模型的冻结后端对照，validate 只检查已有文件合同，不执行训练。
+modules/ 保留这些实际依赖与公共合同，不是第二套当前两视图算法。
+
+gaussian/export 旧 OpenSplat 公共命令、run_cpu、stages、bounded、npu_frontend 和旧训练构建脚本已删除。
+校验合同仍可识别历史 Gaussian/导出格式；这不表示训练命令重新启用。
+旧实验、独立 NPU 诊断包和早期硬件脚本从活动树移除，可按
+[清理归档](../../archive/history_20261102_cleanup/README.md) 恢复。
+私人视频、原始输出与未提交工作目录不在本次删除范围。

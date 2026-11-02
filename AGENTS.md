@@ -1,3 +1,14 @@
+# 2026-11-02：删除旧实验与重复入口
+
+用户已澄清：清理与 NPU→FPGA→网页主线无关、容易误用的旧实验与重复入口；
+保留核心四模块、CPU 回退、冻结 render_main/render_branch 和 releases。
+活动树删除旧 OpenSplat 训练、旧特征 NPU、独立诊断包和被冻结包替代的渲染实验。
+先以原路径/长度/SHA256 保存 257 项归档并核验，再删除 250 个跟踪文件；
+原 main 工作目录的未提交内容不操作。恢复使用既有 tools/archive_history.py。
+公共 CLI 不再提供 gaussian/export 的 OpenSplat 训练/导出；video/pose 为完整 SfM
+冷对照仍使用，render/validate 为现有格式合同工具，不得误报成 NPU 主线。
+新结构与核验见 docs/MAINLINE_CLEANUP_20261102.md。本轮无板卡或固件操作。
+
 # 2026-11-02：合并 NPU 主线到 main
 
 用户要求将已实现的 NPU 主线合入 main 并提交，仍保持四业务模块架构。

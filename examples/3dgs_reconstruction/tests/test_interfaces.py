@@ -13,7 +13,6 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from modules.common import file_sha256
 from modules.contracts import FrameSet, PoseSet, GaussianScene, RenderInput, RenderResult
-from modules.gaussian_generation.training import command as train_command
 from modules.rendering import render
 from interface_fixture import make_reference
 
@@ -149,7 +148,7 @@ class Interfaces(unittest.TestCase):
         # Exercise the actual release entry point without distributing board binaries.
         package = self.run/"renderer_package"
         package.mkdir()
-        shutil.copy2(ROOT.parent/"3dgs_flicker_hw/release/render.py", package/"render.py")
+        shutil.copy2(ROOT.parents[1]/"releases/3dgs_renderer_v1_20260928/render.py", package/"render.py")
         (package/"manifest.json").write_text(json.dumps({"scope": "plan-only test fixture"}))
         result = render(self.reference/"renderer_input", package,
                         self.run/"output", backend="cpu_dense", plan=True)
@@ -165,13 +164,14 @@ class Interfaces(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "length"):
             RenderResult.load(self.run)
 
-    def test_training_command_preserves_cpu_contract(self):
-        command = train_command(self.run, "opensplat", 1000, 6000, "frame_000015.png")
-        self.assertIn("--cpu", command)
-        self.assertEqual(command[command.index("--densify-until")+1], "750")
-        self.assertEqual(command[-2:], ["-o", str(self.run/"splat.ply")])
-        with self.assertRaises(ValueError):
-            train_command(self.run, "opensplat", 20, 6000, "frame.png")
+    def test_removed_training_and_export_commands_are_rejected(self):
+        for stage in ("gaussian", "export"):
+            with self.subTest(stage=stage):
+                result = subprocess.run([sys.executable, str(ROOT/"pipeline.py"), stage,
+                                         "--run", str(self.run)],
+                                        capture_output=True, text=True)
+                self.assertEqual(result.returncode, 2)
+                self.assertIn("invalid choice", result.stderr)
 
 
 if __name__ == "__main__":

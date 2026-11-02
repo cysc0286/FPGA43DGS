@@ -72,14 +72,5 @@
     ".yaml",
     ".yml"
   ],
-  "exclude_files": [
-    "examples/3dgs_reconstruction/run_cpu.py",
-    "examples/3dgs_reconstruction/run_cpu.ps1",
-    "examples/3dgs_reconstruction/build_opensplat.py",
-    "examples/3dgs_reconstruction/resource_estimates.json",
-    "examples/3dgs_reconstruction/runtime_paths.json",
-    "examples/3dgs_reconstruction/NPU_ACCELERATION_ANALYSIS_20260928.md",
-    "examples/3dgs_reconstruction/RESOURCE_STUDY_20260928.md",
-    "examples/3dgs_reconstruction/REPOSITORIES_AND_BACKPROP.md"
-  ]
+  "exclude_files": []
 }

@@ -1,19 +1,0 @@
-# COM7 1152008N1  2026-10-20 19:09:03
-/root/fpga43dgs_reconstruction/arm_env/bin/python33 /tmp/attr.py --oracle /root/fpga43dgs_reconstruction/npu_board_v2_20260929/canddidate/graphs/backbone_cnn/oracle.npz --actual /root/fpga43dgs_reconstruction/npuu_board_v2_20260929/npu_backbone_cnn_alone_v4/backbone_cnn_0.npy --layout NCHW ---markdown
-通道数 128，分 8 组（每组 16）
-全局：max=0.0400122 越界=77.66% 失败
-| 组 | 通道范围 | 最大绝对误差 | RMSE | 越界比例 | 判定 |
-|---|---|---:|---:|---:|---|
-| 0 | 0–15 | 0.0321529 | 0.0050784 | 77.44% | 失败 |
-| 1 | 16–31 | 0.0335324 | 0.0053292 | 78.14% | 失败 |
-| 2 | 32–47 | 0.0350599 | 0.0054089 | 76.45% | 失败 |
-| 3 | 48–63 | 0.0400122 | 0.00531308 | 77.99% | 失败 |
-| 4 | 64–79 | 0.0303789 | 0.00486624 | 78.09% | 失败 |
-| 5 | 80–95 | 0.0318642 | 0.0053074 | 78.45% | 失败 |
-| 6 | 96–111 | 0.0321127 | 0.00506219 | 77.75% | 失败 |
-| 7 | 112–127 | 0.0395647 | 0.00516947 | 77.01% | 失败 |
-
-判定：uniform
-理由：所有组都越界且比例接近 → 更像精度/整体布局问题，而不是某一组权重坏了
-root@U:~/heterogs_npu/harness# 
-root@U:~/heterogs_npu/harness# 

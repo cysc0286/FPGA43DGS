@@ -30,6 +30,7 @@ BOOT.bin
 # Packed tracked history is versioned; local raw runs/build leftovers stay local.
 /archive/local_workspace_20261009/
 !/archive/history_20261009/*.zip
+!/archive/history_20261102_cleanup/*.zip
 __pycache__/
 /examples/3dgs_fpga_eval/build/
 .Xil/

@@ -23,7 +23,7 @@ examples/3dgs_reconstruction/
 │   │   └── render_branch/       PipeGS HGR v4 独立候选，默认不调用
 │   ├── scene_preparation.py     视频与位姿交接协调
 │   └── warm_pipeline.py         高斯生成与首帧协调
-└── modules/                     旧入口兼容与共用文件校验
+└── modules/                     完整 SfM 冷对照依赖与共用合同
 archive/history_20261009/         历史实验及哈希索引
 releases/                        较早冻结后端回退包
 ~~~
@@ -74,3 +74,10 @@ TF32 严格逐元素门槛仍失败，当前采用资产绑定的原生 FPGA 三
 
 冻结 render_main 和 BOOT 保持原样；全网 NPU、长期连续 NPU 更新及新场景泛化仍未验收。
 私人视频、原始帧、权重、SDK 和运行结果不上传。
+
+## 旧实验与重复入口
+
+OpenSplat 训练、旧特征 NPU、独立诊断包和早期渲染实验已从活动树删除。
+公共 CLI 不再提供 gaussian/export 旧训练与导出命令；完整 SfM CPU 对照仍保留。
+需要历史源码时从 [清理归档](archive/history_20261102_cleanup/README.md) 恢复到新目录。
+该清理只减少维护和误调用风险，不构成新的推理或渲染加速。

@@ -49,12 +49,11 @@
 | `archive/local_workspace_20261009/` | 本机未跟踪原始实验、日志、生成物；忽略、不上传 |
 | `mvsplat/rendering/render_branch/` | 保留的 PipeGS HGR v4 独立冻结候选；主线不调用 |
 | `releases/3dgs_renderer_v1_20260928/` | 较早冻结回退及现有 CPU 契约依赖，不能当作最新位流 |
-| `reconstruction/modules/` | 原 COLMAP/OpenSplat 文件接口兼容；`contracts.py` 仍被导出/校验使用 |
-| `reconstruction/bounded/`、`npu_frontend/` | 历史训练/特征实验，不进入主线协作源码包 |
-| `examples/3dgs_flicker_hw/` | 旧硬件开发工作树与未提交工作；日常复建使用当前冻结包 |
+| `reconstruction/modules/` | 完整 SfM 冷对照与共用文件校验；旧 OpenSplat 训练/导出实现已删除 |
+| `archive/history_20261102_cleanup/` | 从活动树删除的训练、特征 NPU、独立诊断与早期渲染实验；按路径/哈希恢复 |
 | `examples/3dgs_compositor/board/remote.py` | 现有板卡传输工具依赖，不是渲染算法 |
 
-未提交硬件改动原地保留。本轮不把它们混入整理提交，也不把它们称为已验收主线。
+原 main 工作目录的未提交硬件改动原地保留；本次只从当前干净工作树删除已归档的跟踪旧实验。
 
 ## 候选分支放在哪里
 
@@ -92,3 +91,11 @@ mvsplat/
 共用后端配置位于 gaussian_generation/npu_branch/config.py，initialize 仅协调生命周期。
 源码包纳入网页静态资源；不包含私人输入、生成资产、权重或 SDK。
 本次执行软件回归和冻结文件检查，未新增上板测速；实板证据及待补项见 MAINLINE.md。
+
+## 2026-11-02 清理后的入口
+
+公共 CLI 删除 gaussian/export 训练和旧导出命令；仍保留 initialize（推荐 NPU）、
+reconstruct（完整 SfM CPU 对照），及实际被引用的 video/pose/render/validate 工具。
+modules/gaussian_generation、bounded、npu_frontend、run_cpu、stages、旧构建/出图脚本、
+独立 NPU deploy_20261021 和早期硬件实验已从活动树删除，详见
+[清理核验](MAINLINE_CLEANUP_20261102.md)。冻结资产及当前 NPU 诊断工具继续保留。
