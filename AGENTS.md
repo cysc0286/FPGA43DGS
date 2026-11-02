@@ -1,3 +1,16 @@
+# 2026-11-02：两个局部预测头 NPU 分块迁移
+
+`to_gaussians` 后接 `to_disparity` 已完成真实 NPU＋冻结 FPGA 三留出视角资格与完整公开视频首帧。
+新增实现继续位于 gaussian_generation/npu_branch；四业务模块、CPU 回退、BOOT 和冻结渲染包不变。
+原权重 Conv/GELU/Conv 改为单视图 36×36 执行块、32×32 有效区、两像素边界；不缩图或删高斯。
+板端需 fresh SDK input Tensor＋每块两次真实 SDK forward，全部成本计入，并通过 READY 前及资格后
+输入切换/有限值/重复检查。此为受限实测规避，不代表 SDK 权重预检或陈旧结果根因已修复。
+严格逐元素 TF32 门槛仍失败；只能使用本轮资产绑定的三视角图像资格，不能泛化任意场景质量。
+四子图视频首帧 21.2445 s（128×128、32768 点、预热不计），20 s 未达到；不是实时训练。
+板端根文件系统已满；新候选与证据暂存 /dev/shm，需电脑归档，重启后不能假定仍存在。
+完整结果、负对照、部署复跑方式和尚未关闭的问题见
+examples/3dgs_reconstruction/mvsplat/gaussian_generation/npu_branch/NPU_LOCAL_HEADS_20261102.md。
+
 # 2026-11-02：恢复连接、NPU 参赛部署与候选实板核验
 
 用户要求先建立合理可展示的 NPU 部署，再优化，不以单个性能指标为目的。

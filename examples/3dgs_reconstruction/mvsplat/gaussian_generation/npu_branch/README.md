@@ -1,5 +1,12 @@
 # NPU 后端：MVSplat 高斯生成
 
+2026-11-02 后续增量：`to_gaussians`、`to_disparity` 已按顺序完成真实 NPU 分块迁移，
+与 `backbone_cnn + depth_head` 组成四子图候选，通过三留出视角原生 FPGA 图像资格、
+输入切换与重复检查，以及完整公开视频首帧。首帧 **21.2445 秒**，20 秒尚未达到。
+严格逐元素门槛仍失败，SDK 根因未关闭；仅凭图像资格及当前运行规避发布 READY。
+操作、代价、实板正负结果详见 [局部预测头迁移记录](NPU_LOCAL_HEADS_20261102.md)。
+原两子图路径仍保留，下面“Gaussian head 暂不接入”是此次分块迁移之前的历史状态。
+
 2026-11-02 回板核验：新桥接库的默认字符串输出已完成公开短片→NPU→FPGA→网页，
 视频结束到首帧22.393秒；三视角及网页确认通过。直接输出虽单轮图像资格通过，
 在完整入口输入切换失败，继续关闭；新增Gaussian head暂不接正式路径。
@@ -47,6 +54,8 @@
 - `runtime.py`、`worker.py`、`bridge.cpp`：CPU Tensor/IPC/SDK 的调用、布局转换和会话管理。
 - `readiness.py`、`verify.py`、诊断脚本：数值检查、权重/布局问题定位。
 - `benchmark.py`：包含数据交接开销的分区对照计时。
+- `spatial.py`、`prepare_spatial_bundle.py`：两个局部预测头的带边界分块、完整拼回与原权重审计。
+- `head_probe.py`、`transport_probe.cpp`：已知卷积、真实头分层/分块和 SDK 设备内存读写诊断。
 
 它不是 YOLO 演示，也不是旧 `npu_frontend/` 的 SIFT 匹配试验。
 下面保留原部署设计与复跑命令；其中编译/布局检查不等于真实 NPU 数值通过。

@@ -1,0 +1,700 @@
+{
+  "schema": "mvsplat_local_head_migration_v1",
+  "verified_date": "2026-11-02",
+  "branch": "feat/npu-gaussian-head-20261102",
+  "base_commit": "dfb73a1",
+  "scope": "One fixed public clip, 2 context views, 3 held-out qualification views, 128x128, 32768 Gaussians",
+  "reliability": {
+    "status": "bounded_workaround_qualified_not_sdk_root_cause_closed",
+    "spatial_tile": [
+      1,
+      36,
+      36
+    ],
+    "core": 32,
+    "halo": 2,
+    "fresh_sdk_input": true,
+    "head_sdk_forwards_per_tile": 2,
+    "strict_tensor_gate_passed": false,
+    "SDK_weight_precheck_root_cause_closed": false
+  },
+  "prepared": {
+    "three_part": {
+      "complete": true,
+      "partitions": [
+        "backbone_cnn",
+        "depth_head",
+        "to_gaussians"
+      ],
+      "gaussian_repeat_exact": true,
+      "strict_tensor_passed": false,
+      "views": {
+        "frame_000007.png": {
+          "npu_vs_cpu": {
+            "psnr_db": 53.45415421236984,
+            "ssim": 0.9988621356737432,
+            "mae": 0.0009050755718954247,
+            "max_abs_error": 0.0823529411764706
+          },
+          "cpu_vs_truth": {
+            "psnr_db": 20.103308336651168,
+            "ssim": 0.8018765047415483,
+            "mae": 0.06338951759089052,
+            "max_abs_error": 0.8705882352941177
+          },
+          "npu_vs_truth": {
+            "psnr_db": 20.10185470600485,
+            "ssim": 0.8013873234130011,
+            "mae": 0.06352116204554738,
+            "max_abs_error": 0.8705882352941177
+          },
+          "truth_psnr_drop_db": 0.0014536306463170945,
+          "truth_ssim_drop": 0.0004891813285471391,
+          "target_sha256": "4c754e6ed05956ae807b93a76b9d319fdd30af6fec499ac80b278c24ed87f957",
+          "camera_sha256": "99abe8c330853cf3cfb2b1e2ef6b3dde288d61e97ff51ea1d839653311152b3b",
+          "live_frame_ms": 49.1780899992591
+        },
+        "frame_000015.png": {
+          "npu_vs_cpu": {
+            "psnr_db": 53.18428304962958,
+            "ssim": 0.9987692823881481,
+            "mae": 0.0009643554687499999,
+            "max_abs_error": 0.06274509803921569
+          },
+          "cpu_vs_truth": {
+            "psnr_db": 20.210329314997967,
+            "ssim": 0.8342630038282568,
+            "mae": 0.043004573248570266,
+            "max_abs_error": 0.9803921568627451
+          },
+          "npu_vs_truth": {
+            "psnr_db": 20.217273427765882,
+            "ssim": 0.8338705120674261,
+            "mae": 0.0429129008374183,
+            "max_abs_error": 0.9803921568627451
+          },
+          "truth_psnr_drop_db": -0.006944112767914845,
+          "truth_ssim_drop": 0.00039249176083067105,
+          "target_sha256": "596c3dd364f7bfc5bf7919ecf4e246123444fe1750d5b10789c8c8b93d373679",
+          "camera_sha256": "6851984da37b3e4e1294803f4136824f9c9aa0f4ede33c6453858b0385ccc348",
+          "live_frame_ms": 52.00318000061088
+        },
+        "frame_000022.png": {
+          "npu_vs_cpu": {
+            "psnr_db": 52.713461635893665,
+            "ssim": 0.9988022452072418,
+            "mae": 0.0009890886693218954,
+            "max_abs_error": 0.08235294117647057
+          },
+          "cpu_vs_truth": {
+            "psnr_db": 24.177819515186677,
+            "ssim": 0.8442717748824858,
+            "mae": 0.0350079305810866,
+            "max_abs_error": 0.8039215686274509
+          },
+          "npu_vs_truth": {
+            "psnr_db": 24.18371023539787,
+            "ssim": 0.8439259593374023,
+            "mae": 0.03491673687704249,
+            "max_abs_error": 0.8039215686274509
+          },
+          "truth_psnr_drop_db": -0.005890720211194633,
+          "truth_ssim_drop": 0.0003458155450835054,
+          "target_sha256": "d2d08fe862d4f7571dc3d880b81b8a16ff7cf62e7ec014d48f8629c63ca7c606",
+          "camera_sha256": "18c6c99acc4c9e506e47b6cc5933f8332c6d692a6069ce127a13e1e1d414c8e1",
+          "live_frame_ms": 50.56963000060932
+        }
+      },
+      "prepared_inference_saving_seconds": 4.8116272000006575,
+      "inference_seconds": {
+        "cpu": 16.736961510001493,
+        "npu": 11.925334310000835,
+        "npu_repeat": 11.220077339999989
+      },
+      "measurement": {
+        "status": "passed",
+        "returncode": 0,
+        "command": [
+          "/root/fpga43dgs_reconstruction/arm_env/bin/python3",
+          "-u",
+          "-m",
+          "gaussian_generation.npu_branch.qualify",
+          "--backend",
+          "npu",
+          "--partitions",
+          "backbone_cnn",
+          "depth_head",
+          "to_gaussians",
+          "--partition-bundle",
+          "/dev/shm/fpga43dgs_npu_head_20261102/reliability/tiled_mainline/compiled",
+          "--oracle-graphs",
+          "/dev/shm/fpga43dgs_npu_head_20261102/reliability/tiled_mainline/graphs",
+          "--npu-library",
+          "/dev/shm/fpga43dgs_npu_head_20261102/bridge/libmgs_npu.so",
+          "--worker-python",
+          "/root/fpga43dgs_reconstruction/arm_env/bin/python3",
+          "--weights",
+          "/root/fpga43dgs_reconstruction/npu_depth_20261102/weights/re10k.ckpt",
+          "--vendor",
+          "/root/fpga43dgs_reconstruction/npu_depth_20261102/vendor/MVSplat_reference",
+          "--input",
+          "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/candidate/input",
+          "--renderer",
+          "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928",
+          "--live-renderer",
+          "/root/fpga43dgs_reconstruction/render_exact_20261001_direct/source_verified_source/rendering/live_exact",
+          "--boot-image",
+          "/run/fpga43dgs_boot_inspect_20261102/BOOT.bin",
+          "--threads",
+          "4",
+          "--out",
+          "/dev/shm/fpga43dgs_npu_head_20261102/reliability/tiled_mainline/three_part_gaussians_clean"
+        ],
+        "wall_seconds": 143.39926064000065,
+        "child_cpu_seconds": 184.165314,
+        "peak_process_tree_rss_mib_sampled": 547.00390625,
+        "samples": 1614,
+        "child_maxrss_mib_kernel": 530.41015625,
+        "min_available_mib_sampled": 109.703125,
+        "sample_interval_seconds": 0.05,
+        "limits": {
+          "rss_mib": 800.0,
+          "reserve_mib": 80.0,
+          "timeout": 300.0
+        },
+        "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+      }
+    },
+    "four_part": {
+      "complete": true,
+      "partitions": [
+        "backbone_cnn",
+        "depth_head",
+        "to_gaussians",
+        "to_disparity"
+      ],
+      "gaussian_repeat_exact": true,
+      "strict_tensor_passed": false,
+      "views": {
+        "frame_000007.png": {
+          "npu_vs_cpu": {
+            "psnr_db": 44.320591953483515,
+            "ssim": 0.9955682258253672,
+            "mae": 0.002932958665236928,
+            "max_abs_error": 0.10588235294117643
+          },
+          "cpu_vs_truth": {
+            "psnr_db": 20.103308336651168,
+            "ssim": 0.8018765047415483,
+            "mae": 0.06338951759089052,
+            "max_abs_error": 0.8705882352941177
+          },
+          "npu_vs_truth": {
+            "psnr_db": 20.097333447626994,
+            "ssim": 0.8015587984827562,
+            "mae": 0.06349220026552288,
+            "max_abs_error": 0.8666666666666667
+          },
+          "truth_psnr_drop_db": 0.005974889024173535,
+          "truth_ssim_drop": 0.0003177062587920165,
+          "target_sha256": "4c754e6ed05956ae807b93a76b9d319fdd30af6fec499ac80b278c24ed87f957",
+          "camera_sha256": "99abe8c330853cf3cfb2b1e2ef6b3dde288d61e97ff51ea1d839653311152b3b",
+          "live_frame_ms": 53.558060000796104
+        },
+        "frame_000015.png": {
+          "npu_vs_cpu": {
+            "psnr_db": 43.612538385184564,
+            "ssim": 0.9953365295852409,
+            "mae": 0.003331242978962418,
+            "max_abs_error": 0.15294117647058825
+          },
+          "cpu_vs_truth": {
+            "psnr_db": 20.210329314997967,
+            "ssim": 0.8342630038282568,
+            "mae": 0.043004573248570266,
+            "max_abs_error": 0.9803921568627451
+          },
+          "npu_vs_truth": {
+            "psnr_db": 20.244825029585463,
+            "ssim": 0.8340490911619998,
+            "mae": 0.042773277930964054,
+            "max_abs_error": 0.9803921568627451
+          },
+          "truth_psnr_drop_db": -0.03449571458749645,
+          "truth_ssim_drop": 0.0002139126662570323,
+          "target_sha256": "596c3dd364f7bfc5bf7919ecf4e246123444fe1750d5b10789c8c8b93d373679",
+          "camera_sha256": "6851984da37b3e4e1294803f4136824f9c9aa0f4ede33c6453858b0385ccc348",
+          "live_frame_ms": 51.83862000012596
+        },
+        "frame_000022.png": {
+          "npu_vs_cpu": {
+            "psnr_db": 42.74837357042675,
+            "ssim": 0.9956062692355483,
+            "mae": 0.003536049836601307,
+            "max_abs_error": 0.19999999999999996
+          },
+          "cpu_vs_truth": {
+            "psnr_db": 24.177819515186677,
+            "ssim": 0.8442717748824858,
+            "mae": 0.0350079305810866,
+            "max_abs_error": 0.8039215686274509
+          },
+          "npu_vs_truth": {
+            "psnr_db": 24.188155178265735,
+            "ssim": 0.8443748942163453,
+            "mae": 0.0349209654564951,
+            "max_abs_error": 0.8117647058823529
+          },
+          "truth_psnr_drop_db": -0.010335663079057866,
+          "truth_ssim_drop": -0.00010311933385942496,
+          "target_sha256": "d2d08fe862d4f7571dc3d880b81b8a16ff7cf62e7ec014d48f8629c63ca7c606",
+          "camera_sha256": "18c6c99acc4c9e506e47b6cc5933f8332c6d692a6069ce127a13e1e1d414c8e1",
+          "live_frame_ms": 50.69781999918632
+        }
+      },
+      "prepared_inference_saving_seconds": 4.964521610001611,
+      "inference_seconds": {
+        "cpu": 16.735443260000466,
+        "npu": 11.770921649998854,
+        "npu_repeat": 11.179684779999661
+      },
+      "measurement": {
+        "status": "passed",
+        "returncode": 0,
+        "command": [
+          "/root/fpga43dgs_reconstruction/arm_env/bin/python3",
+          "-u",
+          "-m",
+          "gaussian_generation.npu_branch.qualify",
+          "--backend",
+          "npu",
+          "--partitions",
+          "backbone_cnn",
+          "depth_head",
+          "to_gaussians",
+          "to_disparity",
+          "--partition-bundle",
+          "/dev/shm/fpga43dgs_npu_head_20261102/reliability/tiled_mainline/compiled",
+          "--oracle-graphs",
+          "/dev/shm/fpga43dgs_npu_head_20261102/reliability/tiled_mainline/graphs",
+          "--npu-library",
+          "/dev/shm/fpga43dgs_npu_head_20261102/bridge/libmgs_npu.so",
+          "--worker-python",
+          "/root/fpga43dgs_reconstruction/arm_env/bin/python3",
+          "--weights",
+          "/root/fpga43dgs_reconstruction/npu_depth_20261102/weights/re10k.ckpt",
+          "--vendor",
+          "/root/fpga43dgs_reconstruction/npu_depth_20261102/vendor/MVSplat_reference",
+          "--input",
+          "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/candidate/input",
+          "--renderer",
+          "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928",
+          "--live-renderer",
+          "/root/fpga43dgs_reconstruction/render_exact_20261001_direct/source_verified_source/rendering/live_exact",
+          "--boot-image",
+          "/run/fpga43dgs_boot_inspect_20261102/BOOT.bin",
+          "--threads",
+          "4",
+          "--out",
+          "/dev/shm/fpga43dgs_npu_head_20261102/reliability/tiled_mainline/four_part_final"
+        ],
+        "wall_seconds": 143.7523266199987,
+        "child_cpu_seconds": 184.787553,
+        "peak_process_tree_rss_mib_sampled": 555.1796875,
+        "samples": 1628,
+        "child_maxrss_mib_kernel": 530.859375,
+        "min_available_mib_sampled": 111.765625,
+        "sample_interval_seconds": 0.05,
+        "limits": {
+          "rss_mib": 800.0,
+          "reserve_mib": 80.0,
+          "timeout": 300.0
+        },
+        "memory_scope": "Sampled tree RSS sums shared pages; kernel maxrss is max process, not simultaneous total"
+      }
+    }
+  },
+  "video": {
+    "four_part": {
+      "complete": true,
+      "timing": {
+        "complete": true,
+        "ready_to_receipt_seconds_record_only": 0.013725640001212014,
+        "gaussian_scene_seconds": 21.106975499998953,
+        "first_render_seconds": 0.1375528700009454,
+        "scene_preparation_seconds": 21.244528369999898
+      },
+      "preheat_seconds_record_only": 105.08107692999874,
+      "inference_seconds": 12.194531669998469,
+      "gaussian_sha256": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+      "scheduling": {
+        "context_ready_seconds": 6.426108760000716,
+        "inference_begin_seconds": 6.426362390000577,
+        "first_target_ready_seconds": 7.658975669999563,
+        "poses_complete_seconds": 9.882548300000053,
+        "inference_end_seconds": 19.668405800000983,
+        "gaussian_row_conversion_seconds": 0.7615415300006134,
+        "renderer_scene_load_seconds": 0.16453698000077566,
+        "combined_seconds": 21.0266100000008,
+        "overlap_seconds": 3.4561859099994763,
+        "video_prepare_stages": {
+          "decode_seconds": 4.020283850000851,
+          "context_sift_seconds": 1.6556740800006082,
+          "context_matching_seconds": 0.40681550999943283,
+          "context_pose_seconds": 0.19899306000115757,
+          "context_total_seconds": 2.2637822500000766,
+          "target_7_sift_seconds": 0.7225099999996019,
+          "target_7_matching_seconds": 0.34913568000047235,
+          "target_7_pnp_seconds": 0.031053009999595815,
+          "target_7_total_seconds": 1.1040928799993708,
+          "target_15_sift_seconds": 0.696774350000851,
+          "target_15_matching_seconds": 0.353393639999922,
+          "target_15_pnp_seconds": 0.0061740600012853974,
+          "target_15_total_seconds": 1.0577478800005338,
+          "target_22_sift_seconds": 0.7006787499994971,
+          "target_22_matching_seconds": 0.35599102999913157,
+          "target_22_pnp_seconds": 0.005925429999479093,
+          "target_22_total_seconds": 1.0638827000002493,
+          "remaining_target_pose_seconds": 2.121630580000783,
+          "remaining_target_pnp_seconds": 0.01209949000076449
+        },
+        "video_prepare_total_seconds": 9.867757809999603
+      },
+      "measurement": {
+        "status": "passed",
+        "error": null,
+        "returncode": 0,
+        "command": [
+          "/root/fpga43dgs_reconstruction/arm_env/bin/python3",
+          "-u",
+          "pipeline.py",
+          "initialize",
+          "--video",
+          "/root/fpga43dgs_reconstruction/npu_integration_20261102/input/nyu_snippet_curl.mp4",
+          "--out",
+          "/dev/shm/fpga43dgs_npu_head_20261102/reliability/tiled_mainline/video_four_part_pss",
+          "--weights",
+          "/root/fpga43dgs_reconstruction/npu_depth_20261102/weights/re10k.ckpt",
+          "--vendor",
+          "/root/fpga43dgs_reconstruction/npu_depth_20261102/vendor/MVSplat_reference",
+          "--renderer",
+          "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928",
+          "--live-renderer",
+          "/root/fpga43dgs_reconstruction/render_exact_20261001_direct/source_verified_source/rendering/live_exact",
+          "--threads",
+          "3",
+          "--prepare-threads",
+          "1",
+          "--overlap-prepare",
+          "--warm-kernels",
+          "--backend",
+          "npu",
+          "--partitions",
+          "backbone_cnn",
+          "depth_head",
+          "to_gaussians",
+          "to_disparity",
+          "--partition-bundle",
+          "/dev/shm/fpga43dgs_npu_head_20261102/reliability/tiled_mainline/compiled",
+          "--oracle-graphs",
+          "/dev/shm/fpga43dgs_npu_head_20261102/reliability/tiled_mainline/graphs",
+          "--npu-library",
+          "/dev/shm/fpga43dgs_npu_head_20261102/bridge/libmgs_npu.so",
+          "--npu-acceptance",
+          "/dev/shm/fpga43dgs_npu_head_20261102/reliability/tiled_mainline/four_part_final/acceptance.json",
+          "--worker-python",
+          "/root/fpga43dgs_reconstruction/arm_env/bin/python3"
+        ],
+        "wall_seconds": 141.79094171999895,
+        "child_cpu_seconds": 142.827844,
+        "peak_process_tree_rss_mib_sampled": 550.18359375,
+        "samples": 1243,
+        "peak_process_tree_pss_mib_sampled": 544.7919921875,
+        "child_maxrss_mib_kernel": 501.3203125,
+        "min_available_mib_sampled": 113.3203125,
+        "sample_interval_seconds": 0.05,
+        "limits": {
+          "rss_mib": 0.0,
+          "pss_mib": 700.0,
+          "reserve_mib": 96.0,
+          "timeout": 240.0
+        },
+        "memory_scope": "RSS sums shared pages; optional PSS apportions them among mappings. MemAvailable protects total host headroom including tmpfs/kernel. Kernel maxrss is max process, not simultaneous total"
+      }
+    },
+    "two_part": {
+      "complete": true,
+      "timing": {
+        "complete": true,
+        "ready_to_receipt_seconds_record_only": 0.007039179999992484,
+        "gaussian_scene_seconds": 22.66339943999992,
+        "first_render_seconds": 0.13929521999853023,
+        "scene_preparation_seconds": 22.80269465999845
+      },
+      "preheat_seconds_record_only": 79.26247224999861,
+      "inference_seconds": 14.34869923000042,
+      "gaussian_sha256": "0cee86757db8ab9e19a18f0ace950c590b0f90105bae27f1c9ca6f22889fdeba",
+      "scheduling": {
+        "context_ready_seconds": 5.913884550000148,
+        "inference_begin_seconds": 5.9141181699997105,
+        "first_target_ready_seconds": 7.112085169999773,
+        "poses_complete_seconds": 9.359240259998842,
+        "inference_end_seconds": 21.238266549999025,
+        "gaussian_row_conversion_seconds": 0.7301009299990255,
+        "renderer_scene_load_seconds": 0.17352066000057675,
+        "combined_seconds": 22.557266460000392,
+        "overlap_seconds": 3.4451220899991313,
+        "video_prepare_stages": {
+          "decode_seconds": 3.546343320000233,
+          "context_sift_seconds": 1.6093905199995788,
+          "context_matching_seconds": 0.4023906399997941,
+          "context_pose_seconds": 0.22347445000013977,
+          "context_total_seconds": 2.2379040899995744,
+          "target_7_sift_seconds": 0.7089159299994208,
+          "target_7_matching_seconds": 0.34949317000064184,
+          "target_7_pnp_seconds": 0.03665759999967122,
+          "target_7_total_seconds": 1.0966524999985268,
+          "target_15_sift_seconds": 0.6996521299988672,
+          "target_15_matching_seconds": 0.35159509999903094,
+          "target_15_pnp_seconds": 0.006372600000759121,
+          "target_15_total_seconds": 1.0590560900000128,
+          "target_22_sift_seconds": 0.712471889999506,
+          "target_22_matching_seconds": 0.3656982499996957,
+          "target_22_pnp_seconds": 0.006212909998794203,
+          "target_22_total_seconds": 1.085849170000074,
+          "remaining_target_pose_seconds": 2.144905260000087,
+          "remaining_target_pnp_seconds": 0.012585509999553324
+        },
+        "video_prepare_total_seconds": 9.31290411000009
+      },
+      "measurement": {
+        "status": "passed",
+        "error": null,
+        "returncode": 0,
+        "command": [
+          "/root/fpga43dgs_reconstruction/arm_env/bin/python3",
+          "-u",
+          "pipeline.py",
+          "initialize",
+          "--video",
+          "/root/fpga43dgs_reconstruction/npu_integration_20261102/input/nyu_snippet_curl.mp4",
+          "--out",
+          "/dev/shm/fpga43dgs_npu_head_20261102/reliability/tiled_mainline/video_two_part_control_oracles_off",
+          "--weights",
+          "/root/fpga43dgs_reconstruction/npu_depth_20261102/weights/re10k.ckpt",
+          "--vendor",
+          "/root/fpga43dgs_reconstruction/npu_depth_20261102/vendor/MVSplat_reference",
+          "--renderer",
+          "/root/fpga43dgs_releases/20260928T004334/3dgs_renderer_v1_20260928",
+          "--live-renderer",
+          "/root/fpga43dgs_reconstruction/render_exact_20261001_direct/source_verified_source/rendering/live_exact",
+          "--threads",
+          "3",
+          "--prepare-threads",
+          "1",
+          "--overlap-prepare",
+          "--warm-kernels",
+          "--backend",
+          "npu",
+          "--partitions",
+          "backbone_cnn",
+          "depth_head",
+          "--partition-bundle",
+          "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/candidate/compiled",
+          "--oracle-graphs",
+          "/root/fpga43dgs_reconstruction/npu_board_v2_20260929/candidate/graphs",
+          "--npu-library",
+          "/dev/shm/fpga43dgs_npu_head_20261102/bridge/libmgs_npu.so",
+          "--npu-acceptance",
+          "/dev/shm/fpga43dgs_npu_head_20261102/mainline/mainline_new_string_receipt.json",
+          "--worker-python",
+          "/root/fpga43dgs_reconstruction/arm_env/bin/python3"
+        ],
+        "wall_seconds": 116.63944113999969,
+        "child_cpu_seconds": 133.89765699999998,
+        "peak_process_tree_rss_mib_sampled": 623.16015625,
+        "samples": 1013,
+        "peak_process_tree_pss_mib_sampled": 609.1884765625,
+        "child_maxrss_mib_kernel": 588.328125,
+        "min_available_mib_sampled": 113.29296875,
+        "sample_interval_seconds": 0.05,
+        "limits": {
+          "rss_mib": 0.0,
+          "pss_mib": 700.0,
+          "reserve_mib": 96.0,
+          "timeout": 240.0
+        },
+        "memory_scope": "RSS sums shared pages; optional PSS apportions them among mappings. MemAvailable protects total host headroom including tmpfs/kernel. Kernel maxrss is max process, not simultaneous total"
+      }
+    },
+    "comparison": {
+      "first_frame_saved_seconds": 1.5581662899985531,
+      "reduction_percent": 6.833255074594149,
+      "forward_saved_seconds": 2.1541675600019516,
+      "sample_count_each": 1,
+      "caveat": "Initial inactive tmpfs assets differed; no latency distribution or significance claim",
+      "target_20s_met": false
+    }
+  },
+  "web": {
+    "complete": true,
+    "scene": {
+      "backend": "npu",
+      "npu_executed": true,
+      "inference_seconds": 12.194531669998469
+    },
+    "renderer_backend": "fpga",
+    "frames": [
+      {
+        "request_id": 1,
+        "yaw": 0,
+        "pitch": 0,
+        "render_ms": 54.49,
+        "http_ms": 70.14760002493858,
+        "sha256": "44f74983bae96114fa72fd357b9c8be0198c9ce97b3ec1feeece73de178e4a28"
+      },
+      {
+        "request_id": 2,
+        "yaw": 8,
+        "pitch": -4,
+        "render_ms": 41.85,
+        "http_ms": 56.23710004147142,
+        "sha256": "167526df65935213461c56fa34a36a116053bb800d752574c8310b46b67433cb"
+      },
+      {
+        "request_id": 3,
+        "yaw": -8,
+        "pitch": 3,
+        "render_ms": 40.68,
+        "http_ms": 52.159099956043065,
+        "sha256": "be1a6350c8a707f816210de1ea3ea80490f8d5cf2016bcd6dca66c00a39e9b1b"
+      },
+      {
+        "request_id": 4,
+        "yaw": 0,
+        "pitch": 0,
+        "render_ms": 41.09,
+        "http_ms": 52.494200062938035,
+        "sha256": "44f74983bae96114fa72fd357b9c8be0198c9ce97b3ec1feeece73de178e4a28"
+      },
+      {
+        "request_id": 5,
+        "yaw": 8,
+        "pitch": -4,
+        "render_ms": 41.04,
+        "http_ms": 52.058600005693734,
+        "sha256": "167526df65935213461c56fa34a36a116053bb800d752574c8310b46b67433cb"
+      },
+      {
+        "request_id": 6,
+        "yaw": -8,
+        "pitch": 3,
+        "render_ms": 40.7,
+        "http_ms": 51.6515999333933,
+        "sha256": "be1a6350c8a707f816210de1ea3ea80490f8d5cf2016bcd6dca66c00a39e9b1b"
+      }
+    ],
+    "timing_scope": "PC HTTP request through PNG response; not browser display latency",
+    "same_view_exact": true,
+    "different_views_distinct": true,
+    "render_ms_summary": {
+      "samples": 6,
+      "mean": 43.30833333333334,
+      "median": 41.065,
+      "minimum": 40.68,
+      "maximum": 54.49
+    },
+    "http_ms_summary": {
+      "samples": 6,
+      "mean": 55.791366670746356,
+      "median": 52.32665000949055,
+      "minimum": 51.6515999333933,
+      "maximum": 70.14760002493858
+    }
+  },
+  "quality_policy": "unchanged_native_fpga_40dB_0.99_truth_drop_0.2dB_0.005",
+  "artifacts": {
+    "graphs_manifest_sha256": "102796c85b107ed3e99eaf57dee3a2e75da4a2ed887f37561f2e0f2e71626c59",
+    "compiled_manifest_sha256": "749f59b1b13cffc7220e07b1f17bcddc86920d034fd8f4bc14aeffe12bfa49f0",
+    "package_tar_sha256": "9df98347a985e4fe7f04529681cad1be9d2d0d97d59f21d434b29c8e70502ccb"
+  },
+  "failures": {
+    "video_four_part": {
+      "status": "rss_limit",
+      "returncode": -15,
+      "wall_seconds": 111.58152212999994,
+      "peak_process_tree_rss_mib_sampled": 1092.28125,
+      "min_available_mib_sampled": 146.21484375,
+      "limits": {
+        "rss_mib": 800.0,
+        "reserve_mib": 80.0,
+        "timeout": 240.0
+      }
+    },
+    "video_two_part_control": {
+      "status": "host_reserve_limit",
+      "returncode": -15,
+      "wall_seconds": 105.64269525999953,
+      "peak_process_tree_rss_mib_sampled": 506.56640625,
+      "min_available_mib_sampled": 92.84375,
+      "limits": {
+        "rss_mib": 0.0,
+        "pss_mib": 700.0,
+        "reserve_mib": 96.0,
+        "timeout": 240.0
+      }
+    },
+    "video_two_part_control_clean": {
+      "status": "host_reserve_limit",
+      "returncode": -15,
+      "wall_seconds": 112.09688104999987,
+      "peak_process_tree_rss_mib_sampled": 525.11328125,
+      "min_available_mib_sampled": 71.4140625,
+      "limits": {
+        "rss_mib": 0.0,
+        "pss_mib": 700.0,
+        "reserve_mib": 96.0,
+        "timeout": 240.0
+      }
+    }
+  },
+  "tests": {
+    "syntax_files": 132,
+    "tests": 182,
+    "passed": 178,
+    "skipped": 4,
+    "skipped_reasons": [
+      "3 local FFmpeg-dependent cases (board real video was tested)",
+      "1 Windows symlink-dependent case"
+    ],
+    "render_main_hash_files": 151,
+    "render_branch_hash_files": 197,
+    "isolation_sources": 95
+  },
+  "resource": {
+    "fpga_rtl_changed": false,
+    "boot_changed": false,
+    "fpga_historical_not_resynthesized": {
+      "lut_percent": 77.94,
+      "ff_percent": 62.58,
+      "slice_percent": 99.84,
+      "bram_percent": 82.45,
+      "dsp_percent": 63,
+      "clock_mhz": 200
+    },
+    "npu_utilization_percent": null,
+    "measured_ddr_traffic": null,
+    "power": null,
+    "root_filesystem_full": true
+  },
+  "evidence_root": "D:\\ADProjects\\FPGA for 3DGS\\outputs\\npu_head_reliability_20261102",
+  "evidence_sha256": {
+    "three_part_gaussians_clean\\acceptance.json": "876a7edd13a99865a32b4f39421ca2ff2e1c3b3b48143abb85ae3f4bbf6d2aac",
+    "four_part_final\\acceptance.json": "35524801dc283be9aa248fe02c9ab83287921c2b3348f94ddee86969c6fed280",
+    "video_four_part_pss\\warm_result.json": "c7e91c5717c41c923dc1c0b9171444ca822769c9243734d8939fd79346e84866",
+    "video_two_part_control_oracles_off\\warm_result.json": "4965ed7022396d5807698cdfb1f8a07bd1b7ffab4a0664694e15273984076e66",
+    "web_four\\verification.json": "561b7a31ee8a2438b39bbfc1d3b503d30a1739b7e9896bbe9fdf6e5ba282529f",
+    "video_full_archive.json": "cd7aaca8af897f786772af6503cb953af8d112d0a9e5fb1e3fb12656a864de58",
+    "final_checks.log": "a6780c575e51865ec9662953f436beb5cc18d33db9de13ee54964f854e08d194"
+  }
+}

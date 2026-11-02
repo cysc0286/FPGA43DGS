@@ -31,8 +31,12 @@ def main(argv=None):
         if kind == "compiled":
             manifest["partitions"] = {name:dict(item, graph=item["graph"].replace("\\", "/"),
                 raw=item["raw"].replace("\\", "/")) for name,item in manifest["partitions"].items()}
-            manifest["origin_source_manifest_sha256"] = compiled.get(
-                "origin_source_manifest_sha256", compiled["source_manifest_sha256"])
+            # A pure relocation must preserve the qualified manifest identity.
+            # Record the old link only when selecting/reordering graphs changed
+            # the source manifest; never invalidate a receipt just by packing.
+            if sha(bundle/"graphs/manifest.json") != compiled["source_manifest_sha256"]:
+                manifest["origin_source_manifest_sha256"] = compiled.get(
+                    "origin_source_manifest_sha256", compiled["source_manifest_sha256"])
             manifest["source_manifest_sha256"] = sha(bundle/"graphs/manifest.json")
         for name, item in manifest["partitions"].items():
             names = [item["graph"], item["raw"]] if kind == "compiled" else [name+"/model.onnx", name+"/oracle.npz"]

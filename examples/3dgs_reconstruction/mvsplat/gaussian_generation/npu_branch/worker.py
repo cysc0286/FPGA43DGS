@@ -13,7 +13,7 @@ from gaussian_generation.npu_branch.buffers import MappedBuffers
 from gaussian_generation.npu_branch.protocol import PROTOCOL_VERSION, check_bridge, check_command, check_direct_sfb
 
 
-def runtime_identity():
+def runtime_identity(spatial_heads=()):
     """Hash loaded SDK binaries once, after session creation, outside video timing."""
     libraries = {}
     for line in Path('/proc/self/maps').read_text().splitlines():
@@ -24,11 +24,18 @@ def runtime_identity():
                 libraries[str(path.resolve())] = sha(path)
     return dict(machine=platform.machine().lower(), sdk_libraries=libraries,
                 ddr_guard_mib=int(os.environ.get('MGS_NPU_DDR_GUARD_MIB', '0')),
+                **({'spatial_head_settle_passes': 2, 'spatial_heads': list(spatial_heads)} if spatial_heads else {}),
                 **({'session_reapply': True} if os.environ.get('MGS_NPU_REAPPLY') == '1' else {}),
                 **({'fresh_input_tensor': True} if os.environ.get('MGS_NPU_FRESH_INPUT') == '1' else {}),
                 **({'force_output_wait': True} if os.environ.get('MGS_NPU_FORCE_WAIT') == '1' else {}),
                 **({'direct_sfb_output': True} if os.environ.get('MGS_NPU_DIRECT_SFB') == '1' else {}),
                 **({'backbone_settle_passes': 2} if os.environ.get('MGS_NPU_SETTLE_BACKBONE') == '1' else {}))
+
+
+def sdk_passes(name, meta):
+    if meta.get('spatial_tiling') and name in ('to_gaussians', 'to_disparity'):
+        return 2
+    return 2 if name == 'backbone_cnn' and os.environ.get('MGS_NPU_SETTLE_BACKBONE') == '1' else 1
 
 
 def main():
@@ -113,7 +120,7 @@ def main():
                 sessions[name] = ort.InferenceSession(part["graph"], sess_options=options, providers=["CPUExecutionProvider"])
                 bindings[name] = 0
         reply(dict(event="READY", backend=backend, npu_executed=False, bindings=bindings,
-                   runtime_identity=runtime_identity() if library else None,
+                   runtime_identity=runtime_identity([n for n,p in parts.items() if p['meta'].get('spatial_tiling')]) if library else None,
                    protocol_version=PROTOCOL_VERSION, buffer_plan=arena.plan))
         for line in sys.stdin:
             command = json.loads(line)
@@ -132,7 +139,7 @@ def main():
             if library:
                 width = 5 if detailed_forward is not None else 3
                 forward = detailed_forward or library.mgs_forward
-                execution_passes = 2 if name == 'backbone_cnn' and os.environ.get('MGS_NPU_SETTLE_BACKBONE') == '1' else 1
+                execution_passes = sdk_passes(name, parts[name]['meta'])
                 stages = [0.] * width
                 # Explicit workaround for a board-observed one-request stale
                 # result. Both full SDK calls are charged; this is not a cache

@@ -58,6 +58,17 @@ class HeadProbeChecks(unittest.TestCase):
         from initialize.board_sync import NPU_SOURCE_FILES
         self.assertIn('gaussian_generation/npu_branch/output_sink.h', NPU_SOURCE_FILES)
 
+    def test_tiled_heads_charge_settling_but_do_not_change_other_partitions(self):
+        from gaussian_generation.npu_branch.worker import sdk_passes
+        from unittest.mock import patch
+        meta = dict(spatial_tiling=dict(schema='mvsplat_local_head_tiles_v1'))
+        with patch.dict('os.environ', {'MGS_NPU_SETTLE_BACKBONE':'1'}):
+            self.assertEqual(sdk_passes('to_gaussians',meta),2)
+            self.assertEqual(sdk_passes('to_disparity',meta),2)
+            self.assertEqual(sdk_passes('to_gaussians',{}),1)
+            self.assertEqual(sdk_passes('backbone_cnn',{}),2)
+            self.assertEqual(sdk_passes('depth_head',{}),1)
+
     def test_fp32_diagnostic_patches_only_requested_output_mode(self):
         from gaussian_generation.npu_branch.fp32_blocked_probe import diagnostic_bridge
         raw, sfb = diagnostic_bridge('raw'), diagnostic_bridge('sfb')
@@ -75,6 +86,26 @@ class HeadProbeChecks(unittest.TestCase):
                 schema='mvsplat_head_probe_v1', weight_sha256=FULL_WEIGHT_SHA256)), encoding='utf-8')
             with self.assertRaisesRegex(ValueError, 'schema'):
                 validate_bundle(directory, ['to_gaussians'], 'onnx_reference')
+
+    @unittest.skipUnless(importlib.util.find_spec('onnx') and importlib.util.find_spec('onnxruntime'),
+                         'ONNX and ORT required')
+    def test_known_convolution_has_independent_exact_changed_input_oracles(self):
+        import tempfile
+        from gaussian_generation.npu_branch.head_probe import export_known, _session
+        import onnx
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)/'graphs'
+            result = export_known(root)
+            self.assertTrue(result['synthetic_known_weights'])
+            self.assertTrue(result['diagnostic_only'])
+            for name in ('identity16','affine17','spatial16'):
+                with np.load(root/name/'oracle.npz') as samples:
+                    self.assertFalse(np.array_equal(samples['expected'],samples['alternate_expected']))
+                    session = _session(onnx.load(str(root/name/'model.onnx')))
+                    for x, y in (('input','expected'),('alternate_input','alternate_expected')):
+                        np.testing.assert_array_equal(session.run(None, {'features':samples[x]})[0],samples[y])
+                    if name == 'identity16':
+                        np.testing.assert_array_equal(samples['input'],samples['expected'])
 
 
 @unittest.skipUnless(importlib.util.find_spec('onnx') and importlib.util.find_spec('onnxruntime'),
@@ -133,6 +164,26 @@ class HeadGraphChecks(unittest.TestCase):
         model.graph.node[1].op_type = 'Softmax'
         with self.assertRaisesRegex(ValueError, 'pointwise'):
             aligned_model(model)
+
+    def test_spatial_execution_preserves_edges_seams_and_both_views(self):
+        import copy
+        from gaussian_generation.npu_branch.spatial import execute_spatial, validate_tiling
+        full=self.graph()
+        for boundary in (*full.graph.input,*full.graph.output):
+            boundary.type.tensor_type.shape.dim[2].dim_value=17
+            boundary.type.tensor_type.shape.dim[3].dim_value=19
+        tile=copy.deepcopy(full)
+        for boundary in (*tile.graph.input,*tile.graph.output):
+            for axis,value in ((0,1),(2,9),(3,9)):
+                boundary.type.tensor_type.shape.dim[axis].dim_value=value
+        meta=dict(input_shape=[1,5,9,9],output_shape=[1,3,9,9],spatial_tiling=dict(
+            schema='mvsplat_local_head_tiles_v1',halo=2,core_size=5,
+            input_shape=[2,5,17,19],output_shape=[2,3,17,19]))
+        value=np.random.default_rng(438).normal(size=(2,5,17,19)).astype(np.float32)
+        actual=execute_spatial(value,meta,lambda x:self.run_graph(tile,x))
+        np.testing.assert_allclose(actual,self.run_graph(full,value),rtol=2e-5,atol=2e-6)
+        bad=copy.deepcopy(meta);bad['spatial_tiling']['core_size']=6
+        with self.assertRaisesRegex(ValueError,'halo'):validate_tiling(bad)
 
 
 if __name__ == '__main__':

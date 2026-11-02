@@ -193,7 +193,7 @@ class IntegrationTests(unittest.TestCase):
         runtime=PartitionRuntime.__new__(PartitionRuntime)
         runtime.calls=deque((dict(sequence=i,npu_executed=True,total_seconds=.1,input_bytes=4,output_bytes=4)
                              for i in range(1000)),maxlen=256)
-        runtime.backend='npu';runtime.parts={'to_gaussians':{}};runtime.provenance={}
+        runtime.backend='npu';runtime.parts={'to_gaussians':{'meta':{}}};runtime.provenance={}
         runtime.sequence=1000
         self.assertEqual(len(runtime.report(999)['calls']),1)
         self.assertEqual(runtime.report()['history_first_sequence'],744)

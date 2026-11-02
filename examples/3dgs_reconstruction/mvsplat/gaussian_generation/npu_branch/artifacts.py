@@ -48,6 +48,10 @@ def validate_bundle(root, names, backend):
             result[name] = dict(meta=item, graph=str(graph),
                 input=dict(layout="NCHW", shape=item["input_shape"]),
                 output=dict(layout="NCHW", shape=item["output_shape"]))
+        from gaussian_generation.npu_branch.spatial import validate_tiling
+        tiling = validate_tiling(result[name]['meta'])
+        if tiling and name not in ('to_gaussians','to_disparity'):
+            raise ValueError('Spatial execution is restricted to local prediction heads')
     return data, result
 
 

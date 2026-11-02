@@ -140,6 +140,122 @@ def _session(model):
                                providers=['CPUExecutionProvider'])
 
 
+def export_known(out):
+    """Small exact convolutions isolate transport/layout from checkpoint error.
+
+    References are computed with NumPy, independently of both compilers. Binary
+    fractions and channel permutations expose stale inputs and layout swaps
+    without large activations, reductions, or a learned-network error budget.
+    These synthetic graphs cannot be accepted as production partitions.
+    """
+    import onnx
+    from onnx import helper, numpy_helper, TensorProto
+    out = new_directory(out)
+    manifest = dict(schema='mvsplat_head_probe_v1', diagnostic_only=True,
+                    synthetic_known_weights=True, npu_executed=False,
+                    weight_sha256=hashlib.sha256(b'known-convolution-v1').hexdigest(),
+                    input_shape=[1, 16, 8, 8], partitions={})
+    for name, channels, kernel in (('identity16', 16, 1), ('affine17', 17, 1),
+                                    ('spatial16', 16, 3)):
+        shape = (1, channels, 8, 8)
+        a = ((np.arange(np.prod(shape)).reshape(shape) % 61)-30).astype(np.float32)/32
+        b = np.flip(a, axis=3).copy()/2 + np.float32(1/16)
+        weight = np.zeros((channels, channels, kernel, kernel), np.float32)
+        bias = np.zeros(channels, np.float32)
+        for channel in range(channels):
+            source = channel if name == 'identity16' else (channel+3) % channels
+            weight[channel, source, kernel//2, kernel//2] = 1 if name == 'identity16' else .5
+            if kernel == 3:
+                weight[channel, source, 0, 1] = .125
+                weight[channel, source, 2, 1] = -.125
+            if name != 'identity16':
+                bias[channel] = (channel % 5-2)/16
+        def reference(value):
+            padded = np.pad(value, ((0,0),(0,0),(kernel//2,kernel//2),(kernel//2,kernel//2)))
+            result = np.broadcast_to(bias[None,:,None,None], shape).copy()
+            for y in range(kernel):
+                for x in range(kernel):
+                    result += np.einsum('oc,nchw->nohw', weight[:,:,y,x], padded[:,:,y:y+8,x:x+8])
+            return result
+        ya, yb = reference(a), reference(b)
+        graph = helper.make_graph([helper.make_node('Conv', ['features','weight','bias'],
+            ['result'], name='/known/Conv', kernel_shape=[kernel,kernel],
+            pads=[kernel//2]*4, strides=[1,1], dilations=[1,1], group=1)], name,
+            [helper.make_tensor_value_info('features', TensorProto.FLOAT, shape)],
+            [helper.make_tensor_value_info('result', TensorProto.FLOAT, shape)],
+            [numpy_helper.from_array(weight, 'weight'), numpy_helper.from_array(bias, 'bias')])
+        model = helper.make_model(graph, opset_imports=[helper.make_opsetid('', 17)])
+        model.ir_version = 8
+        onnx.checker.check_model(model)
+        session = _session(model)
+        for value, expected in ((a, ya), (b, yb)):
+            if not np.array_equal(session.run(None, {'features': value})[0], expected):
+                raise ValueError('Independent known-weight reference disagrees with ONNX')
+        folder = new_directory(out/name)
+        onnx.save(model, str(folder/'model.onnx'))
+        np.savez(folder/'oracle.npz', input=a, expected=ya, alternate_input=b, alternate_expected=yb)
+        manifest['partitions'][name] = dict(complete=True, diagnostic_only=True,
+            input_shape=list(shape), output_shape=list(shape), returns_list=False,
+            graph_sha256=sha(folder/'model.onnx'), oracle_sha256=sha(folder/'oracle.npz'),
+            host_onnx_passed=True, logical_io_bytes=a.nbytes+ya.nbytes,
+            alternate_kind='independent exact pattern', npu_executed=False)
+        save(out/'manifest.json', manifest)
+    return manifest
+
+
+def export_spatial(graphs, out, partition='to_gaussians', size=36):
+    """Keep trained weights, reduce only spatial execution size for diagnosis."""
+    import onnx
+    from gaussian_generation.npu_branch.artifacts import validate_bundle
+    metadata, parts = validate_bundle(graphs, [partition], 'onnx_reference')
+    source = Path(parts[partition]['graph'])
+    oracle = Path(graphs)/partition/'oracle.npz'
+    if sha(oracle) != metadata['partitions'][partition]['oracle_sha256']:
+        raise ValueError('Source oracle changed')
+    with np.load(oracle, allow_pickle=False) as payload:
+        value, expected = payload['input'], payload['expected']
+    if not 5 <= size <= min(value.shape[-2:]):
+        raise ValueError('Tile must contain the two-convolution receptive field')
+    model = onnx.load(str(source))
+    nodes, _, _, _, _ = _head(model)
+    for node in (nodes[0],nodes[-1]):
+        attrs={a.name:onnx.helper.get_attribute_value(a) for a in node.attribute}
+        if any(attrs.get(k) != v for k,v in (('kernel_shape',[3,3]),('strides',[1,1]),
+                ('dilations',[1,1]),('pads',[1,1,1,1]))):
+            raise ValueError('Two-pixel halo requires two stride-one 3x3 same-padded convolutions')
+    out = new_directory(out)
+    manifest = dict(schema='mvsplat_head_probe_v1', diagnostic_only=True,
+        npu_executed=False, weight_sha256=metadata['weight_sha256'],
+        input_shape=metadata['input_shape'], source_partition=partition,
+        source_graph_sha256=sha(source), source_oracle_sha256=sha(oracle), partitions={})
+    for batch in (1,2):
+        candidate = copy.deepcopy(model)
+        for boundary in (*candidate.graph.input,*candidate.graph.output):
+            for axis, dimension in ((0,batch),(2,size),(3,size)):
+                boundary.type.tensor_type.shape.dim[axis].dim_value=dimension
+        del candidate.graph.value_info[:]
+        a=value[:batch,:,:size,:size].copy()
+        b=value[:batch,:,-size:,-size:].copy()
+        session=_session(candidate)
+        ya,yb=[session.run(None,{'features':x})[0] for x in (a,b)]
+        # Interior at the crop seam has two-pixel halo; image edges keep the
+        # original per-layer zero-padding instead of padding the input twice.
+        checks=[compare_output(ya[:,:,:-2,:-2],expected[:batch,:,:size-2,:size-2]),
+                compare_output(yb[:,:,2:,2:],expected[:batch,:,-size+2:,-size+2:])]
+        if not all(c['passed'] for c in checks):raise ValueError('Spatial rewrite changed retained pixels')
+        name=f'{partition}_tile{size}_b{batch}'
+        folder=new_directory(out/name)
+        onnx.save(candidate,str(folder/'model.onnx'))
+        np.savez(folder/'oracle.npz',input=a,expected=ya,alternate_input=b,alternate_expected=yb)
+        manifest['partitions'][name]=dict(complete=True,diagnostic_only=True,
+            input_shape=list(a.shape),output_shape=list(ya.shape),returns_list=False,
+            graph_sha256=sha(folder/'model.onnx'),oracle_sha256=sha(folder/'oracle.npz'),
+            host_onnx_passed=True,logical_io_bytes=a.nbytes+ya.nbytes,
+            alternate_kind='opposite real-image crop',retained_pixel_checks=checks,npu_executed=False)
+        save(out/'manifest.json',manifest)
+    return manifest
+
+
 def export(graphs, out):
     import onnx
     from gaussian_generation.npu_branch.artifacts import validate_bundle
@@ -438,8 +554,8 @@ def compare_icraft(graphs, bundle, out, runner):
 
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('action', choices=('export', 'run', 'compare-icraft'))
-    p.add_argument('--graphs', type=Path, required=True)
+    p.add_argument('action', choices=('export', 'export-known', 'export-spatial', 'run', 'compare-icraft'))
+    p.add_argument('--graphs', type=Path)
     p.add_argument('--out', type=Path, required=True)
     p.add_argument('--bundle', type=Path)
     p.add_argument('--library', type=Path)
@@ -448,8 +564,16 @@ def main(argv=None):
     p.add_argument('--sdk-passes', type=int, choices=(1,2), default=1)
     p.add_argument('--save-outputs', action='store_true')
     p.add_argument('--compare-sink', action='store_true', help='Alternate string/direct output in one real session')
+    p.add_argument('--partition', choices=('to_gaussians','to_disparity'), default='to_gaussians')
+    p.add_argument('--tile-size',type=int,default=36)
     a = p.parse_args(argv)
-    if a.action == 'export':
+    if a.action == 'export-known':
+        export_known(a.out)
+    elif not a.graphs:
+        p.error('This action requires --graphs')
+    elif a.action == 'export-spatial':
+        export_spatial(a.graphs,a.out,a.partition,a.tile_size)
+    elif a.action == 'export':
         export(a.graphs, a.out)
     elif a.action == 'compare-icraft':
         if not a.bundle or not a.runner:

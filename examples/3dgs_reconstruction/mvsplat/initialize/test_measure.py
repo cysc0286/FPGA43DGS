@@ -2,7 +2,7 @@
 from pathlib import Path
 import tempfile
 import unittest
-from measure import tree_rss
+from measure import tree_rss, tree_memory
 
 
 class TreeRssTests(unittest.TestCase):
@@ -37,6 +37,22 @@ class TreeRssTests(unittest.TestCase):
             self.process(root,10,11)
             self.process(root,11,10,128)
             self.assertEqual(tree_rss(10,root),128*1024)
+
+    def test_pss_counts_shared_mappings_proportionally(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            for pid, parent in ((100,1),(101,100),(200,1)):
+                self.process(root,pid,parent,1024)
+                (root/str(pid)/'smaps_rollup').write_text('Rss: 1024 kB\nPss: 512 kB\n')
+            self.assertEqual(tree_memory(100,root,True),
+                             dict(rss_bytes=2*1024**2,pss_bytes=1024**2))
+
+    def test_missing_live_pss_is_an_error_instead_of_zero_memory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            self.process(root,100,1,1024)
+            with self.assertRaisesRegex(RuntimeError,'PSS'):
+                tree_memory(100,root,True)
 
 
 if __name__=='__main__':

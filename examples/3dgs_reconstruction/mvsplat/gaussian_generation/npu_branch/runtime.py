@@ -15,6 +15,7 @@ from gaussian_generation.npu_branch.artifacts import from_wire, to_wire, validat
 from gaussian_generation.npu_branch.catalog import PARTITIONS, replace
 from gaussian_generation.npu_branch.buffers import buffer_plan, MappedBuffers
 from gaussian_generation.npu_branch.protocol import PROTOCOL_VERSION
+from gaussian_generation.npu_branch.spatial import execute_spatial
 
 
 class PartitionRuntime:
@@ -24,6 +25,14 @@ class PartitionRuntime:
         if backend not in ("onnx_reference", "npu"):
             raise ValueError("Expected an explicit accelerated or host validation backend")
         data, self.parts = validate_bundle(bundle, names, backend)
+        if backend == 'npu' and any(p['meta'].get('spatial_tiling') for p in self.parts.values()):
+            # Board probes exposed stale results across rapidly changing tiles.
+            # A fresh SDK Tensor and two charged forwards are both required;
+            # the retained-session/input-switch gate still runs before READY.
+            environment = dict(os.environ if environment is None else environment)
+            environment.setdefault('MGS_NPU_FRESH_INPUT', '1')
+            if environment['MGS_NPU_FRESH_INPUT'] != '1':
+                raise ValueError('Tiled NPU heads require fresh SDK input tensors')
         plan = buffer_plan(self.parts, buffer_policy)
         limit_bytes = int(buffer_limit_mib*1024**2)
         if limit_bytes <= 0 or plan["allocated_bytes"] > limit_bytes:
@@ -96,44 +105,54 @@ class PartitionRuntime:
         return value
 
     def execute(self, name, value):
+        part = self.parts[name]
+        if part['meta'].get('spatial_tiling'):
+            # Hold the same transaction lock across the complete head. Worker
+            # request IDs remain one per actual tile, with every call measured.
+            with self.lock:
+                return execute_spatial(value, part['meta'],
+                    lambda tile: self._execute_once(name, tile))
         with self.lock:
-            if self.closed or self.failed:
-                raise RuntimeError("Partition worker is closed or failed")
-            started = time.perf_counter()
-            part = self.parts[name]
-            if list(value.shape) != part["meta"]["input_shape"]:
-                raise ValueError("Static network shape mismatch for " + name)
-            input_buffer, output_buffer = self.buffers[name]
-            # Real-board transport probe: tiling helps large channel planes,
-            # while Python tile dispatch slows small boundaries. Exact copies
-            # only; never reduce precision or skip finite/shape validation.
-            blocked = value.nbytes >= 4*1024**2
-            to_wire(value, part["input"], out=input_buffer, blocked=blocked)
-            packed = time.perf_counter()
-            command = dict(command="FORWARD", name=name, sequence=self.sequence)
-            try:
-                self.process.stdin.write(json.dumps(command)+"\n")
-                self.process.stdin.flush()
-                response = self._response()
-                if (response.get("event"), response.get("name"), response.get("sequence"),
-                    response.get("backend"), response.get("npu_executed")) != (
-                    "COMPLETE", name, self.sequence, self.backend, self.backend == "npu"):
-                    raise ValueError("Wrong task/sequence/backend in worker response")
-                received = time.perf_counter()
-                result = from_wire(output_buffer, part["output"])
-                if list(result.shape) != part["meta"]["output_shape"]:
-                    raise ValueError("Logical output shape mismatch")
-                finished = time.perf_counter()
-                response.update(pack_seconds=packed-started, wait_seconds=received-packed,
-                    unpack_seconds=finished-received, total_seconds=finished-started,
-                    input_bytes=input_buffer.nbytes, output_bytes=output_buffer.nbytes,
-                    input_layout_copy='cache_tiled' if blocked else 'numpy_direct')
-                self.calls.append(response)
-                self.sequence += 1
-                return result
-            except BaseException:
-                self.failed = True
-                raise
+            return self._execute_once(name, value)
+
+    def _execute_once(self, name, value):
+        if self.closed or self.failed:
+            raise RuntimeError("Partition worker is closed or failed")
+        started = time.perf_counter()
+        part = self.parts[name]
+        if list(value.shape) != part["meta"]["input_shape"]:
+            raise ValueError("Static network shape mismatch for " + name)
+        input_buffer, output_buffer = self.buffers[name]
+        # Real-board transport probe: tiling helps large channel planes,
+        # while Python tile dispatch slows small boundaries. Exact copies
+        # only; never reduce precision or skip finite/shape validation.
+        blocked = value.nbytes >= 4*1024**2
+        to_wire(value, part["input"], out=input_buffer, blocked=blocked)
+        packed = time.perf_counter()
+        command = dict(command="FORWARD", name=name, sequence=self.sequence)
+        try:
+            self.process.stdin.write(json.dumps(command)+"\n")
+            self.process.stdin.flush()
+            response = self._response()
+            if (response.get("event"), response.get("name"), response.get("sequence"),
+                response.get("backend"), response.get("npu_executed")) != (
+                "COMPLETE", name, self.sequence, self.backend, self.backend == "npu"):
+                raise ValueError("Wrong task/sequence/backend in worker response")
+            received = time.perf_counter()
+            result = from_wire(output_buffer, part["output"])
+            if list(result.shape) != part["meta"]["output_shape"]:
+                raise ValueError("Logical output shape mismatch")
+            finished = time.perf_counter()
+            response.update(pack_seconds=packed-started, wait_seconds=received-packed,
+                unpack_seconds=finished-received, total_seconds=finished-started,
+                input_bytes=input_buffer.nbytes, output_bytes=output_buffer.nbytes,
+                input_layout_copy='cache_tiled' if blocked else 'numpy_direct')
+            self.calls.append(response)
+            self.sequence += 1
+            return result
+        except BaseException:
+            self.failed = True
+            raise
 
     def attach(self, model):
         import torch
@@ -156,6 +175,8 @@ class PartitionRuntime:
         calls = [c for c in self.calls if start is None or c['sequence'] >= start]
         return dict(backend=self.backend, npu_executed=any(c["npu_executed"] for c in calls),
             selected_partitions=list(self.parts), cpu_partitions=[n for n in PARTITIONS if n not in self.parts],
+            spatial_execution={n:p['meta']['spatial_tiling'] for n,p in self.parts.items()
+                               if p['meta'].get('spatial_tiling')},
             cpu_remainder="camera geometry, cost-volume warping, multi-view attention, refinement UNets, Gaussian adapter",
             calls=calls, total_partition_seconds=sum(c["total_seconds"] for c in calls),
             history_scope='bounded recent calls; complete per-inference slices are persisted separately',

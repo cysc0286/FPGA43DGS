@@ -9,6 +9,7 @@ from common import new_directory, save, sha
 from gaussian_generation.npu_branch.artifacts import relative_file, validate_bundle
 from gaussian_generation.npu_branch.buffers import buffer_plan
 from gaussian_generation.npu_branch.protocol import BRIDGE_ABI_VERSION, PROTOCOL_VERSION, check_bridge
+from gaussian_generation.npu_branch.spatial import validate_tiling
 
 
 def check_candidate(root, policy="shared", limit_mib=128):
@@ -41,7 +42,10 @@ def check_candidate(root, policy="shared", limit_mib=128):
         if sha(oracle) != item["oracle_sha256"]:
             raise ValueError("Oracle hash mismatch")
         with np.load(oracle, allow_pickle=False) as values:
-            for key, shape in (("input", item["input_shape"]), ("expected", item["output_shape"])):
+            # Keep the original full-image oracle even when the device executes
+            # tiles. Readiness validates assembly, not only one easy crop.
+            logical = validate_tiling(item) or item
+            for key, shape in (("input", logical["input_shape"]), ("expected", logical["output_shape"])):
                 value = values[key]
                 if list(value.shape) != shape or value.dtype != np.float32 or not np.isfinite(value).all():
                     raise ValueError("Oracle shape/dtype/finite mismatch")
