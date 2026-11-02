@@ -10,7 +10,7 @@ import numpy as np
 from common import sha
 from gaussian_generation.npu_branch.artifacts import validate_bundle
 from gaussian_generation.npu_branch.buffers import MappedBuffers
-from gaussian_generation.npu_branch.protocol import PROTOCOL_VERSION, check_bridge, check_command
+from gaussian_generation.npu_branch.protocol import PROTOCOL_VERSION, check_bridge, check_command, check_direct_sfb
 
 
 def runtime_identity():
@@ -27,6 +27,7 @@ def runtime_identity():
                 **({'session_reapply': True} if os.environ.get('MGS_NPU_REAPPLY') == '1' else {}),
                 **({'fresh_input_tensor': True} if os.environ.get('MGS_NPU_FRESH_INPUT') == '1' else {}),
                 **({'force_output_wait': True} if os.environ.get('MGS_NPU_FORCE_WAIT') == '1' else {}),
+                **({'direct_sfb_output': True} if os.environ.get('MGS_NPU_DIRECT_SFB') == '1' else {}),
                 **({'backbone_settle_passes': 2} if os.environ.get('MGS_NPU_SETTLE_BACKBONE') == '1' else {}))
 
 
@@ -58,6 +59,8 @@ def main():
             device_lock = open("/run/lock/fpga43dgs-npu.lock", "a")
             fcntl.flock(device_lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
             library = ct.CDLL(request["library"])
+            if os.environ.get('MGS_NPU_DIRECT_SFB') == '1':
+                check_direct_sfb(library)
             check_bridge(library)
             library.mgs_error.restype = ct.c_char_p
             library.mgs_create.argtypes = [ct.c_char_p, ct.c_char_p, ct.c_size_t, ct.c_size_t]

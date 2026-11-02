@@ -128,6 +128,11 @@ python measure.py --out NPU_BENCH.measurement.json --rss-mib 650 --reserve-mib 1
 
 ## 实板数值检查
 
+2026-11-02 后续离线增量：新增 `head_probe.py` 的真实 Gaussian head 逐层、batch-one、
+通道补齐对照，八图已编译；增加默认关闭的 `MGS_NPU_DIRECT_SFB=1` C++ 输出拷贝候选。
+它们仍待实板诊断/资格，不能沿用旧 receipt 或称新加速。
+详见 [候选与数值定位](NPU_HEAD_CANDIDATES_20261102.md)。
+
 ```sh
 python -m gaussian_generation.npu_branch.oracle_probe --bundle PACKAGE/compiled --graphs PACKAGE/graphs --library ARM/libmgs_npu.so --partitions backbone_cnn --out NEW_PROBE
 ```

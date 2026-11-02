@@ -20,3 +20,16 @@ def check_bridge(library):
     library.mgs_abi_version.restype = ct.c_int
     if library.mgs_abi_version() != BRIDGE_ABI_VERSION:
         raise ValueError("Native bridge ABI mismatch; rebuild libmgs_npu.so")
+
+
+def check_direct_sfb(library):
+    """An old bridge must not silently ignore an enabled transfer candidate."""
+    import ctypes as ct
+    try:
+        capability = library.mgs_direct_sfb_supported
+    except AttributeError:
+        raise ValueError('Bridge lacks direct SFB support; rebuild candidate library') from None
+    capability.argtypes = []
+    capability.restype = ct.c_int
+    if capability() != 1:
+        raise ValueError('Bridge rejected direct SFB capability')

@@ -16,7 +16,7 @@ NPU_SOURCE_FILES = ("common.py", "runtime.py", "memory_runtime.py",
                     "initialize/session.py") + tuple(
     path.relative_to(ROOT / "mvsplat").as_posix()
     for path in sorted((ROOT / "mvsplat/gaussian_generation/npu_branch").iterdir())
-    if path.is_file() and path.suffix in (".py", ".cpp"))
+    if path.is_file() and path.suffix in (".py", ".cpp", ".h"))
 
 SOURCE_FILES = ("common.py", "measure.py", "export.py", "scene_preparation.py",
                 "gaussian_generation/__init__.py", "gaussian_generation/runtime.py",

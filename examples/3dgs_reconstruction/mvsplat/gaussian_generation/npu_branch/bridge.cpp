@@ -8,6 +8,7 @@
 #include <icraft-backends/zg330backend/zg330backend.h>
 #include <icraft-xir/core/network.h>
 #include <icraft-xir/ops/hard_op.h>
+#include "output_sink.h"
 #include <chrono>
 #include <cstring>
 #include <cstdlib>
@@ -86,11 +87,21 @@ struct MgsContext {
 };
 extern "C" const char* mgs_error() {return error_text.c_str();}
 extern "C" int mgs_abi_version() {return 2;}
+extern "C" int mgs_direct_sfb_supported() {return 1;}
 extern "C" void* mgs_create(const char* json,const char* raw,size_t ib,size_t ob) {
     try {return new MgsContext(json,raw,ib,ob);} catch(const std::exception& e){error_text=e.what();return nullptr;}
 }
 extern "C" void mgs_destroy(void* ctx) {delete static_cast<MgsContext*>(ctx);}
 extern "C" int mgs_bindings(void* ctx) {return static_cast<MgsContext*>(ctx)->bindings;}
+// Optional diagnostic extension. A failure is retained separately from tensor
+// error; the normal forward path never silently ignores it as a passed check.
+extern "C" int mgs_precheck(void* ctx) {
+    try {
+        if(!ctx)throw std::runtime_error("Null precheck context");
+        auto& c=*static_cast<MgsContext*>(ctx);
+        return c.session->backends[0].cast<zg330::ZG330Backend>().precheck()?1:0;
+    } catch(const std::exception& e){error_text=e.what();return -1;}
+}
 extern "C" const char* mgs_memory_layout(void* ctx) {
     static thread_local std::string layout;
     try {
@@ -102,6 +113,21 @@ extern "C" const char* mgs_memory_layout(void* ctx) {
         }
         out<<']';layout=out.str();return layout.c_str();
     }catch(const std::exception& e){error_text=e.what();return nullptr;}
+}
+static void copy_sfb(Tensor& tensor,float* out,size_t bytes) {
+    const char* direct=std::getenv("MGS_NPU_DIRECT_SFB");
+    if(direct && std::string(direct)=="1") {
+        // Still use the SDK conversion; raw device bytes are not FP32 host I/O.
+        MgsOutputSink sink(reinterpret_cast<char*>(out),bytes);
+        std::ostream stream(&sink);tensor.dump(stream,"SFB");
+        if(!stream || sink.size()!=bytes)
+            throw std::runtime_error("Direct SFB output length mismatch");
+    } else {
+        std::ostringstream stream(std::ios::out|std::ios::binary);
+        tensor.dump(stream,"SFB");const auto text=stream.str();
+        if(text.size()!=bytes)throw std::runtime_error("SFB output length mismatch");
+        std::memcpy(out,text.data(),text.size());
+    }
 }
 static int forward_impl(void* ctx,const float* in,size_t ib,float* out,size_t ob,
                         double* detailed) {
@@ -129,10 +155,8 @@ static int forward_impl(void* ctx,const float* in,size_t ib,float* out,size_t ob
         if(values.size()==1 && force_wait && std::string(force_wait)=="1")values[0].setReady(false);
         if(values.size()!=1 || !values[0].waitForReady(std::chrono::seconds(30))) throw std::runtime_error("NPU output timeout");
         const auto wait_done=Clock::now();
-        std::ostringstream stream(std::ios::out|std::ios::binary);
-        values[0].dump(stream,"SFB");const auto bytes=stream.str();
-        if(bytes.size()!=c.out_bytes) throw std::runtime_error("SFB output length mismatch");
-        std::memcpy(out,bytes.data(),bytes.size());const auto finished=Clock::now();
+        copy_sfb(values[0],out,c.out_bytes);
+        const auto finished=Clock::now();
         detailed[0]=std::chrono::duration<double>(input_done-start).count();
         detailed[1]=std::chrono::duration<double>(submitted-input_done).count();
         detailed[2]=std::chrono::duration<double>(wait_done-submitted).count();

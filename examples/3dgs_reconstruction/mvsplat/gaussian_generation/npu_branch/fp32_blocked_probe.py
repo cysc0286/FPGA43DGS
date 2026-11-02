@@ -45,7 +45,7 @@ def diagnostic_bridge(readout):
     edits = {
         "#include <memory>": "#include <memory>\n#include <iostream>",
         "!type->element_dtype.isFP32()": "(i==0 && !type->element_dtype.isFP32())",
-        "session.apply();": '''session.apply();
+        "        session.apply();": '''        session.apply();
         try {
             bool ok=session->backends[0].cast<zg330::ZG330Backend>().precheck();
             std::cerr << "DIAGNOSTIC_PRECHECK=" << ok << std::endl;
@@ -54,10 +54,7 @@ def diagnostic_bridge(readout):
         }''',
     }
     if readout == "raw":
-        edits['''std::ostringstream stream(std::ios::out|std::ios::binary);
-        values[0].dump(stream,"SFB");const auto bytes=stream.str();
-        if(bytes.size()!=c.out_bytes) throw std::runtime_error("SFB output length mismatch");
-        std::memcpy(out,bytes.data(),bytes.size());'''] = 'values[0].read(reinterpret_cast<char*>(out),0,c.out_bytes);'
+        edits['copy_sfb(values[0],out,c.out_bytes);'] = 'values[0].read(reinterpret_cast<char*>(out),0,c.out_bytes);'
     for before, after in edits.items():
         if source.count(before) != 1:
             raise ValueError("Bridge changed; re-review diagnostic patch")
@@ -125,6 +122,7 @@ def main():
     audit(a.graph, a.raw, a.oracle)
     a.out.mkdir(parents=True, exist_ok=False)
     (a.out/"bridge.cpp").write_text(diagnostic_bridge(a.readout), encoding="utf-8")
+    (a.out/'output_sink.h').write_bytes(Path(__file__).with_name('output_sink.h').read_bytes())
     sys.path.insert(0, str(Path(__file__).resolve().parents[4]/"3dgs_compositor/board"))
     import remote
     from initialize.board_sync import NPU_SOURCE_FILES, upload_sources
@@ -135,7 +133,8 @@ def main():
         upload_sources(client, a.board_root + "/mvsplat", NPU_SOURCE_FILES)
         sftp = client.open_sftp()
         for source, name in ((a.graph,"graph.json"), (a.raw,"params.raw"), (a.oracle,"oracle.npz"),
-                             (a.out/"bridge.cpp","bridge.cpp"), (Path(__file__),"probe.py")):
+                             (a.out/"bridge.cpp","bridge.cpp"),
+                             (a.out/'output_sink.h','output_sink.h'), (Path(__file__),"probe.py")):
             sftp.put(str(source), a.board_root+"/"+name)
         sdk = "/root/heterogs_npu/sdk_3.36.1/usr"
         command = (f"cd {root} && timeout 180s g++ -O3 -std=gnu++17 -shared -fPIC bridge.cpp -o bridge.so "

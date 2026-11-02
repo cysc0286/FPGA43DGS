@@ -50,6 +50,7 @@ def main():
         sftp.put(str(Path(__file__).with_name("known_conv.py")), root+"/known_conv.py")
         if a.board_library is None:
             sftp.put(str(a.bridge_source.resolve()), root+"/bridge.cpp")
+            sftp.put(str(Path(__file__).with_name('output_sink.h')), root+'/output_sink.h')
         # Keep the command explicit because remote shells otherwise treat a
         # typo in the SDK path as a successful no-op when logging is redirected.
         build = (

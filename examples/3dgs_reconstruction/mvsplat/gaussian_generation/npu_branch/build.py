@@ -49,7 +49,8 @@ def main(argv=None):
     with (out / "build.log").open("wb") as log:
         result = subprocess.run(cmd, cwd=out, env=env, stdout=log, stderr=subprocess.STDOUT, timeout=180)
     save(out / "result.json", dict(exit_code=result.returncode, command=cmd,
-        source_sha256=sha(source), syntax_only=a.syntax_only, npu_executed=False))
+        source_sha256=sha(source), header_sha256=sha(source.with_name('output_sink.h')),
+        syntax_only=a.syntax_only, npu_executed=False))
     if result.returncode:
         raise RuntimeError("Bridge compilation failed: " + str(out / "build.log"))
 

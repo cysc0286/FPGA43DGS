@@ -5,6 +5,10 @@
 
 ## 推荐生成与渲染配置
 
+离线优化增量：Gaussian head 逐层/单视图/通道补齐候选与可选 C++ SFB 输出拷贝，
+均未替换正式分区或既有桥接库；本轮无新增板端成绩。
+[候选机制、ICraft 逐层结果与复测顺序](examples/3dgs_reconstruction/mvsplat/gaussian_generation/npu_branch/NPU_HEAD_CANDIDATES_20261102.md)。
+
 - 生成：显式 --backend npu --partitions backbone_cnn depth_head，使用 ICraft 3.36.1；
   其余网络、注意力、代价体及位姿仍在 CPU，并非全网 NPU。
 - NPU worker 默认预留 64 MiB PL DDR 工作区，并为 backbone 请求执行两次 SDK forward，

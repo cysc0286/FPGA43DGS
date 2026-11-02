@@ -1,3 +1,12 @@
+# 2026-11-02：继续 NPU 优化，板卡当前离线
+
+用户要求继续 NPU 优化。现以太网未连接、SSH 超时，继续可离线验证的候选，
+未上传/改固件。head_probe 真实权重逐层、batch-one、通道补齐图已导出并编译，
+ICraft Host 未量化输出通过、TF32 首层严格门槛失败但有限；板端 Inf 根因仍待定位。
+DIRECT_SFB 默认关闭，运行身份记录开关；新库/图不可继承旧三视角 receipt。
+保留正式双子图、CPU 回退、冻结 FPGA，不以 Host 微基准或 HardOp 数声称板端加速。
+结果与回板顺序见 gaussian_generation/npu_branch/NPU_HEAD_CANDIDATES_20261102.md（相对 mvsplat）。
+
 # 2026-11-02：删除旧实验与重复入口
 
 用户已澄清：清理与 NPU→FPGA→网页主线无关、容易误用的旧实验与重复入口；
