@@ -17,6 +17,7 @@ def main(argv=None):
     p.add_argument("--out", required=True, type=Path)
     p.add_argument("--partitions", required=True, nargs="+")
     p.add_argument("--repeats", type=int, default=20)
+    p.add_argument('--blocked', action='store_true', help='Also measure cache-tiled packing; no NPU speed claim')
     a = p.parse_args(argv)
     if a.repeats < 3:
         p.error("At least three measured repeats required")
@@ -37,30 +38,34 @@ def main(argv=None):
             with np.load(oracle, allow_pickle=False) as data:
                 value = data["input"]
             spec, dest = part["input"], arena.views[name][0]
-            legacy, direct = [], []
+            legacy, direct, blocked = [], [], []
             for i in range(a.repeats+1):
-                for kind in (("legacy", "direct") if i % 2 == 0 else ("direct", "legacy")):
+                kinds = ['legacy', 'direct'] + (['blocked'] if a.blocked else [])
+                for kind in (kinds if i % 2 == 0 else list(reversed(kinds))):
                     start = time.perf_counter()
                     if kind == "legacy":
                         temporary = to_wire(value, spec)
                         dest[:] = temporary
                         del temporary
                     else:
-                        to_wire(value, spec, out=dest)
+                        to_wire(value, spec, out=dest, blocked=kind == 'blocked')
                     elapsed = time.perf_counter()-start
                     if i:
-                        (legacy if kind == "legacy" else direct).append(elapsed)
+                        {'legacy':legacy, 'direct':direct, 'blocked':blocked}[kind].append(elapsed)
                     # Numeric checks are outside the measured packing interval.
                     np.testing.assert_array_equal(from_wire(dest, spec), value)
             record["partitions"][name] = dict(exact_roundtrip=True, layout=spec["layout"],
                 input_bytes=value.nbytes, legacy_seconds=legacy, direct_seconds=direct,
                 legacy=statistics(legacy), direct=statistics(direct),
                 removed_float_temporary_bytes=value.nbytes if spec["layout"] == "NHWC" else 0)
+            if a.blocked:
+                record['partitions'][name].update(blocked_seconds=blocked, blocked=statistics(blocked))
         record["complete"] = True
     finally:
         arena.close()
         save(out/"transport.json", record)
-    print(json.dumps({name:{k:v[k] for k in ("legacy", "direct")} for name,v in record["partitions"].items()}, indent=2))
+    print(json.dumps({name:{k:v[k] for k in (('legacy', 'direct', 'blocked') if a.blocked else ('legacy', 'direct'))}
+                      for name,v in record['partitions'].items()}, indent=2))
 
 
 if __name__ == "__main__":

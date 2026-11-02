@@ -1,4 +1,4 @@
-"""Accept a closed local video file after READY (live capture is a future adapter)."""
+"""Accept a closed local video after READY, including a completed UVC capture."""
 from pathlib import Path
 import time
 from common import sha

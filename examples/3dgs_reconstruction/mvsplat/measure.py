@@ -3,28 +3,35 @@ import argparse
 import json
 import os
 from pathlib import Path
-import resource
 import signal
 import subprocess
 import time
 
 
-def tree_rss(pid):
+def tree_rss(pid, proc_root=Path('/proc')):
+    # This BSP omits /proc/PID/task/TID/children (CONFIG_PROC_CHILDREN).
+    # PPid in status also covers children created by secondary threads.
+    parents, resident = {}, {}
+    for proc in proc_root.iterdir():
+        if not proc.name.isdecimal():
+            continue
+        try:
+            fields = dict(line.split(':', 1) for line in
+                          (proc/'status').read_text().splitlines() if ':' in line)
+            parent = int(fields['PPid'].strip())
+            current = int(proc.name)
+            resident[current] = int(fields.get('VmRSS', '0 kB').split()[0])*1024
+            parents.setdefault(parent, []).append(current)
+        except (OSError, ValueError, KeyError):
+            continue  # A process can exit during a /proc sample.
     pending, seen, rss = [pid], set(), 0
     while pending:
         current = pending.pop()
         if current in seen:
             continue
         seen.add(current)
-        try:
-            proc = Path("/proc")/str(current)
-            for line in (proc/"status").read_text().splitlines():
-                if line.startswith("VmRSS:"):
-                    rss += int(line.split()[1])*1024
-            for task in (proc/"task").iterdir():
-                pending.extend(int(v) for v in (task/"children").read_text().split())
-        except (OSError, ValueError):
-            pass
+        rss += resident.get(current, 0)
+        pending.extend(parents.get(current, ()))
     return rss
 
 
@@ -36,6 +43,10 @@ def available_mib():
 
 
 def main():
+    import resource  # Linux-only CLI; pure /proc parsing can be tested elsewhere.
+    def interrupted(signum, frame):
+        raise KeyboardInterrupt
+    signal.signal(signal.SIGTERM, interrupted)
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--rss-mib", type=float, default=650)
@@ -69,6 +80,8 @@ def main():
             time.sleep(.05)
         if state == "running":
             state = "passed" if proc.returncode == 0 else "process_failed"
+    except KeyboardInterrupt:
+        state = 'interrupted'
     finally:
         if proc is not None and proc.poll() is None:
             os.killpg(proc.pid, signal.SIGTERM)

@@ -29,13 +29,34 @@ class ReadinessTests(unittest.TestCase):
                 provenance={"oracle_manifest_sha256": sha(root/"manifest.json")})
             with patch("gaussian_generation.npu_branch.readiness.validate_bundle", return_value=(meta, {})):
                 if corrupt:
-                    with self.assertRaisesRegex(ValueError, "numerical readiness"):
+                    with self.assertRaisesRegex(ValueError, "oracle output changed"):
                         validate_oracles(worker, root, root/"readiness.json")
                 else:
                     validate_oracles(worker, root, root/"readiness.json")
             result = json.loads((root/"readiness.json").read_text())
             self.assertEqual(result["complete"], not corrupt)
-            self.assertEqual(len(calls), 2)
+            self.assertEqual(len(calls), 2 if corrupt else 6)
+
+    def test_previous_input_lag_cannot_pass_identical_oracles(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root/'backbone_cnn').mkdir()
+            expected = np.ones((1, 1, 2, 2), dtype=np.float32)
+            oracle = root/'backbone_cnn/oracle.npz'
+            np.savez(oracle, input=expected, expected=expected)
+            (root/'manifest.json').write_text('{}')
+            meta = {'partitions': {'backbone_cnn': {'oracle_sha256': sha(oracle)}}}
+            last = [expected.copy()]
+            def delayed(name, value):
+                output = last[0]
+                last[0] = value.copy()
+                return output
+            worker = SimpleNamespace(parts={'backbone_cnn': {}}, execute=delayed,
+                provenance={'oracle_manifest_sha256': sha(root/'manifest.json')})
+            with patch('gaussian_generation.npu_branch.readiness.validate_bundle', return_value=(meta, {})):
+                with self.assertRaisesRegex(ValueError, 'stale output after input switch'):
+                    validate_oracles(worker, root, root/'readiness.json')
+            self.assertFalse(json.loads((root/'readiness.json').read_text())['complete'])
 
     def test_correct_repeated_execution_passes(self):
         self.run_gate(False)

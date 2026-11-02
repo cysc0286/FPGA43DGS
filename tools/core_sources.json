@@ -51,6 +51,10 @@
   ],
   "extensions": [
     ".py",
+    ".cjs",
+    ".js",
+    ".html",
+    ".css",
     ".c",
     ".cpp",
     ".h",

@@ -10,7 +10,7 @@
 |---|---|
 | `video_input/` | 视频接收、解码、选帧及相关实现和测试 |
 | `pose_estimation/` | 位姿、特征、匹配、几何及相关实现和测试 |
-| `gaussian_generation/` | MVSplat 生成、Gaussian 数据适配及相关实现和测试；NPU 候选放在 `npu_branch/` |
+| `gaussian_generation/` | MVSplat 生成、Gaussian 数据适配及相关实现和测试；NPU 后端与候选工具放在 `npu_branch/` |
 | `rendering/` | 相机投影、排序、CPU/FPGA 渲染及相关实现和测试；冻结主线为 `render_main/`，独立候选为 `render_branch/` |
 
 已有 `initialize/` 只负责视频前预热、资源生命周期与整链部署协调；
@@ -29,13 +29,21 @@
 4. 各模块通过 [既定数据接口](../examples/3dgs_reconstruction/modules/INTERFACES.md) 交接。
    改路径时同步改导入、子进程入口、部署清单和说明，不留下指向旧位置的活动调用。
 5. `render_main/` 冻结基线必须可回退；`render_branch/` 默认不调用。
-   `gaussian_generation/npu_branch/` 默认不启用，仅显式选择 NPU 且通过既有检查后才能进入整链。
+   推荐生成配置为显式 --backend npu --partitions backbone_cnn depth_head，
+   NPU 后端仍归属 gaussian_generation/npu_branch/；通过当前输入切换、共存及资产绑定检查后才能 READY。
+   通用 CLI 默认 CPU 用于兼容和对照，NPU 失败不得静默回退；禁止把全网推理描述为均在 NPU。
 6. 历史实验使用既有归档体系，保留原始路径、哈希和测量口径；不改写历史证据来适应新目录。
 
-## 本轮完成与验证边界
+## 2026-10-09 结构整理的历史验证边界
 
 - 原 `mvsplat/npu/` 整体迁至 `mvsplat/gaussian_generation/npu_branch/`，不增加第五个业务阶段。
 - 用户已要求板卡离线时不测试；本轮仅整理源码、文档，进行静态检查并更新 GitHub。
 - 不把目录搬迁当作 NPU 数值通过、性能提升或整链验收；功能与板端结果待恢复测试后记录。
 
 完整当前目录见 [代码结构](CODE_STRUCTURE.md)，默认配置和历史测量范围见 [主线说明](../MAINLINE.md)。
+
+## 2026-11-02 NPU 主线整合
+
+用户已要求将 NPU 主线合入 main，未改变四模块接口和冻结硬件。
+推荐配置、当前测量和未验收项以 [MAINLINE.md](../MAINLINE.md) 为准；
+不得用本轮软件合并覆盖历史数值失败、输入残留发现或未完成的板端收尾。

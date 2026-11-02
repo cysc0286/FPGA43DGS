@@ -18,10 +18,17 @@ NPU_SOURCE_FILES = ("common.py", "runtime.py", "memory_runtime.py",
     for path in sorted((ROOT / "mvsplat/gaussian_generation/npu_branch").iterdir())
     if path.is_file() and path.suffix in (".py", ".cpp"))
 
-SOURCE_FILES = ("common.py", "export.py", "scene_preparation.py",
+SOURCE_FILES = ("common.py", "measure.py", "export.py", "scene_preparation.py",
                 "gaussian_generation/__init__.py", "gaussian_generation/runtime.py",
                 "gaussian_generation/adapter.py", "pose_estimation/__init__.py",
                 "pose_estimation/geometry.py", "video_input/decode.py",
+                "video_input/__init__.py", "video_input/receipt.py",
+                "video_input/calibration.py", "video_input/capture.py",
+                "video_input/preview.py", "video_input/recording.py", "initialize/camera_ui.py",
+                "video_input/streaming.py", "pose_estimation/streaming.py",
+                "rendering/streaming.py", "initialize/streaming.py",
+                "initialize/events.py", "rendering/viewer.py", "rendering/viewer.html",
+                "rendering/viewer.js", "rendering/viewer.css", "evaluate.py",
                 "initialize/model_runtime.py",
                 "initialize/renderer_runtime.py", "initialize/attributes_resident.cpp",
                 "initialize/validate_resident.py", "initialize/group_sort_resident.cpp",
@@ -65,6 +72,14 @@ def main():
             remote.run(client, "ln -s " + qbase + "/" + name + " " + qdest + "/" + name)
         files = SOURCE_FILES
         upload_sources(client, a.dest + "/mvsplat", files)
+        # mvsplat/evaluate.py shares the root evaluator's SSIM implementation.
+        # Old board bases did not copy this file into new candidates.
+        sftp = client.open_sftp()
+        try:
+            sftp.put(str(ROOT / 'evaluate.py'), a.dest + '/evaluate.py')
+            sftp.put(str(ROOT / 'pipeline.py'), a.dest + '/pipeline.py')
+        finally:
+            sftp.close()
         script = " ".join(shlex.quote(a.dest + "/mvsplat/" + name)
                           for name in files if name.endswith(".py"))
         status, output = remote.run(client,

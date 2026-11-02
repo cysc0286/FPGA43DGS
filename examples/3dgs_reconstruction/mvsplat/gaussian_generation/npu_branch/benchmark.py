@@ -66,7 +66,7 @@ def main(argv=None):
                     module = locate(model.model, name)
                     results = dict(cpu=[], candidate=[], comparisons=[], passed=False)
                     record["partitions"][name] = results
-                    first_call = len(worker.calls)
+                    first_call = worker.sequence
                     with model.torch.inference_mode():
                         for i in range(a.warmup+a.repeats):
                             outputs, durations = {}, {}
@@ -91,7 +91,7 @@ def main(argv=None):
                                     results[kind].append(durations[kind])
                     results.update(passed=True, cpu_summary=statistics(results["cpu"]),
                         candidate_summary=statistics(results["candidate"]),
-                        measured_worker_calls=worker.calls[first_call+a.warmup:])
+                        measured_worker_calls=worker.report(first_call+a.warmup)['calls'])
                     results["cpu_over_candidate_median"] = (results["cpu_summary"]["median_seconds"] /
                                                               results["candidate_summary"]["median_seconds"])
                     results["npu_partition_gain_measured"] = (a.backend == "npu" and
