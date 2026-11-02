@@ -1,5 +1,10 @@
 # NPU 后端：MVSplat 高斯生成
 
+2026-11-02 回板核验：新桥接库的默认字符串输出已完成公开短片→NPU→FPGA→网页，
+视频结束到首帧22.393秒；三视角及网页确认通过。直接输出虽单轮图像资格通过，
+在完整入口输入切换失败，继续关闭；新增Gaussian head暂不接正式路径。
+参赛主线以合理分工和稳定演示为先，详见[实板核验与部署说明](NPU_HEAD_BOARD_VALIDATION_20261102.md)。
+
 `gaussian_generation/npu_branch/` 是 **gaussian_generation 的可选硬件后端**，不是第五个业务阶段，也不是 FPGA 渲染器。
 它尝试把 MVSplat 里的图像特征提取、深度预测和高斯参数预测子图交给板上的 NPU。
 

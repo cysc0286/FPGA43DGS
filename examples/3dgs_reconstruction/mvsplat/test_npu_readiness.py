@@ -11,7 +11,7 @@ from gaussian_generation.npu_branch.readiness import validate_oracles
 
 
 class ReadinessTests(unittest.TestCase):
-    def run_gate(self, corrupt):
+    def run_gate(self, corrupt, constant=False):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root/"backbone_cnn").mkdir()
@@ -24,17 +24,20 @@ class ReadinessTests(unittest.TestCase):
             def execute(name, value):
                 calls.append(name)
                 # Corruption on reuse catches stale device buffers after READY.
-                return value + (0.04 if corrupt and len(calls) == 2 else 0)
+                return expected.copy() if constant else value + (0.04 if corrupt and len(calls) == 2 else 0)
             worker = SimpleNamespace(parts={"backbone_cnn": {}}, execute=execute,
                 provenance={"oracle_manifest_sha256": sha(root/"manifest.json")})
             with patch("gaussian_generation.npu_branch.readiness.validate_bundle", return_value=(meta, {})):
-                if corrupt:
+                if constant:
+                    with self.assertRaisesRegex(ValueError, 'unchanged output after input switch'):
+                        validate_oracles(worker, root, root/'readiness.json')
+                elif corrupt:
                     with self.assertRaisesRegex(ValueError, "oracle output changed"):
                         validate_oracles(worker, root, root/"readiness.json")
                 else:
                     validate_oracles(worker, root, root/"readiness.json")
             result = json.loads((root/"readiness.json").read_text())
-            self.assertEqual(result["complete"], not corrupt)
+            self.assertEqual(result["complete"], not (corrupt or constant))
             self.assertEqual(len(calls), 2 if corrupt else 6)
 
     def test_previous_input_lag_cannot_pass_identical_oracles(self):
@@ -60,6 +63,9 @@ class ReadinessTests(unittest.TestCase):
 
     def test_correct_repeated_execution_passes(self):
         self.run_gate(False)
+
+    def test_permanently_cached_oracle_cannot_publish_readiness(self):
+        self.run_gate(False, constant=True)
 
     def test_corrupted_repeat_cannot_publish_readiness(self):
         self.run_gate(True)

@@ -208,7 +208,21 @@ def export(graphs, out):
     return manifest
 
 
-def run(graphs, bundle, library, name, out, passes=1, save_outputs=False):
+def output_consistency(checks, compare_sink=False):
+    """Do not confuse a stable old input or repeated Inf with a usable copy."""
+    groups = {label: [c for c in checks if c['input_label'] == label] for label in ('A','B')}
+    hashes = {label: {c['output_sha256'] for c in values} for label, values in groups.items()}
+    fresh = all(len(v) == 1 for v in hashes.values()) and hashes['A'] != hashes['B']
+    result = dict(freshness_passed=bool(fresh))
+    if compare_sink:
+        exact = fresh and all({c['output_sink'] for c in values} == {'string','direct'}
+                              and all(c['nonfinite_count'] == 0 for c in values)
+                              for values in groups.values())
+        result['output_sink_byte_exact'] = bool(exact)
+    return result
+
+
+def run(graphs, bundle, library, name, out, passes=1, save_outputs=False, compare_sink=False):
     """Exactly one graph/session per process; changed inputs must be current.
 
     Input write, submit, wait, conversion and entire caller duration are kept.
@@ -243,6 +257,8 @@ def run(graphs, bundle, library, name, out, passes=1, save_outputs=False):
         passed=False, npu_executed=False, case=name, sdk_execution_passes=passes,
         library_sha256=sha(library), source_manifest_sha256=sha(graphs/'manifest.json'),
         compiled_manifest_sha256=sha(bundle/'manifest.json'), checks=[],
+        compare_output_sink=compare_sink,
+        runtime_flags={k:v for k,v in os.environ.items() if k.startswith('MGS_NPU_')},
         scope='one real NPU session; not full model, FPGA quality or end-to-end speed')
     lock = open('/run/lock/fpga43dgs-npu.lock', 'a')
     ctx, lib = None, None
@@ -252,7 +268,7 @@ def run(graphs, bundle, library, name, out, passes=1, save_outputs=False):
         os.environ.setdefault('MGS_NPU_DDR_GUARD_MIB', '64')
         lib = ct.CDLL(str(library.resolve()))
         check_bridge(lib)
-        if os.environ.get('MGS_NPU_DIRECT_SFB') == '1':
+        if compare_sink or os.environ.get('MGS_NPU_DIRECT_SFB') == '1':
             check_direct_sfb(lib)
         lib.mgs_error.restype = ct.c_char_p
         lib.mgs_create.argtypes = [ct.c_char_p, ct.c_char_p, ct.c_size_t, ct.c_size_t]
@@ -291,7 +307,13 @@ def run(graphs, bundle, library, name, out, passes=1, save_outputs=False):
                     error=lib.mgs_error().decode() if status < 0 else None)
             # Continue only inside this diagnostic to localize the first bad
             # layer. A failed/unavailable SDK precheck cannot produce a pass.
-            for step, label in enumerate(('A', 'A', 'B', 'B', 'A', 'A')):
+            sequence = []
+            for i, label in enumerate(('A', 'A', 'B', 'B', 'A', 'A')):
+                modes = ((0,1) if i % 2 == 0 else (1,0)) if compare_sink else (None,)
+                sequence.extend((label, mode) for mode in modes)
+            for step, (label, direct) in enumerate(sequence):
+                if direct is not None:
+                    os.environ['MGS_NPU_DIRECT_SFB'] = str(direct)
                 value, expected = (samples['input'], samples['expected']) if label == 'A' else (
                     samples['alternate_input'], samples['alternate_expected'])
                 started = time.perf_counter()
@@ -310,7 +332,9 @@ def run(graphs, bundle, library, name, out, passes=1, save_outputs=False):
                           np.array(y.transpose(0,3,1,2) if placement['output']['layout'] == 'NHWC' else y, copy=True))
                 finished = time.perf_counter()
                 check = compare_output(actual, expected)
-                check.update(step=step, input_label=label, pack_seconds=packed-started,
+                check.update(step=step, input_label=label,
+                    output_sink='direct' if os.environ.get('MGS_NPU_DIRECT_SFB') == '1' else 'string',
+                    pack_seconds=packed-started,
                     sdk_call_seconds=received-packed, unpack_seconds=finished-received,
                     total_seconds=finished-started, sdk_seconds=stages.tolist(),
                     sdk_stage_names=['input_write','forward_submit','wait','output_convert','sdk_total'],
@@ -320,9 +344,7 @@ def run(graphs, bundle, library, name, out, passes=1, save_outputs=False):
                     np.save(out/f'{step}_{label}.npy', actual, allow_pickle=False)
                 save(out/'result.json', result)
                 print(json.dumps(check), flush=True)
-            hashes = [c['output_sha256'] for c in result['checks']]
-            result['freshness_passed'] = bool(hashes[0] == hashes[1] == hashes[4] == hashes[5] and
-                                               hashes[2] == hashes[3] and hashes[1] != hashes[2])
+            result.update(output_consistency(result['checks'], compare_sink))
             result['passed'] = (result['sdk_precheck']['passed'] and result['freshness_passed'] and
                                 all(c['passed'] for c in result['checks']))
     except BaseException as exc:
@@ -425,6 +447,7 @@ def main(argv=None):
     p.add_argument('--case')
     p.add_argument('--sdk-passes', type=int, choices=(1,2), default=1)
     p.add_argument('--save-outputs', action='store_true')
+    p.add_argument('--compare-sink', action='store_true', help='Alternate string/direct output in one real session')
     a = p.parse_args(argv)
     if a.action == 'export':
         export(a.graphs, a.out)
@@ -437,7 +460,7 @@ def main(argv=None):
     else:
         if not all((a.bundle, a.library, a.case)):
             p.error('run requires bundle, library and case')
-        run(a.graphs, a.bundle, a.library, a.case, a.out, a.sdk_passes, a.save_outputs)
+        run(a.graphs, a.bundle, a.library, a.case, a.out, a.sdk_passes, a.save_outputs, a.compare_sink)
 
 
 if __name__ == '__main__':

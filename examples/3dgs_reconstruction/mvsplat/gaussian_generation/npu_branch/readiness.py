@@ -56,6 +56,10 @@ def probe_oracles(worker, graphs, output):
                     input_label=label, output_sha256=digest))
             if hashes[0] != hashes[1] or hashes[2] != previous[name] or hashes[3] != previous[name]:
                 raise ValueError('NPU stale output after input switch: '+name)
+            # These checkpoint-backed partitions must react to the real-vs-zero
+            # probe. A permanently cached oracle must not qualify as fresh.
+            if hashes[0] == previous[name]:
+                raise ValueError('NPU unchanged output after input switch: '+name)
         record["complete"] = True
         record['strict_passed'] = all(c['passed'] for c in record['checks'])
     except BaseException as exc:

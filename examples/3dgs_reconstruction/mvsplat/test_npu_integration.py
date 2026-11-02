@@ -67,9 +67,14 @@ class IntegrationTests(unittest.TestCase):
 
     def test_native_qualification_rgb_io_without_pillow(self):
         import cv2
-        from gaussian_generation.npu_branch.qualify import read_rgb, write_rgb
+        import sys
+        from gaussian_generation.npu_branch.qualify import image_metrics, read_rgb, write_rgb
         rgb = np.array([[[255, 0, 0], [0, 255, 0], [0, 0, 255]]], dtype=np.uint8)
         with tempfile.TemporaryDirectory() as directory, patch.dict('sys.modules', {'PIL': None}):
+            sys.modules.pop('evaluate', None)
+            same = np.zeros((16, 16, 3), np.float64)
+            self.assertEqual(image_metrics(same, same)['psnr_db'], 120.)
+            self.assertEqual(image_metrics(same, same)['ssim'], 1.)
             path = Path(directory) / 'colors.png'
             write_rgb(path, rgb)
             np.testing.assert_array_equal(cv2.imread(str(path)), rgb[:, :, ::-1])

@@ -9,6 +9,21 @@ from gaussian_generation.npu_branch.head_probe import aligned_model, compare_out
 
 
 class HeadProbeChecks(unittest.TestCase):
+    def test_sink_comparison_rejects_stale_nonfinite_and_missing_mode(self):
+        import copy
+        from gaussian_generation.npu_branch.head_probe import output_consistency
+        values = [dict(input_label=label, output_sink=mode,
+                       output_sha256=label, nonfinite_count=0)
+                  for label in ('A','B') for mode in ('string','direct')]
+        self.assertTrue(output_consistency(values, True)['output_sink_byte_exact'])
+        stale = copy.deepcopy(values)
+        stale[2]['output_sha256'] = 'A'
+        self.assertFalse(output_consistency(stale, True)['freshness_passed'])
+        nonfinite = copy.deepcopy(values)
+        nonfinite[0]['nonfinite_count'] = 1
+        self.assertFalse(output_consistency(nonfinite, True)['output_sink_byte_exact'])
+        self.assertFalse(output_consistency(values[1:], True)['output_sink_byte_exact'])
+
     def test_old_bridge_cannot_silently_ignore_direct_output_option(self):
         from types import SimpleNamespace
         from unittest.mock import Mock

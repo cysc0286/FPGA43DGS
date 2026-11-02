@@ -7,7 +7,6 @@ from pathlib import Path
 import struct
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
 
 from common import new_directory, save
 
@@ -48,6 +47,9 @@ def local_error(actual, target, tile=16):
 
 
 def main():
+    # Pillow is needed for the report canvas, not for native image metrics.
+    from PIL import Image, ImageDraw
+
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--input", type=Path, required=True)
     p.add_argument("--reference", type=Path, required=True)
