@@ -1,4 +1,4 @@
-# NPU 候选：加速 MVSplat 高斯生成
+# NPU 后端：MVSplat 高斯生成
 
 `gaussian_generation/npu_branch/` 是 **gaussian_generation 的可选硬件后端**，不是第五个业务阶段，也不是 FPGA 渲染器。
 它尝试把 MVSplat 里的图像特征提取、深度预测和高斯参数预测子图交给板上的 NPU。
@@ -10,14 +10,30 @@
 
 高斯准备好之后切换相机，只调用后面的渲染器；当前这个 NPU 目录不参与换视角渲染。
 保留它是为了后续缩短场景准备时间。默认 `--backend cpu` 不创建 PartitionRuntime；
-只有显式选择 `--backend npu` 才尝试加载 NPU，并且必须先通过数值预检才能发布 READY。
+只有显式选择 `--backend npu` 才尝试加载 NPU，并且必须先通过所选校验策略才能发布 READY。
 
-## 当前状态
+2026-11-02 增量：`backbone_cnn + depth_head` 已做真实 NPU＋冻结 FPGA 三留出视角验收。
+新增输入切换测试发现 backbone 首次返回上一请求结果；仅重复同一 oracle 不能排除该问题。
+`readiness.py` 现在必须通过 B,B,A,A 输入切换后才允许 READY，旧图像 receipt 不能绕过该检查。
+推荐入口默认设置 `MGS_NPU_SETTLE_BACKBONE=1`（显式 0 仅用于诊断），backbone 每请求执行两次 SDK forward，
+丢弃第一次并把两次耗时全部计入；运行身份绑定此策略，须重新生成 receipt。
+严格 TF32 tensor 门槛仍失败，图像政策不等于全网 NPU 或任意新场景已通过。
+本轮速度、画质、负结果和重跑方式见 [NPU 深度增量实板记录](NPU_DEPTH_VALIDATION_20261102.md)。
 
-七个真实 MVSplat 分区已经在板上执行过，但尚未通过既定逐元素数值门槛；
-还记录过权重预检错误和多会话非有限输出。因此当前可用主线仍为 CPU 生成高斯＋FPGA 渲染，
-不能把候选短耗时当成已实现的 NPU 加速。详见 [历史板端结果](../../BOARD_WARM_NPU_VALIDATION.md)。
-本次完成目录迁移、调用与部署路径同步；没有重新测试 NPU。
+2026-11-02 首轮：短片、相机按钮和连续窗口已统一 NPU 调用入口，当时限制单个常驻会话。
+默认保留逐元素门槛；另提供 `qualify.py` 执行同输入 CPU/NPU、三留出视角原生 FPGA 图像验收，
+通过并保存资产绑定记录后才可使用 `--npu-acceptance`。
+本轮随后完成真实 NPU＋FPGA＋网页验收：修复启动顺序和 PL DDR 地址重叠，backbone 单会话通过三视角图像与重复性门槛，严格 tensor 门槛仍失败。
+视频首帧重叠候选 24.356 s，六次网页换视角板端均值 51.445 ms；这些是固定公开视频的一轮结果。
+具体限制和完整证据见 [2026-11-02 实板报告](BOARD_INTEGRATION_20261102.md)。
+完整操作见 [最终联调说明](../../FINAL_INTEGRATION_20261102.md)。
+
+## 历史状态与未解决问题
+
+七个真实 MVSplat 分区均已尝试板端执行，但尚未通过既定逐元素数值门槛；
+还记录过权重预检错误和多会话非有限输出。因此当时可用主线仍为 CPU 生成高斯＋FPGA 渲染，
+不能把未通过稳定性/图像验收的候选短耗时当成已实现的 NPU 加速。详见 [历史板端结果](../../BOARD_WARM_NPU_VALIDATION.md)。
+此段描述历史门槛，不覆盖本页顶部标注的 2026-11-02 实板增量。
 
 ## 这里保存的内容
 

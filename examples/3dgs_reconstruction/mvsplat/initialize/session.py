@@ -23,7 +23,23 @@ def worker_environment():
                               "/root/fpga43dgs_reconstruction/arm_env/lib")
     env["OMP_NUM_THREADS"] = "1"
     env["OPENBLAS_NUM_THREADS"] = "1"
+    # The SDK allocator is process-local, while PL DDR is shared with the
+    # renderer. Reserve its low workspace before loading NPU weights.
+    env.setdefault("MGS_NPU_DDR_GUARD_MIB", "64")
+    # The measured backbone SDK path can return the previous input's output.
+    # Keep the qualified two-execution workaround in the production entry;
+    # readiness still verifies input switches and binds this runtime identity.
+    env.setdefault("MGS_NPU_SETTLE_BACKBONE", "1")
     return env
+
+
+def protect_renderer_workspace(renderer, backend):
+    """Bound both renderer DMA slots below the NPU's reserved DDR boundary."""
+    if backend == 'npu':
+        guard = int(worker_environment()['MGS_NPU_DDR_GUARD_MIB'])
+        if not 1 <= guard <= 512:
+            raise ValueError('Concurrent NPU/FPGA requires a positive DDR reservation')
+        renderer.runtime.pl_ddr_limit_bytes = guard * 1024 * 1024
 
 
 class WarmSession:
@@ -32,46 +48,38 @@ class WarmSession:
         started = time.monotonic()
         try:
             self.partitions = None
-            numerical_readiness = None
-            if args.backend != "cpu":
-                from gaussian_generation.npu_branch.runtime import PartitionRuntime
-                self.partitions = self.resources.enter_context(PartitionRuntime(
-                    args.backend, args.partition_bundle, args.partitions, out / "partition_runtime",
-                    library=args.npu_library, worker_python=args.worker_python,
-                    environment=worker_environment() if args.backend == "npu" else None,
-                    buffer_policy=args.buffer_policy, buffer_limit_mib=args.buffer_limit_mib))
-                if args.backend == "npu":
-                    from gaussian_generation.npu_branch.readiness import validate_oracles
-                    graphs = getattr(args, "oracle_graphs", None) or Path(args.partition_bundle).parent/"graphs"
-                    numerical_readiness = validate_oracles(self.partitions, graphs, out/"npu_readiness.json")
+            # Device::Open resets shared device state. Open the renderer before
+            # the retained NPU session, and close it last (ExitStack is LIFO).
+            self.renderer = self.resources.enter_context(self._open_renderer(args, out))
+            protect_renderer_workspace(self.renderer, args.backend)
             # NPU checks are in a separate SDK process. Import/load Torch before
             # OpenCV for the board's OpenMP environment; reject bad hardware
             # outputs before spending time and memory loading the full model.
-            from gaussian_generation.runtime import ModelRuntime
-            self.model = ModelRuntime(args.weights, args.vendor, args.threads, 16, out / "initialize")
-            if self.partitions is not None:
-                self.model.attach_partitions(self.partitions)
+            from gaussian_generation.npu_branch.config import GenerationSession
+            generation = self.resources.enter_context(GenerationSession(args, out, threads=args.threads))
+            self.model, self.partitions = generation.model, generation.partitions
+            numerical_readiness = generation.readiness
             # Imports and package/device initialization are outside the video clock.
             import scene_preparation
             import export
-            if getattr(args, "live_renderer", None):
-                from rendering.pipeline_adapter import PipelineRenderer
-                configuration = {key: getattr(args, "render_" + key, None)
-                                 for key in ("threads", "max_gaussians", "batch", "uniform_preview")}
-                self.renderer = self.resources.enter_context(PipelineRenderer(args.renderer,
-                    args.live_renderer, render_environment(), out / "renderer.log",
-                    profile=getattr(args, "render_profile", "mainline"),
-                    **{key: value for key, value in configuration.items() if value is not None}))
-            else:
-                from initialize.renderer_runtime import RendererRuntime
-                self.renderer = self.resources.enter_context(RendererRuntime(args.renderer,
-                    args.resident_binary, render_environment(), out / "renderer.log"))
+            kernel_warmup = None
+            if getattr(args, 'warm_kernels', False):
+                kernel_warmup = self.model.warm_kernels(getattr(args, 'size', 128))
+                save(out/'kernel_warmup.json', kernel_warmup)
+                if self.partitions and args.backend == 'npu':
+                    from gaussian_generation.npu_branch.readiness import validate_oracles
+                    c = generation.config
+                    numerical_readiness = validate_oracles(self.partitions,
+                        c.oracle_graphs or c.partition_bundle.parent/'graphs',
+                        out/'npu_readiness_after_warmup.json', acceptance=c.npu_acceptance)
+                    self.partitions.validation = numerical_readiness
             gc.collect()
             self.record = dict(preheat_seconds_record_only=time.monotonic()-started,
                 model_load_seconds_record_only=self.model.load_seconds, backend=args.backend,
                 threads=dict(inference=args.threads, preparation=args.prepare_threads),
                 warm_scope="weights, Python dependencies, selected compiled sessions, FPGA device/runtime",
-                kernel_first_use_warmed=False, scene_cache="Gaussian rows loaded once; projection remains per view",
+                kernel_first_use_warmed=kernel_warmup is not None, kernel_warmup=kernel_warmup,
+                scene_cache="Gaussian rows loaded once; projection remains per view",
                 rss_mib_at_ready=self._rss())
             if getattr(args, "live_renderer", None):
                 self.record["renderer_configuration"] = dict(self.renderer.runtime.configuration)
@@ -86,6 +94,18 @@ class WarmSession:
                 partitions=self.partitions.report() if self.partitions is not None else None))
             self.resources.close()
             raise
+
+    @staticmethod
+    def _open_renderer(args, out):
+        if getattr(args, "live_renderer", None):
+            from rendering.pipeline_adapter import PipelineRenderer
+            configuration = {key: getattr(args, "render_" + key, None)
+                             for key in ("threads", "max_gaussians", "batch", "uniform_preview")}
+            return PipelineRenderer(args.renderer, args.live_renderer, render_environment(),
+                out / "renderer.log", profile=getattr(args, "render_profile", "mainline"),
+                **{key: value for key, value in configuration.items() if value is not None})
+        from initialize.renderer_runtime import RendererRuntime
+        return RendererRuntime(args.renderer, args.resident_binary, render_environment(), out / "renderer.log")
 
     @staticmethod
     def _rss():

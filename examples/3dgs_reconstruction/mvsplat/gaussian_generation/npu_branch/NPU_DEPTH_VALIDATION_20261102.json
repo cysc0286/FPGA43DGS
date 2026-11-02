@@ -1,0 +1,216 @@
+{
+  "date": "2026-11-02",
+  "board": "30TAI Lite",
+  "real_npu": true,
+  "real_fpga": true,
+  "resolution": [
+    128,
+    128
+  ],
+  "gaussians": 32768,
+  "partitions": [
+    "backbone_cnn",
+    "depth_head"
+  ],
+  "policy": {
+    "strict_tensor_passed": false,
+    "native_three_view_qualified": true,
+    "input_switch_required": true,
+    "backbone_sdk_passes": 2,
+    "sdk_root_cause_resolved": false,
+    "environment": {
+      "MGS_NPU_SETTLE_BACKBONE": "1"
+    }
+  },
+  "video_cases": {
+    "video_cpu3": {
+      "timing": {
+        "complete": true,
+        "ready_to_receipt_seconds_record_only": 0.0064295400006813,
+        "gaussian_scene_seconds": 24.363714339999206,
+        "first_render_seconds": 0.14806226000018796,
+        "scene_preparation_seconds": 24.511776599999394
+      },
+      "inference_seconds": 16.414078219999283,
+      "preheat_seconds_record_only": 42.03433758000028,
+      "gaussian_sha256": "c12e70d43779b3e44622e89a1aeaae1c0aa34e481295a63266776844bea92cd6",
+      "context_sha256": "8f01469ed479d249550121b6bb12b920b7e1af8063a2eaf25ccf2c721df21d87",
+      "peak_rss": 604.14453125,
+      "min_available": 220.5859375
+    },
+    "video_npu2_3": {
+      "timing": {
+        "complete": true,
+        "ready_to_receipt_seconds_record_only": 0.008196140000109153,
+        "gaussian_scene_seconds": 23.49521323999943,
+        "first_render_seconds": 0.13849243000004208,
+        "scene_preparation_seconds": 23.633705669999472
+      },
+      "inference_seconds": 15.480454409999766,
+      "preheat_seconds_record_only": 58.431358040000305,
+      "gaussian_sha256": "3385feb43aeb59e50ec80dc0a8b9b9910d2e0c9802fe49620238083d905b180d",
+      "context_sha256": "8f01469ed479d249550121b6bb12b920b7e1af8063a2eaf25ccf2c721df21d87",
+      "peak_rss": 654.34375,
+      "min_available": 203.9765625
+    },
+    "video_npu2_settle_warm": {
+      "timing": {
+        "complete": true,
+        "ready_to_receipt_seconds_record_only": 0.006335089999993215,
+        "gaussian_scene_seconds": 23.789159570000265,
+        "first_render_seconds": 0.14394618999995146,
+        "scene_preparation_seconds": 23.933105760000217
+      },
+      "inference_seconds": 14.507952409999234,
+      "preheat_seconds_record_only": 72.96368175000043,
+      "gaussian_sha256": "08e4f4361940d7ecca066508f3782ca6539dad69be36ce9f4ff54142487fa009",
+      "context_sha256": "8f01469ed479d249550121b6bb12b920b7e1af8063a2eaf25ccf2c721df21d87",
+      "peak_rss": 584.35546875,
+      "min_available": 149.03125
+    },
+    "video_npu2_settle": {
+      "timing": {
+        "complete": true,
+        "ready_to_receipt_seconds_record_only": 0.011908659999789961,
+        "gaussian_scene_seconds": 24.231665819999762,
+        "first_render_seconds": 0.1212883200005308,
+        "scene_preparation_seconds": 24.352954140000293
+      },
+      "inference_seconds": 16.018594170000142,
+      "preheat_seconds_record_only": 57.762461209999856,
+      "gaussian_sha256": "08e4f4361940d7ecca066508f3782ca6539dad69be36ce9f4ff54142487fa009",
+      "context_sha256": "8f01469ed479d249550121b6bb12b920b7e1af8063a2eaf25ccf2c721df21d87",
+      "peak_rss": 591.75390625,
+      "min_available": 174.3984375
+    }
+  },
+  "corrected_video_quality": {
+    "candidate_vs_cpu": {
+      "psnr_db": 55.33206531498315,
+      "ssim_rgb_gaussian_11_sigma1p5_valid": 0.999231973862685,
+      "mae": 0.0006180906607434639,
+      "max_abs_error": 0.054901960784313725
+    },
+    "candidate_vs_truth": {
+      "psnr_db": 19.44980457053704,
+      "ssim_rgb_gaussian_11_sigma1p5_valid": 0.804061277252999,
+      "mae": 0.06569959852430556,
+      "max_abs_error": 0.8666666666666667
+    },
+    "pixel_exact_vs_original_two": false
+  },
+  "three_view_metrics": {
+    "frame_000007.png": {
+      "npu_vs_cpu": {
+        "psnr_db": 54.36881351957069,
+        "ssim": 0.999227021782612,
+        "mae": 0.0006301381229575163,
+        "max_abs_error": 0.0823529411764706
+      },
+      "cpu_vs_truth": {
+        "psnr_db": 20.103308336651168,
+        "ssim": 0.8018765047415483,
+        "mae": 0.06338951759089052,
+        "max_abs_error": 0.8705882352941177
+      },
+      "npu_vs_truth": {
+        "psnr_db": 20.113646922629144,
+        "ssim": 0.8019480386881329,
+        "mae": 0.06328260633680556,
+        "max_abs_error": 0.8705882352941177
+      },
+      "truth_psnr_drop_db": -0.010338585977976322,
+      "truth_ssim_drop": -7.15339465846565e-05,
+      "target_sha256": "4c754e6ed05956ae807b93a76b9d319fdd30af6fec499ac80b278c24ed87f957",
+      "camera_sha256": "99abe8c330853cf3cfb2b1e2ef6b3dde288d61e97ff51ea1d839653311152b3b",
+      "live_frame_ms": 51.423130000330275
+    },
+    "frame_000015.png": {
+      "npu_vs_cpu": {
+        "psnr_db": 55.401262153282175,
+        "ssim": 0.9991538643366205,
+        "mae": 0.0006407494638480391,
+        "max_abs_error": 0.0431372549019608
+      },
+      "cpu_vs_truth": {
+        "psnr_db": 20.210329314997967,
+        "ssim": 0.8342630038282568,
+        "mae": 0.043004573248570266,
+        "max_abs_error": 0.9803921568627451
+      },
+      "npu_vs_truth": {
+        "psnr_db": 20.21384344773219,
+        "ssim": 0.8342381603532857,
+        "mae": 0.043044226154003266,
+        "max_abs_error": 0.9803921568627451
+      },
+      "truth_psnr_drop_db": -0.0035141327342245177,
+      "truth_ssim_drop": 2.484347497111461e-05,
+      "target_sha256": "596c3dd364f7bfc5bf7919ecf4e246123444fe1750d5b10789c8c8b93d373679",
+      "camera_sha256": "6851984da37b3e4e1294803f4136824f9c9aa0f4ede33c6453858b0385ccc348",
+      "live_frame_ms": 48.7676000002466
+    },
+    "frame_000022.png": {
+      "npu_vs_cpu": {
+        "psnr_db": 53.88312740227893,
+        "ssim": 0.9991473058386323,
+        "mae": 0.0006836735345179738,
+        "max_abs_error": 0.08235294117647063
+      },
+      "cpu_vs_truth": {
+        "psnr_db": 24.177819515186677,
+        "ssim": 0.8442717748824858,
+        "mae": 0.0350079305810866,
+        "max_abs_error": 0.8039215686274509
+      },
+      "npu_vs_truth": {
+        "psnr_db": 24.177247414924604,
+        "ssim": 0.844171905358254,
+        "mae": 0.03505795547385621,
+        "max_abs_error": 0.8039215686274509
+      },
+      "truth_psnr_drop_db": 0.0005721002620724391,
+      "truth_ssim_drop": 9.986952423179929e-05,
+      "target_sha256": "d2d08fe862d4f7571dc3d880b81b8a16ff7cf62e7ec014d48f8629c63ca7c606",
+      "camera_sha256": "18c6c99acc4c9e506e47b6cc5933f8332c6d692a6069ce127a13e1e1d414c8e1",
+      "live_frame_ms": 43.31801000080304
+    }
+  },
+  "fixed_input_qualified_inference_seconds": {
+    "cpu": 15.847149080000236,
+    "npu": 13.398763769999277,
+    "npu_repeat": 13.252928529999735
+  },
+  "performance": {
+    "video_repetitions_per_configuration": 1,
+    "stable_end_to_end_speedup_established": false,
+    "target_seconds": 20,
+    "target_met": false,
+    "corrected_warm_saving_vs_cpu_seconds": 0.5786708399991767
+  },
+  "resources": {
+    "changed": false,
+    "evidence": "historical frozen FPGA report",
+    "LUT_percent": 77.94,
+    "FF_percent": 62.58,
+    "Slice_percent": 99.84,
+    "BRAM36_percent": 82.45,
+    "DSP_percent": 63,
+    "power_measured": false,
+    "npu_utilization_measured": false
+  },
+  "validation": {
+    "local_related_tests_passed": 91,
+    "git_diff_check": true,
+    "corrected_scene_browser_retested": false,
+    "complete_final_raw_archive_downloaded": false,
+    "last_metadata_line_synced": false,
+    "network_state": "Ethernet disconnected after successful full-chain tests; user requested offline consolidation"
+  },
+  "evidence_directory": "D:\\ADProjects\\FPGA for 3DGS\\outputs\\npu_depth_validation_20261102",
+  "stage2_archive": {
+    "bytes": 96258888,
+    "sha256": "16c01eb9c91fd6861e04c3f76517acc2f96d21de185bb5644eca1c09269cf171",
+    "scope": "through corrected three-view qualification; excludes later complete video raw directories"
+  }
+}

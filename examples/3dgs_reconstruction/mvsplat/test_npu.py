@@ -36,6 +36,15 @@ class NpuContractTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             to_wire(x, spec, out=np.empty(spec["shape"], np.float64))
 
+    def test_blocked_copy_odd_dimensions_and_noncontiguous_source(self):
+        # Tail tiles and reversed strides mirror non-contiguous Torch boundaries.
+        x = np.arange(2*19*11*13, dtype=np.float32).reshape(2,19,11,13)[:, :, ::-1, :]
+        spec = dict(layout='NHWC', shape=[2,11,13,19])
+        out = np.empty(spec['shape'], np.float32)
+        to_wire(x, spec, out=out, blocked=True)
+        np.testing.assert_array_equal(out, to_wire(x, spec))
+        np.testing.assert_array_equal(from_wire(out, spec), x)
+
     @staticmethod
     def small_parts():
         return {name: {k:dict(layout="NCHW", shape=shape) for k in ("input", "output")}

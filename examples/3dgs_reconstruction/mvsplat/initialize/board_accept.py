@@ -32,6 +32,7 @@ def main():
     p.add_argument("--partitions", nargs="+")
     p.add_argument("--npu-library")
     p.add_argument("--oracle-graphs")
+    p.add_argument("--npu-acceptance")
     p.add_argument("--buffer-policy", choices=("shared", "per_partition"), default="shared")
     p.add_argument("--buffer-limit-mib", type=int, default=128)
     a = p.parse_args()
@@ -75,6 +76,8 @@ def main():
     if a.backend == "npu":
         if a.oracle_graphs:
             args += ["--oracle-graphs", a.oracle_graphs]
+        if a.npu_acceptance:
+            args += ["--npu-acceptance", a.npu_acceptance]
         args += ["--partition-bundle", a.partition_bundle, "--npu-library", a.npu_library,
                  "--buffer-policy", a.buffer_policy, "--buffer-limit-mib", str(a.buffer_limit_mib),
                  "--partitions"] + a.partitions
@@ -121,6 +124,9 @@ def main():
     result = json.loads((a.out / "warm_result.json").read_text(encoding="utf-8"))
     if not result["complete"] or not outcome["evidence_collected"]:
         raise RuntimeError("Run or evidence collection incomplete")
+    inference = json.loads((a.out / 'inference/inference.json').read_text(encoding='utf-8'))
+    if a.backend == 'npu' and inference.get('npu_executed') is not True:
+        raise RuntimeError('Requested NPU did not execute; no NPU acceptance claimed')
     print(json.dumps(result["timing"], indent=2))
 
 

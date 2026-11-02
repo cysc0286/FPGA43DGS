@@ -71,6 +71,40 @@ class ModelRuntime:
         self._pending_gaussians = None
         return pending[1]
 
+    def warm_kernels(self, size=128):
+        """Warm operators before video with a scene-independent synthetic pair.
+
+        No checkpoint updates, input video access, Gaussian publication or scene
+        reuse. The ordinary inference path must still run for every real video.
+        """
+        if size < 64 or size % 64:
+            raise ValueError('Kernel warmup requires a supported square input size')
+        torch = self.torch
+        start = time.perf_counter()
+        context = dict(image=torch.full((1,2,3,size,size), .5),
+            extrinsics=torch.eye(4).repeat(1,2,1,1),
+            intrinsics=torch.tensor([[.9,0.,.5],[0.,.9,.5],[0.,0.,1.]]).repeat(1,2,1,1),
+            near=torch.ones((1,2)), far=torch.full((1,2), 100.))
+        context['extrinsics'][0,1,0,3] = .2
+        first = self.partition_runtime.sequence if self.partition_runtime else 0
+        with torch.inference_mode():
+            g = self.model(context, global_step=300000, deterministic=True)
+        result = {key:getattr(g,key)[0].detach().numpy() for key in
+                  ('means','covariances','harmonics','opacities')}
+        validate_gaussians(result)
+        record = dict(seconds_record_only=time.perf_counter()-start, input_shape=[1,2,3,size,size],
+            input_kind='constant synthetic pair with fixed canonical baseline; no video data',
+            discarded_gaussians=len(result['means']), training_steps=0,
+            npu_executed=False, scene_published=False)
+        if self.partition_runtime:
+            record['partitions'] = self.partition_runtime.report(first)
+            record['npu_executed'] = record['partitions']['npu_executed']
+            if self.partition_runtime.backend == 'npu' and not record['npu_executed']:
+                raise ValueError('Requested NPU kernel warmup did not execute NPU')
+        del context, g, result
+        gc.collect()
+        return record
+
     def persist_gaussians(self, record, gaussians):
         """Finish the deferred artifact audit after the first frame is available."""
         pending = self._pending_archive
@@ -106,7 +140,7 @@ class ModelRuntime:
         out.mkdir(parents=True, exist_ok=False)
         started = time.perf_counter()
         backend = "cpu" if self.partition_runtime is None else self.partition_runtime.backend
-        call_start = 0 if self.partition_runtime is None else len(self.partition_runtime.calls)
+        call_start = 0 if self.partition_runtime is None else self.partition_runtime.sequence
         record = dict(complete=False, device="cpu" if backend != "npu" else "cpu+npu", backend=backend,
                       machine=platform.machine(), platform=platform.platform(),
                       source_commit=SOURCE_COMMIT, weight_sha256=self.weight_hash,
@@ -147,6 +181,8 @@ class ModelRuntime:
             result = {key: getattr(gaussians, key)[0].detach().cpu().numpy() for key in
                       ("means", "covariances", "harmonics", "opacities")}
             validate_gaussians(result)
+            if backend == 'npu' and not self.partition_runtime.report(call_start)['npu_executed']:
+                raise ValueError('NPU requested but no actual NPU partition executed')
             if defer_archive:
                 stream = io.BytesIO()
                 self.np.savez(stream, **result)

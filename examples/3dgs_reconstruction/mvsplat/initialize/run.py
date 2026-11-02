@@ -45,6 +45,8 @@ def main(argv=None):
                    help="Uniform thinning with enlarged footprint; requires a Gaussian budget")
     p.add_argument("--size", type=int, default=128)
     p.add_argument("--threads", type=int, default=4, help="Torch intra-op threads; measured 30TAI CPU default")
+    p.add_argument('--warm-kernels', action='store_true',
+                   help='Before video, run a discarded synthetic pair through the retained model')
     p.add_argument("--prepare-threads", type=int, default=1, help="OpenCV/decoder budget")
     schedule = p.add_mutually_exclusive_group()
     schedule.add_argument("--serial-prepare", dest="serial_prepare", action="store_true",
@@ -53,16 +55,13 @@ def main(argv=None):
                           help="Overlap PnP with inference; use --threads 3 on the four-core board")
     p.set_defaults(serial_prepare=True)
     p.add_argument("--focal-ratio", type=float, default=0.9)
-    p.add_argument("--backend", choices=("cpu", "onnx_reference", "npu"), default="cpu")
-    p.add_argument("--partition-bundle", type=Path)
-    p.add_argument("--partitions", nargs="+")
-    p.add_argument("--npu-library", type=Path)
-    p.add_argument("--oracle-graphs", type=Path,
-                   help="Real-input export oracles; NPU default is graphs beside compiled bundle")
-    p.add_argument("--worker-python", type=Path)
-    p.add_argument("--buffer-policy", choices=("shared", "per_partition"), default="shared")
-    p.add_argument("--buffer-limit-mib", type=int, default=128)
+    from gaussian_generation.npu_branch.config import add_arguments, BackendConfig
+    add_arguments(p)
     a = p.parse_args(argv)
+    try:
+        BackendConfig.from_args(a)
+    except ValueError as exc:
+        p.error(str(exc))
     if a.camera is not None:
         if a.calibration is None:
             p.error("--camera requires --calibration for the selected capture mode")
@@ -102,8 +101,6 @@ def main(argv=None):
     if min(a.threads, a.prepare_threads) < 1 or (not a.serial_prepare and
             a.threads+a.prepare_threads > (os.cpu_count() or 4)):
         p.error("Overlapping inference/preparation must fit the CPU thread budget")
-    if a.backend != "cpu" and (a.partition_bundle is None or not a.partitions):
-        p.error("Non-CPU backend needs --partition-bundle and explicit --partitions")
     out = new_directory(a.out)
     events = EventLog(out / "events.json")
     record = dict(complete=False, mode="warm_fast_pair", backend=a.backend,

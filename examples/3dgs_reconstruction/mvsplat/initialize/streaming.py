@@ -1,5 +1,6 @@
 """Lifecycle for bounded sampling, one resident encoder and one FPGA owner."""
 import argparse
+from contextlib import ExitStack
 import json
 from pathlib import Path
 import shutil
@@ -63,7 +64,7 @@ class LivePipeline:
         export(['--input',str(slot/'input'),'--inference',str(slot/'inference'),'--out',str(slot/'renderer_input')],gaussians=gaussians)
         rows,_=gaussian_rows(gaussians)
         base=next(v for v in prepared['views'] if v['role']=='target')
-        self.progress(phase='publishing')
+        self.progress(phase='publishing',generation={k:inference.get(k) for k in ('backend','npu_executed','inference_seconds')})
         record={}
         def commit(frame,version):
             completed=frame.metadata['host_complete_monotonic']
@@ -73,6 +74,8 @@ class LivePipeline:
                     completed_monotonic=completed,window_to_frame_seconds=completed-source_time,
                     processing_seconds=completed-started,geometry_seconds=geometry_seconds,
                     inference_seconds=inference['inference_seconds'],frame_sha256=sha(slot/'board/first_frame/frame.bin'),
+                    backend=inference.get('backend','cpu'),npu_executed=inference.get('npu_executed',False),
+                    partitions=inference.get('partitions'),
                     scope='latest selected frame host JPEG receive to complete RGB; not exposure time; continuous input has no VIDEO_COMPLETE',
                     coordinate_frame='fixed_initial_anchor',context_indices=prepared['context_indices'],target_indices=prepared['target_indices'])
             atomic_json(slot/'live_result.json',record)
@@ -96,73 +99,85 @@ def main(argv=None):
     p.add_argument('--renderer',type=Path,required=True);p.add_argument('--live-renderer',type=Path,required=True)
     p.add_argument('--calibration',type=Path);p.add_argument('--focal-ratio',type=float)
     p.add_argument('--host',default='127.0.0.1');p.add_argument('--port',type=int,default=8080)
+    from gaussian_generation.npu_branch.config import add_arguments,BackendConfig,GenerationSession
+    add_arguments(p)
     a=p.parse_args(argv)
+    try:BackendConfig.from_args(a)
+    except ValueError as exc:p.error(str(exc))
     if bool(a.calibration)==bool(a.focal_ratio):p.error('Choose measured calibration or explicit approximate focal ratio')
     if a.focal_ratio is not None and (not 0<a.focal_ratio<10):p.error('Invalid focal ratio')
     from video_input.streaming import LiveSampler
     sampler=LiveSampler(a.source_url,stop_path=a.out/'stop.requested')
     a.out.mkdir(parents=True,exist_ok=False)
     atomic_json(a.out/'stream.json',dict(schema='camera_live_v1',phase='warming'))
-    server=None;exchange=None
+    server=None;exchange=None;resources=ExitStack()
     def interrupted(signum,frame):raise KeyboardInterrupt
     signal.signal(signal.SIGTERM,interrupted)
     try:
-        # Match the board's established Torch-before-OpenCV import order.
-        from gaussian_generation.runtime import ModelRuntime
-        model=ModelRuntime(a.weights,a.vendor,2,16,a.out/'initialize')
+        # Torch must precede OpenCV; open the shared device before NPU loading.
+        import torch
+        from initialize.session import render_environment, protect_renderer_workspace
+        from rendering.pipeline_adapter import PipelineRenderer
+        renderer=resources.enter_context(PipelineRenderer(a.renderer,a.live_renderer,
+                    render_environment(),a.out/'renderer.log'))
+        protect_renderer_workspace(renderer,a.backend)
+        generation=resources.enter_context(GenerationSession(a,a.out,threads=2))
+        model=generation.model
+        atomic_json(a.out/'generation.json',dict(backend=a.backend,numerical_readiness=generation.readiness,
+                    model_load_seconds_record_only=model.load_seconds))
         import cv2
         cv2.setNumThreads(1)
-        from initialize.session import render_environment
-        from rendering.pipeline_adapter import PipelineRenderer
         from rendering.streaming import SceneExchange
         from rendering.viewer import make_server
         from video_input.calibration import Calibration
         calibration=Calibration(a.calibration) if a.calibration else None
-        with PipelineRenderer(a.renderer,a.live_renderer,render_environment(),a.out/'renderer.log') as renderer:
-            exchange=SceneExchange(renderer.runtime)
-            pipeline=LivePipeline(model,exchange,a.out,calibration=calibration,focal_ratio=a.focal_ratio)
-            server=make_server(renderer.runtime,None,None,a.host,a.port,live=exchange)
-            def serve():
-                while not server.stopping:server.handle_request()
-            thread=threading.Thread(target=serve,daemon=True);thread.start()
-            print(json.dumps(dict(event='VIEWER_READY',url=f'http://{a.host}:{server.server_port}/#token={server.session_token}',mode='streaming')),flush=True)
-            try:
-                sampler.start();last=-1;last_attempt=0.
-                pipeline.progress(phase='sampling')
-                while not server.stopping and not (a.out/'stop.requested').exists():
-                    packets,source=sampler.snapshot(last)
-                    exchange.update(source=source)
-                    if source['source_resets']:raise RuntimeError('Camera source restarted; stop and start a new reference session')
-                    if packets and time.monotonic()-last_attempt>=2:
-                        last=packets[-1].sequence;last_attempt=time.monotonic()
-                        try:pipeline.process(packets)
-                        except (ValueError,cv2.error) as exc:
-                            if exchange.failure:raise
-                            pipeline.reject(exc)
-                    atomic_json(a.out/'stream.json',dict(schema='camera_live_v1',**exchange.snapshot()))
-                    time.sleep(.2)
-                sampler.close()
-                if server.stats.get('fatal_error'):raise RuntimeError(server.stats['fatal_error'])
-                pipeline.progress(phase='stopped',message=('采集已结束；可继续查看最后一个有效场景。' if exchange.base is not None else '采集已结束；尚未生成有效场景，可重新开始。'))
-                from video_input.recording import prune_stream_candidate
-                storage=prune_stream_candidate(a.out,a.out.resolve().parent)
-                pipeline.progress(storage=storage)
-                # Keep the final scene interactive until closed/replaced by the UI.
-                while not server.stopping:time.sleep(.2)
-                if server.stats.get('fatal_error'):raise RuntimeError(server.stats['fatal_error'])
-            finally:
-                server.stopping=True
-                # A request already in progress finishes before the owner closes.
-                thread.join(125)
-                server.server_close()
+        exchange=SceneExchange(renderer.runtime)
+        pipeline=LivePipeline(model,exchange,a.out,calibration=calibration,focal_ratio=a.focal_ratio)
+        server=make_server(renderer.runtime,None,None,a.host,a.port,live=exchange)
+        def serve():
+            while not server.stopping:server.handle_request()
+        thread=threading.Thread(target=serve,daemon=True);thread.start()
+        print(json.dumps(dict(event='VIEWER_READY',url=f'http://{a.host}:{server.server_port}/#token={server.session_token}',mode='streaming')),flush=True)
+        try:
+            sampler.start();last=-1;last_attempt=0.
+            pipeline.progress(phase='sampling')
+            while not server.stopping and not (a.out/'stop.requested').exists():
+                packets,source=sampler.snapshot(last)
+                exchange.update(source=source)
+                if source['source_resets']:raise RuntimeError('Camera source restarted; stop and start a new reference session')
+                if packets and time.monotonic()-last_attempt>=2:
+                    last=packets[-1].sequence;last_attempt=time.monotonic()
+                    try:pipeline.process(packets)
+                    except (ValueError,cv2.error) as exc:
+                        if exchange.failure:raise
+                        pipeline.reject(exc)
+                atomic_json(a.out/'stream.json',dict(schema='camera_live_v1',**exchange.snapshot()))
+                time.sleep(.2)
+            sampler.close()
+            if server.stats.get('fatal_error'):raise RuntimeError(server.stats['fatal_error'])
+            pipeline.progress(phase='stopped',message=('采集已结束；可继续查看最后一个有效场景。' if exchange.base is not None else '采集已结束；尚未生成有效场景，可重新开始。'))
+            from video_input.recording import prune_stream_candidate
+            storage=prune_stream_candidate(a.out,a.out.resolve().parent)
+            pipeline.progress(storage=storage)
+            # Keep the final scene interactive until closed/replaced by the UI.
+            while not server.stopping:time.sleep(.2)
+            if server.stats.get('fatal_error'):raise RuntimeError(server.stats['fatal_error'])
+        finally:
+            server.stopping=True
+            # A request already in progress finishes before the owner closes.
+            thread.join(125)
+            server.server_close()
     except KeyboardInterrupt:pass
     except BaseException as exc:
         state=exchange.snapshot() if exchange else {}
         atomic_json(a.out/'stream.json',dict(state,schema='camera_live_v1',phase='error',message=str(exc)[:2048]))
         raise
     finally:
-        sampler.close()
-        if server:server.stopping=True;server.server_close()
+        try:
+            sampler.close()
+            if server:server.stopping=True;server.server_close()
+        finally:
+            resources.close()
 
 
 if __name__=='__main__':main()

@@ -202,6 +202,14 @@ class LiveRenderer:
         camera = bytes(camera)
         if self.scene is None:
             raise ValueError("Load a scene before rendering")
+        limit = getattr(self, 'pl_ddr_limit_bytes', None)
+        if limit is not None:
+            # Each tile can reference every selected Gaussian. The native
+            # workspace keeps two slots of batch*(candidate*64 + output*4096).
+            # Include one 64-byte Tile header and the SDK's initial 4 KiB area.
+            bound = 4096 + 2 * self.configuration['batch'] * ((self.scene['selected'] + 1) * 64 + 4096)
+            if bound > limit:
+                raise ValueError('Renderer workspace exceeds reserved PL DDR; resize reservation before loading NPU')
         if len(camera) != 136 or camera[:8] != b"FLCAM001":
             raise ValueError("Camera ABI")
         if not np.isfinite(np.frombuffer(camera, dtype="<f8", offset=24)).all():

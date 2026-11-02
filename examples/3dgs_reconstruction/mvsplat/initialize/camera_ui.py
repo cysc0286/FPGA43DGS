@@ -12,6 +12,7 @@ import time
 from urllib.parse import urlsplit
 
 from video_input.recording import CameraRecorder, make_server
+from gaussian_generation.npu_branch.config import add_arguments, BackendConfig
 
 
 def reconstruction_error(detail):
@@ -53,6 +54,7 @@ class ReconstructionJob:
                 elif self.stream_stop_requested:phase='stopping'
             return dict(phase=phase,error=self.error,details=self.error_details,url=self.url,
                         clip_path=self.clip_path,run_path=self.run_path,mode=self.mode,
+                        requested_backend=getattr(self.args,'backend','cpu'),
                         live={k:v for k,v in live.items() if k not in ('points','trajectory')})
 
     def start_stream(self):
@@ -160,6 +162,7 @@ class ReconstructionJob:
                 '--interactive','--viewer-host','127.0.0.1','--viewer-port',str(args.viewer_port)]
             if args.calibration: cli+=['--calibration',str(args.calibration)]
             else: cli+=['--focal-ratio',str(args.focal_ratio)]
+            cli+=BackendConfig.from_args(args).cli()
             if scene is not None:
                 cli=[sys.executable,'-m','rendering.viewer','--scene',str(scene),
                      '--renderer',str(args.renderer),'--live-renderer',str(args.live_renderer),
@@ -170,6 +173,7 @@ class ReconstructionJob:
                      '--renderer',str(args.renderer),'--live-renderer',str(args.live_renderer),
                      '--host','127.0.0.1','--port',str(args.viewer_port)]
                 cli+=['--calibration',str(args.calibration)] if args.calibration else ['--focal-ratio',str(args.focal_ratio)]
+                cli+=BackendConfig.from_args(args).cli()
             command=['/usr/bin/python3',str(Path(__file__).resolve().parents[1]/'measure.py'),
                 '--out',str(measurement_path),'--rss-mib','650','--reserve-mib','128','--timeout','1800','--']+cli
             env=dict(os.environ,PYTHONUNBUFFERED='1')
@@ -240,7 +244,10 @@ def main(argv=None):
     p.add_argument('--focal-ratio',type=float,default=None)
     p.add_argument('--viewer-port',type=int,default=8080)
     p.add_argument('--viewer-public-url',required=True,help='URL reachable in the user browser, without token')
+    add_arguments(p)
     a=p.parse_args(argv)
+    try:BackendConfig.from_args(a)
+    except ValueError as exc:p.error(str(exc))
     if a.resume_scene and a.resume_stream:p.error('Choose one saved scene or stream')
     if a.resume_scene and not a.resume_clip:p.error('--resume-scene requires --resume-clip')
     if bool(a.calibration)==bool(a.focal_ratio): p.error('Choose measured --calibration or explicit approximate --focal-ratio')

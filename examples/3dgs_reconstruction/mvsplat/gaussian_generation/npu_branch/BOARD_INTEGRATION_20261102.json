@@ -1,0 +1,249 @@
+{
+  "date": "2026-11-02",
+  "evidence": "physical ARM/NPU/FPGA and actual browser",
+  "complete": true,
+  "scope": "One public video, fixed 128x128, 32768 Gaussians; three held-out views; no new camera capture",
+  "npu_scope": [
+    "backbone_cnn"
+  ],
+  "full_network_on_npu": false,
+  "tensor_gate_passed": false,
+  "image_qualified": true,
+  "cases": {
+    "warm_cpu_v1": {
+      "scene_preparation_seconds": 29.317353870000034,
+      "inference_seconds": 15.738668970000163,
+      "preheat_record_only": 44.6129271100001,
+      "npu_executed": false,
+      "context_sha256": "8f01469ed479d249550121b6bb12b920b7e1af8063a2eaf25ccf2c721df21d87",
+      "peak_tree_rss_mib": 611.59765625,
+      "min_available_mib": 294.19140625
+    },
+    "warm_npu_v1": {
+      "scene_preparation_seconds": 28.50853314999995,
+      "inference_seconds": 15.057518419999951,
+      "preheat_record_only": 54.70315229999983,
+      "npu_executed": true,
+      "context_sha256": "8f01469ed479d249550121b6bb12b920b7e1af8063a2eaf25ccf2c721df21d87",
+      "peak_tree_rss_mib": 611.01953125,
+      "min_available_mib": 256.953125
+    },
+    "warm_npu_overlap3_v1": {
+      "scene_preparation_seconds": 24.35596953000004,
+      "inference_seconds": 16.038424830000167,
+      "preheat_record_only": 54.80109642999969,
+      "npu_executed": true,
+      "context_sha256": "8f01469ed479d249550121b6bb12b920b7e1af8063a2eaf25ccf2c721df21d87",
+      "peak_tree_rss_mib": 623.12109375,
+      "min_available_mib": 228.0546875
+    }
+  },
+  "browser": {
+    "passed": true,
+    "actual_board": true,
+    "errors": [],
+    "frames": [
+      {
+        "label": "dragged",
+        "request": {
+          "yaw": 3.3,
+          "pitch": -1.95,
+          "distance": 1.030454533953517,
+          "pan_x": 0,
+          "pan_y": 0,
+          "request_id": 2
+        },
+        "native_rgb_ms": 53.09,
+        "browser_display_ms": 75.7,
+        "playwright_click_to_display_ms": 93.06790000000001,
+        "capture_source": "displayed canvas PNG",
+        "png_sha256": "2aaf3641633fdc40f6309b9979396f87839d5cdaa92022bcb980ad68d03d1e41"
+      },
+      {
+        "label": "1",
+        "request": {
+          "yaw": -6,
+          "pitch": 0,
+          "distance": 1,
+          "pan_x": 0,
+          "pan_y": 0,
+          "request_id": 5
+        },
+        "native_rgb_ms": 50.64,
+        "browser_display_ms": 69.7,
+        "playwright_click_to_display_ms": 88.0942,
+        "capture_source": "displayed canvas PNG",
+        "png_sha256": "a3349c7cd90070c7f09f28a0dcab7292b4b039170c22ff723808134d6000340e"
+      },
+      {
+        "label": "2",
+        "request": {
+          "yaw": 0,
+          "pitch": 0,
+          "distance": 1,
+          "pan_x": 0,
+          "pan_y": 0,
+          "request_id": 8
+        },
+        "native_rgb_ms": 51.61,
+        "browser_display_ms": 70.6,
+        "playwright_click_to_display_ms": 91.61590000000001,
+        "capture_source": "displayed canvas PNG",
+        "png_sha256": "a36ce98ca91c73a66032f5353ddfa036fe7ffa64e21a35149678994630f8ae21"
+      },
+      {
+        "label": "3",
+        "request": {
+          "yaw": 6,
+          "pitch": 2,
+          "distance": 1,
+          "pan_x": 0,
+          "pan_y": 0,
+          "request_id": 11
+        },
+        "native_rgb_ms": 50.59,
+        "browser_display_ms": 70.5,
+        "playwright_click_to_display_ms": 92.8098,
+        "capture_source": "displayed canvas PNG",
+        "png_sha256": "5745f07500e5cabacf61182d82ecfd1c624531fd0b3852b023836691b792c1a1"
+      },
+      {
+        "label": "4",
+        "request": {
+          "yaw": 3,
+          "pitch": -2,
+          "distance": 1,
+          "pan_x": 0,
+          "pan_y": 0,
+          "request_id": 14
+        },
+        "native_rgb_ms": 51.01,
+        "browser_display_ms": 69.9,
+        "playwright_click_to_display_ms": 87.048,
+        "capture_source": "displayed canvas PNG",
+        "png_sha256": "baf3ef8c51837dd0de9b1ac68274aca199137998c460e4ce6c71ade0f1324fe5"
+      },
+      {
+        "label": "5",
+        "request": {
+          "yaw": 0,
+          "pitch": 0,
+          "distance": 1,
+          "pan_x": 0,
+          "pan_y": 0,
+          "request_id": 17
+        },
+        "native_rgb_ms": 51.73,
+        "browser_display_ms": 70.6,
+        "playwright_click_to_display_ms": 87.91640000000007,
+        "capture_source": "displayed canvas PNG",
+        "png_sha256": "a36ce98ca91c73a66032f5353ddfa036fe7ffa64e21a35149678994630f8ae21"
+      }
+    ],
+    "checks": [
+      "local drag and zoom do not submit FPGA requests",
+      "confirmed camera IDs match six actual FPGA responses",
+      "128x128 complete PNG frames",
+      "different camera images differ",
+      "desktop two columns",
+      "320px layout has no horizontal overflow",
+      "orderly server quit"
+    ],
+    "pipeline_badge": "NPU 参与高斯推理 → FPGA 渲染"
+  },
+  "input_sha256": null,
+  "power": "not measured",
+  "hardware_changed": false,
+  "next": "Same-schedule CPU control, then NPU depth coverage and independent scene validation",
+  "same_context_all_video_cases": true,
+  "qualification_views": {
+    "frame_000007.png": {
+      "npu_vs_cpu": {
+        "psnr_db": 55.32928315933448,
+        "ssim": 0.9993096776318526,
+        "mae": 0.0005322425194035947,
+        "max_abs_error": 0.08235294117647063
+      },
+      "cpu_vs_truth": {
+        "psnr_db": 20.103308336651168,
+        "ssim": 0.8018765047415483,
+        "mae": 0.06338951759089052,
+        "max_abs_error": 0.8705882352941177
+      },
+      "npu_vs_truth": {
+        "psnr_db": 20.11465900408755,
+        "ssim": 0.8020440664706879,
+        "mae": 0.06328156913807191,
+        "max_abs_error": 0.8705882352941177
+      },
+      "truth_psnr_drop_db": -0.011350667436381912,
+      "truth_ssim_drop": -0.00016756172913967582,
+      "target_sha256": "4c754e6ed05956ae807b93a76b9d319fdd30af6fec499ac80b278c24ed87f957",
+      "camera_sha256": "99abe8c330853cf3cfb2b1e2ef6b3dde288d61e97ff51ea1d839653311152b3b",
+      "live_frame_ms": 50.559570000132226
+    },
+    "frame_000015.png": {
+      "npu_vs_cpu": {
+        "psnr_db": 56.396360942235155,
+        "ssim": 0.9993020924280638,
+        "mae": 0.000516524969362745,
+        "max_abs_error": 0.0431372549019608
+      },
+      "cpu_vs_truth": {
+        "psnr_db": 20.210329314997967,
+        "ssim": 0.8342630038282568,
+        "mae": 0.043004573248570266,
+        "max_abs_error": 0.9803921568627451
+      },
+      "npu_vs_truth": {
+        "psnr_db": 20.217913600320713,
+        "ssim": 0.8342328367848321,
+        "mae": 0.04301749834048202,
+        "max_abs_error": 0.9803921568627451
+      },
+      "truth_psnr_drop_db": -0.007584285322746354,
+      "truth_ssim_drop": 3.016704342473364e-05,
+      "target_sha256": "596c3dd364f7bfc5bf7919ecf4e246123444fe1750d5b10789c8c8b93d373679",
+      "camera_sha256": "6851984da37b3e4e1294803f4136824f9c9aa0f4ede33c6453858b0385ccc348",
+      "live_frame_ms": 49.49209000005794
+    },
+    "frame_000022.png": {
+      "npu_vs_cpu": {
+        "psnr_db": 54.72244583673373,
+        "ssim": 0.9992824950661342,
+        "mae": 0.0005541832618464051,
+        "max_abs_error": 0.08235294117647063
+      },
+      "cpu_vs_truth": {
+        "psnr_db": 24.177819515186677,
+        "ssim": 0.8442717748824858,
+        "mae": 0.0350079305810866,
+        "max_abs_error": 0.8039215686274509
+      },
+      "npu_vs_truth": {
+        "psnr_db": 24.182139900368355,
+        "ssim": 0.8442412971620632,
+        "mae": 0.03503106809129902,
+        "max_abs_error": 0.8039215686274509
+      },
+      "truth_psnr_drop_db": -0.004320385181678432,
+      "truth_ssim_drop": 3.0477720422639187e-05,
+      "target_sha256": "d2d08fe862d4f7571dc3d880b81b8a16ff7cf62e7ec014d48f8629c63ca7c606",
+      "camera_sha256": "18c6c99acc4c9e506e47b6cc5933f8332c6d692a6069ce127a13e1e1d414c8e1",
+      "live_frame_ms": 51.510389999975814
+    }
+  },
+  "video_first_frame_quality": {
+    "psnr_db": 50.475120874651154,
+    "ssim_rgb_gaussian_11_sigma1p5_valid": 0.998682223992719,
+    "mae": 0.0010845109528186273,
+    "max_abs_error": 0.1568627450980392
+  },
+  "archive": {
+    "complete": true,
+    "bytes": 110384330,
+    "sha256": "b4195f5736936faa44082b77d0079b2bd1a7cd68420e1d20564f8e1530051700",
+    "members": 1791,
+    "dereference": false
+  }
+}

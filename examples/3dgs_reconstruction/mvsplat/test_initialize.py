@@ -3,7 +3,8 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+from types import SimpleNamespace
 import threading
 import struct
 import hashlib
@@ -16,6 +17,24 @@ from initialize.model_runtime import ModelRuntime
 from initialize.renderer_runtime import framebuffer_rgb, frozen_renderer_module
 from warm_pipeline import overlap_prepare_infer
 from video_input.receipt import receive_file
+from initialize.session import worker_environment
+
+
+class WorkerEnvironmentTests(unittest.TestCase):
+    def test_npu_defaults_include_qualified_input_switch_workaround(self):
+        with patch.dict("os.environ", {"LD_PRELOAD": "host-only.so"}, clear=True):
+            env = worker_environment()
+        self.assertEqual(env["MGS_NPU_SETTLE_BACKBONE"], "1")
+        self.assertEqual(env["MGS_NPU_DDR_GUARD_MIB"], "64")
+        self.assertEqual(env["OMP_NUM_THREADS"], "1")
+        self.assertNotIn("LD_PRELOAD", env)
+
+    def test_explicit_diagnostic_override_does_not_change_parent(self):
+        import os
+        with patch.dict("os.environ", {"MGS_NPU_SETTLE_BACKBONE": "0"}, clear=True):
+            env = worker_environment()
+            self.assertEqual(env["MGS_NPU_SETTLE_BACKBONE"], "0")
+            self.assertNotIn("MGS_NPU_DDR_GUARD_MIB", os.environ)
 
 
 class FramebufferTests(unittest.TestCase):
@@ -143,6 +162,31 @@ class OverlapTests(unittest.TestCase):
 
 
 class GaussianHandoffTests(unittest.TestCase):
+    def test_synthetic_warmup_cannot_publish_or_cache_a_scene(self):
+        """A pre-video forward must not become a real video's Gaussian result."""
+        runtime = ModelRuntime.__new__(ModelRuntime)
+        runtime.torch = MagicMock()
+        runtime.partition_runtime = None
+        runtime._pending_gaussians = runtime._pending_archive = None
+        gaussian = dict(means=np.zeros((1, 1, 3), np.float32),
+                        covariances=np.eye(3, dtype=np.float32)[None, None],
+                        harmonics=np.zeros((1, 1, 3, 25), np.float32),
+                        opacities=np.array([[0.5]], np.float32))
+        fields = {}
+        for key, value in gaussian.items():
+            tensor = MagicMock()
+            tensor.__getitem__.return_value.detach.return_value.numpy.return_value = value[0]
+            fields[key] = tensor
+        runtime.model = MagicMock(return_value=SimpleNamespace(**fields))
+        record = runtime.warm_kernels()
+        self.assertEqual(record['discarded_gaussians'], 1)
+        self.assertFalse(record['scene_published'])
+        self.assertEqual(record['training_steps'], 0)
+        self.assertIsNone(runtime._pending_gaussians)
+        self.assertIsNone(runtime._pending_archive)
+        with self.assertRaisesRegex(ValueError, 'No validated'):
+            runtime.take_gaussians('a real video must run inference first')
+
     def test_deferred_archive_is_exact_and_rejects_changed_parameters(self):
         gaussian = dict(means=np.zeros((1, 3), np.float32),
                         covariances=np.eye(3, dtype=np.float32)[None],

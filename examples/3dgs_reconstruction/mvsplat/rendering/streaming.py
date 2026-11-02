@@ -21,6 +21,13 @@ class SceneExchange:
                         model_age_seconds=None if self.source_time is None else max(0,time.monotonic()-self.source_time),
                         fatal_error=self.failure)
 
+    def preview(self):
+        """Bounded selector data in the exact orbit reference used by render_view."""
+        with self.lock:
+            points = [] if self.rows is None else self.rows[::max(1,(len(self.rows)+1499)//1500),:3].tolist()
+            return dict(base=self.base,focus_distance=self.focus,points=points,version=self.version,
+                        generation=self.state.get('generation',{}))
+
     def publish(self, rows, base, means, source_time, commit=None):
         rows=np.ascontiguousarray(rows,dtype='<f4')
         if rows.ndim!=2 or rows.shape[1]!=62 or not 0<len(rows)<=1000000 or not np.isfinite(rows).all():

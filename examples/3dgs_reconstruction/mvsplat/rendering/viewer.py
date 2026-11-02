@@ -9,68 +9,7 @@ import cv2
 import numpy as np
 
 
-PAGE = r'''<!doctype html><html lang="zh-CN"><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>3DGS 场景</title>
-<style>
-:root{color-scheme:light dark;font-family:system-ui,sans-serif}body{max-width:800px;margin:24px auto;padding:0 16px}
-canvas{display:block;width:100%;max-width:640px;background:#555;touch-action:none;image-rendering:auto}
-.controls{display:flex;flex-wrap:wrap;gap:16px;margin:16px 0}label{display:flex;align-items:center;gap:8px}
-button,input{font:inherit}button{padding:8px 14px}#status{min-height:2em}input{max-width:160px}
-body.streaming #view{width:256px;max-width:100%;margin:auto}body.streaming #cloud{max-width:480px;margin:auto}body.streaming h1{font-size:22px}
-</style><h1>3DGS 场景</h1><p>拖动画面旋转；滚轮缩放；按住 Shift 拖动平移。</p>
-<canvas id="view" width="128" height="128" aria-label="重建场景；也可使用下方滑块调整视角"></canvas>
-<div class="controls"><label>水平角度<input id="yaw" type="range" min="-30" max="30" value="0"></label>
-<label>俯仰角度<input id="pitch" type="range" min="-20" max="20" value="0"></label>
-<label>远近<input id="distance" type="range" min="0.6" max="1.5" step="0.01" value="1"></label>
-<button id="reset">初始视角</button><button id="quit">结束会话</button></div><p id="status" role="status"></p>
-<section id="live-panel" hidden><p id="live-status" role="status"></p><p>局部稀疏点云与轨迹（拖动旋转；尺度为单目相对单位）</p><canvas id="cloud" width="480" height="270"></canvas></section>
-<script>
-const token=new URLSearchParams(location.hash.slice(1)).get('token')||'';
-const canvas=document.getElementById('view'), ctx=canvas.getContext('2d'), status=document.getElementById('status');
-const fields=['yaw','pitch','distance'], state={yaw:0,pitch:0,distance:1,pan_x:0,pan_y:0};
-let revision=0, busy=false, stopped=false, pointer=null;
-let liveVersion=0,cloudState=null,cloudYaw=0,cloudPitch=0,cloudPointer=null;
-const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
-function sync(){for(const key of fields)document.getElementById(key).value=state[key];}
-async function request(path,body){const r=await fetch(path,{method:'POST',headers:{'Authorization':'Bearer '+token,
-  'Content-Type':'application/json'},body:JSON.stringify(body)}); if(!r.ok)throw Error(await r.text());return r;}
-async function draw(){if(busy||stopped)return;busy=true;const id=revision;
-  try{const response=await request('/render',{...state,request_id:id});const blob=await response.blob();
-    const image=await createImageBitmap(blob);canvas.width=image.width;canvas.height=image.height;
-    ctx.drawImage(image,0,0);image.close();status.textContent='原生分辨率 '+canvas.width+'×'+canvas.height+
-      ' · 本次渲染 '+response.headers.get('X-Render-Ms')+' ms';
-  }catch(error){status.textContent=error.message;}finally{busy=false;if(id!==revision&&!stopped)draw();}}
-function changed(){revision++;sync();draw();}
-function cloudDraw(){if(!cloudState)return;const c=document.getElementById('cloud'),g=c.getContext('2d');g.fillStyle='#111827';g.fillRect(0,0,c.width,c.height);
- const points=cloudState.points||[],trajectory=cloudState.trajectory||[],all=points.concat(trajectory);if(!all.length)return;
- const center=[0,1,2].map(k=>all.reduce((s,p)=>s+p[k],0)/all.length),cs=Math.cos(cloudYaw),sn=Math.sin(cloudYaw),cp=Math.cos(cloudPitch),sp=Math.sin(cloudPitch);
- const xy=p=>{const x=p[0]-center[0],y=p[1]-center[1],z=p[2]-center[2],rx=cs*x+sn*z,rz=-sn*x+cs*z;return [rx,cp*y-sp*rz]};
- const projected=all.map(xy),extent=Math.max(1e-5,...projected.flat().map(Math.abs)),scale=110/extent;
- const screen=p=>{const q=xy(p);return [240+q[0]*scale,135+q[1]*scale]};g.fillStyle='#62b8ff';
- for(const p of points){const q=screen(p);g.fillRect(q[0],q[1],2,2)}g.strokeStyle='#ffc052';g.beginPath();
- trajectory.forEach((p,i)=>{const q=screen(p);i?g.lineTo(...q):g.moveTo(...q)});g.stroke();}
-const cloud=document.getElementById('cloud');cloud.onpointerdown=e=>{cloudPointer=[e.clientX,e.clientY];cloud.setPointerCapture(e.pointerId)};
-cloud.onpointermove=e=>{if(!cloudPointer)return;cloudYaw+=(e.clientX-cloudPointer[0])*.01;cloudPitch+=(e.clientY-cloudPointer[1])*.01;cloudPointer=[e.clientX,e.clientY];cloudDraw()};cloud.onpointerup=()=>cloudPointer=null;
-async function livePoll(){if(stopped)return;try{const r=await fetch('/state',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
- if(r.ok){cloudState=await r.json();document.body.classList.add('streaming');document.getElementById('live-panel').hidden=false;
- const labels={warming:'模型预热中',sampling:'等待下一组有效视角',geometry:'估计位姿与点云',inference:'生成高斯模型',publishing:'校验并更新场景',stopping:'正在完成当前更新',stopped:'采集已结束',error:'更新已停止'};
- document.getElementById('live-status').textContent=(labels[cloudState.phase]||cloudState.phase)+' · 模型版本 '+cloudState.version+
- (cloudState.model_age_seconds===null?'':' · 数据滞后 '+cloudState.model_age_seconds.toFixed(1)+' 秒')+(cloudState.message?' · '+cloudState.message:'');cloudDraw();
- if(cloudState.has_scene&&cloudState.version!==liveVersion){liveVersion=cloudState.version;changed()}}}catch(e){document.getElementById('live-status').textContent=e.message}setTimeout(livePoll,1000)}
-livePoll();
-for(const key of fields)document.getElementById(key).addEventListener('input',e=>{state[key]=Number(e.target.value);changed();});
-canvas.addEventListener('pointerdown',e=>{pointer={id:e.pointerId,x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);});
-canvas.addEventListener('pointermove',e=>{if(!pointer||pointer.id!==e.pointerId)return;
-  const dx=e.clientX-pointer.x,dy=e.clientY-pointer.y;pointer.x=e.clientX;pointer.y=e.clientY;
-  if(e.shiftKey){state.pan_x=clamp(state.pan_x-dx/1000,-.25,.25);state.pan_y=clamp(state.pan_y-dy/1000,-.25,.25);}
-  else{state.yaw=clamp(state.yaw+dx*.15,-30,30);state.pitch=clamp(state.pitch-dy*.15,-20,20);}changed();});
-for(const event of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(event,()=>pointer=null);
-canvas.addEventListener('wheel',e=>{e.preventDefault();state.distance=clamp(state.distance*Math.exp(e.deltaY*.001),.6,1.5);changed();},{passive:false});
-document.getElementById('reset').onclick=()=>{Object.assign(state,{yaw:0,pitch:0,distance:1,pan_x:0,pan_y:0});changed();};
-document.getElementById('quit').onclick=async()=>{stopped=true;try{await request('/quit',{});status.textContent='会话已结束';}
-  catch(error){stopped=false;status.textContent=error.message;}};
-draw();
-</script></html>'''
+PAGE = Path(__file__).with_name('viewer.html').read_text(encoding='utf-8')
 
 
 def orbit_view(base, controls, focus_distance):
@@ -109,8 +48,9 @@ def orbit_view(base, controls, focus_distance):
     return dict(base, c2w=c2w.tolist())
 
 
-def make_server(renderer, base, focus_distance, host="127.0.0.1", port=8080, *, live=None):
-    """One renderer owner and one active request. Browser coalesces pending views."""
+def make_server(renderer, base, focus_distance, host="127.0.0.1", port=8080, *, live=None,
+                points=None, generation=None):
+    """One renderer owner. Browser selects locally, submits only on confirmation."""
     if live is None and (not np.isfinite(focus_distance) or focus_distance <= 0):
         raise ValueError("Invalid scene focus distance")
     from gaussian_generation.adapter import camera_bytes
@@ -118,6 +58,12 @@ def make_server(renderer, base, focus_distance, host="127.0.0.1", port=8080, *, 
     if live is None:camera_bytes(base)
     token = secrets.token_urlsafe(24)
     stats = dict(frames=0, errors=0, render_ms_total=0.)
+    def selected_points(values):
+        data = np.asarray(values if values is not None else [], dtype=np.float64).reshape(-1, 3)
+        data = data[np.isfinite(data).all(axis=1)]
+        step = max(1, (len(data)+1499)//1500)
+        return data[::step].tolist()
+    preview_points = selected_points(points)
 
     class Handler(BaseHTTPRequestHandler):
         def setup(self):
@@ -140,6 +86,19 @@ def make_server(renderer, base, focus_distance, host="127.0.0.1", port=8080, *, 
         def do_GET(self):
             if self.path == "/":
                 self.reply(200, PAGE.encode("utf-8"), "text/html; charset=utf-8")
+            elif self.path in ('/viewer.js', '/viewer.css'):
+                content = 'application/javascript; charset=utf-8' if self.path.endswith('.js') else 'text/css; charset=utf-8'
+                self.reply(200, Path(__file__).with_name(self.path[1:]).read_bytes(), content)
+            elif self.path == '/scene':
+                if not secrets.compare_digest(self.headers.get('Authorization',''),'Bearer '+token):
+                    self.reply(403,b'Invalid session token');return
+                if live is not None:
+                    record = live.preview()
+                else:
+                    record = dict(base=base, focus_distance=focus_distance, points=preview_points,
+                                  version=0, generation=generation or {})
+                record['renderer_backend'] = getattr(renderer, 'configuration', {}).get('backend', 'unknown')
+                self.reply(200,json.dumps(record,allow_nan=False).encode(),'application/json; charset=utf-8')
             elif self.path=='/state' and live is not None:
                 if not secrets.compare_digest(self.headers.get('Authorization',''),'Bearer '+token):
                     self.reply(403,b'Invalid session token');return
@@ -206,7 +165,9 @@ def serve_scene(renderer, prepared, inference, *, host="127.0.0.1", port=8080):
     positive = depth[np.isfinite(depth) & (depth > 0)]
     if not len(positive):
         raise ValueError("No positive scene depth for viewer")
-    server = make_server(renderer, base, float(np.median(positive)), host, port)
+    generation_record = json.loads((Path(inference)/'inference.json').read_text(encoding='utf-8'))
+    generation = {k:generation_record.get(k) for k in ('backend','npu_executed','inference_seconds')}
+    server = make_server(renderer, base, float(np.median(positive)), host, port, points=means, generation=generation)
     shown_host = "<board-IP>" if host == "0.0.0.0" else host
     print(json.dumps(dict(event="VIEWER_READY", url=f"http://{shown_host}:{server.server_port}/#token={server.session_token}",
                           width=base["width"], height=base["height"])), flush=True)

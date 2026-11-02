@@ -51,7 +51,20 @@ def validate_bundle(root, names, backend):
     return data, result
 
 
-def to_wire(array, spec, out=None):
+def _blocked_copy(out, source, rows=8, channels=16):
+    """Copy a layout view in cache-sized tiles, without a full float temporary.
+
+    Both arguments have the same logical shape. Tiling the height and channel
+    dimensions bounds the active source/destination cache lines on ARM cores.
+    """
+    for n in range(source.shape[0]):
+        for h in range(0, source.shape[1], rows):
+            for c in range(0, source.shape[3], channels):
+                np.copyto(out[n, h:h+rows, :, c:c+channels],
+                          source[n, h:h+rows, :, c:c+channels], casting='no')
+
+
+def to_wire(array, spec, out=None, *, blocked=False):
     if spec["layout"] == "NHWC":
         array = array.transpose(0, 2, 3, 1)
     elif spec["layout"] != "NCHW":
@@ -65,7 +78,10 @@ def to_wire(array, spec, out=None):
         raise ValueError("Destination buffer ABI mismatch")
     # A transposed view can be copied directly into IPC. Do not materialize a
     # second, full-size contiguous NHWC float buffer first.
-    np.copyto(out, array, casting="no")
+    if blocked and spec['layout'] == 'NHWC':
+        _blocked_copy(out, array)
+    else:
+        np.copyto(out, array, casting="no")
     return out
 
 

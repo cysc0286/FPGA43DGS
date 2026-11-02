@@ -1,5 +1,6 @@
 """Probe checkpoint-backed depth modules without changing the production graph."""
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import time
@@ -13,18 +14,70 @@ from gaussian_generation.runtime import ModelRuntime
 MODULES = ("corr_refine_net", "refine_unet")
 
 
+def profile_cpu(runtime, context_path, out, repeats):
+    """Time actual nested stages; inclusive parent times must not be added."""
+    from gaussian_generation.npu_branch.catalog import PARTITIONS, locate
+    stages = {name: locate(runtime.model, name) for name in PARTITIONS}
+    stages.update(backbone=runtime.model.backbone,
+                  corr_refine_net=runtime.model.depth_predictor.corr_refine_net,
+                  refine_unet=runtime.model.depth_predictor.refine_unet,
+                  depth=runtime.model.depth_predictor,
+                  gaussian_adapter=runtime.model.gaussian_adapter)
+    rounds, hooks, starts, current = [], [], {}, {}
+    def begin(name):
+        def hook(module, inputs):
+            starts[name] = time.perf_counter()
+        return hook
+    def end(name):
+        def hook(module, inputs, output):
+            current[name] = time.perf_counter()-starts[name]
+        return hook
+    for name, module in stages.items():
+        hooks.extend((module.register_forward_pre_hook(begin(name)),
+                      module.register_forward_hook(end(name))))
+    try:
+        with np.load(context_path, allow_pickle=False) as data:
+            context = {k: runtime.torch.from_numpy(data[k].copy()).unsqueeze(0) for k in data.files}
+        for index in range(repeats):
+            current.clear()
+            start = time.perf_counter()
+            with runtime.torch.inference_mode():
+                g = runtime.model(context, global_step=300000, deterministic=True)
+            seconds = time.perf_counter()-start
+            arrays = {k: getattr(g, k).detach().numpy() for k in
+                      ('means', 'covariances', 'harmonics', 'opacities')}
+            rounds.append(dict(round=index, inference_seconds=seconds, stages_seconds=dict(current),
+                finite=all(np.isfinite(v).all() for v in arrays.values()),
+                gaussian_hashes={k: hashlib.sha256(v.tobytes()).hexdigest() for k,v in arrays.items()}))
+            save(out/'cpu_profile.json', dict(npu_executed=False, threads=runtime.threads,
+                scope='Actual board CPU reference; nested stage durations are inclusive', rounds=rounds))
+            print(json.dumps(rounds[-1]), flush=True)
+            del g, arrays
+    finally:
+        for hook in hooks:
+            hook.remove()
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--context", type=Path, required=True)
     parser.add_argument("--weights", type=Path, required=True)
     parser.add_argument("--vendor", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--threads", type=int, default=2)
+    parser.add_argument("--profile-only", action="store_true", help="Measure actual CPU stage costs; do not export")
+    parser.add_argument("--repeats", type=int, default=3)
     args = parser.parse_args(argv)
     args.out.mkdir(parents=True, exist_ok=False)
     result = {"weight_sha256": sha(args.weights), "context_sha256": sha(args.context),
               "modules": {}, "npu_executed": False}
     save(args.out / "result.json", result)
-    runtime = ModelRuntime(args.weights, args.vendor, 2, 16, args.out / "runtime")
+    if args.repeats < 1:
+        parser.error('At least one repetition required')
+    runtime = ModelRuntime(args.weights, args.vendor, args.threads, 16, args.out / "runtime")
+    if args.profile_only:
+        profile_cpu(runtime, args.context, args.out, args.repeats)
+        return
     torch = runtime.torch
     import onnx
     captured = {}

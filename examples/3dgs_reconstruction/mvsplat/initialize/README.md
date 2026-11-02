@@ -1,4 +1,20 @@
+# 2026-11-02：推荐 NPU 整合状态
+
+当前推荐显式 --backend npu --partitions backbone_cnn depth_head，沿用四模块结构。
+worker 默认启用 backbone 两次 SDK 执行规避、64 MiB PL DDR 隔离；默认仍检查输入切换。
+TF32 严格门槛未通过，需当前资产绑定的三留出视角原生 FPGA 图像 receipt；错误不静默回退。
+--warm-kernels 是额外合成前向预热候选，默认关闭；真实视频前预热与视频输入只记录。
+当前软件、实板边界和复跑命令以 [联调说明](../FINAL_INTEGRATION_20261102.md) 为准。
+下文各日期及未接入/未验收表述为历史记录，不覆盖当前主线；新场景网页恢复待接板补验。
+
 # 视频前预热与常驻渲染候选
+
+2026-11-02：新增显式 `--warm-kernels`，在 READY 前对固定合成图像对执行一次完整前向，
+丢弃所有高斯；不读输入视频、不更新权重、不发布或缓存测试场景。
+实际视频仍完整推理，预热时间仅记录。NPU 在该次前向后再次执行实际 worker 的数值及输入切换检查，
+失败不发布 READY。该选项默认关闭；本轮未证明它能降低视频结束到首帧时间。
+backbone 输入切换规避策略和实测边界见
+[NPU 增量实测](../gaussian_generation/npu_branch/NPU_DEPTH_VALIDATION_20261102.md)。
 
 2026-11-01：新增存储清理按钮，当前录像、最近成功场景和来源录像受保护，录制/重建期间拒绝清理。
 生命周期入口增加 `--resume-scene 场景目录 --resume-clip capture.json`，校验来源和保存文件后，

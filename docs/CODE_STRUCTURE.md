@@ -1,6 +1,6 @@
 # 当前代码结构
 
-更新：2026-11-01。**四个业务模块都在 `examples/3dgs_reconstruction/mvsplat/` 下。**
+更新：2026-11-02。**四个业务模块都在 `examples/3dgs_reconstruction/mvsplat/` 下。**
 `initialize` 是视频前预热；两个协调文件管理调用顺序。它们不是第五种重建算法。
 目录约束见 [项目要求](PROJECT_REQUIREMENTS.md)，执行规则同时写入根目录 `AGENTS.md`。
 
@@ -8,7 +8,7 @@
 |---|---|---|---|
 | 视频输入 | `video_input/receipt.py`、`video_input/decode.py` | 接收已完成视频、选帧、缩放，保留原帧索引 | CPU |
 | 位姿估计 | `pose_estimation/geometry.py` | 两视图 SIFT/匹配/Essential/三角化，留出视角 PnP | CPU |
-| 高斯生成 | `gaussian_generation/runtime.py`、`adapter.py` | 固定权重前向、参数校验、协方差/SH/相机 ABI 转换 | 当前 CPU；NPU 另行验证 |
+| 高斯生成 | `gaussian_generation/runtime.py`、`adapter.py` | 固定权重前向、参数校验、协方差/SH/相机 ABI 转换 | NPU backbone＋depth_head；CPU 其余网络 |
 | 渲染 | `rendering/runtime.py`、`live_renderer.cpp`、`render_main/` | 常驻场景、投影、排序、FPGA 求值合成、返回 RGB | CPU＋FPGA |
 
 2026-10-29：视频输入内部新增 `capture.py`（Linux UVC 短片）与 `calibration.py`（针孔标定/校正）；
@@ -18,7 +18,7 @@
 `initialize/camera_ui.py` 只协调既有录制、重建子进程与查看器生命周期。
 11 月 1 日后续获准实现连续框架：`video_input/streaming.py` 为有界近期 JPEG 窗口及上下文序列化；
 `pose_estimation/streaming.py` 固定初始参考并复用地标定位；`rendering/streaming.py` 串行交换模型和相机请求；
-`initialize/streaming.py` 协调一个常驻 CPU 模型、采样器和 FPGA 所有者。
+`initialize/streaming.py` 协调一个常驻模型、采样器和 FPGA 所有者；后端共用 NPU 配置，但长期 NPU 连续更新尚未实板验收。
 局部点云随有效窗口更新，高斯按批更新，均不构成全局 SLAM 或全局高斯融合。
 操作和当前验证见 [连续框架](../examples/3dgs_reconstruction/mvsplat/video_input/STREAMING.md)。
 本轮已做真实短片按钮和原实拍片段重建回归，详见
@@ -48,7 +48,6 @@
 | `archive/history_20261009/` | 823 个历史文件条目的 ZIP 与哈希清单，含失败/负收益结果 |
 | `archive/local_workspace_20261009/` | 本机未跟踪原始实验、日志、生成物；忽略、不上传 |
 | `mvsplat/rendering/render_branch/` | 保留的 PipeGS HGR v4 独立冻结候选；主线不调用 |
-| `mvsplat/gaussian_generation/npu_branch/` | 高斯生成内部的 NPU 候选、编译与诊断；默认不启用，没有新的数值验收 |
 | `releases/3dgs_renderer_v1_20260928/` | 较早冻结回退及现有 CPU 契约依赖，不能当作最新位流 |
 | `reconstruction/modules/` | 原 COLMAP/OpenSplat 文件接口兼容；`contracts.py` 仍被导出/校验使用 |
 | `reconstruction/bounded/`、`npu_frontend/` | 历史训练/特征实验，不进入主线协作源码包 |
@@ -65,9 +64,9 @@ mvsplat/
 ├── video_input/
 ├── pose_estimation/
 ├── gaussian_generation/
-│   ├── runtime.py              当前 CPU 生成器
+│   ├── runtime.py              常驻模型，CPU 或经资格验收的 NPU 子图
 │   ├── adapter.py              Gaussian/相机到渲染 ABI
-│   └── npu_branch/             NPU 生成候选及其编译、诊断和验证工具
+│   └── npu_branch/             推荐 NPU 后端及编译、诊断、资格验收
 └── rendering/
     ├── render_main/            当前四路冻结主线
     └── render_branch/          独立 HGR 候选，默认不调用
@@ -75,7 +74,10 @@ mvsplat/
 
 原 `mvsplat/npu/` 已整体迁入 `gaussian_generation/npu_branch/`，不保留同级副本。
 从 `mvsplat` 目录调用 NPU 工具时使用 `python -m gaussian_generation.npu_branch.<工具名>`。
-`--backend npu` 仍是原后端选择参数；默认仍为 `cpu`，数值检查规则没有放宽。
+推荐显式 --backend npu --partitions backbone_cnn depth_head；通用 CLI 默认 cpu 保留兼容。
+严格逐元素门槛仍保留。TF32 未通过时需当前资产绑定的三留出视角图像验收，
+并通过 B,B,A,A 输入切换；详见 [联调说明](../examples/3dgs_reconstruction/mvsplat/FINAL_INTEGRATION_20261102.md)。
+默认 backbone 两次真实 SDK 执行规避输入残留，累计全部成本，不代表根因修复。
 板端候选同步和独立诊断脚本随同更新包路径，不能只上传一个脚本后依赖旧 `npu/`。
 新增代码、测试和候选实现都必须归入对应现有模块；新独立模块需先获用户明确批注。
 
@@ -86,4 +88,7 @@ mvsplat/
 主线源码包不含权重、SDK、模型、BOOT/bit；完整硬件复建/回退资产请另取 `rendering/render_main/`。
 历史恢复必须解压到新目录，按 [归档说明](../archive/history_20261009/README.md) 操作。
 
-本轮只有静态整理与文件完整性核对，未运行功能测试、编译或上板测速。
+2026-11-02 合并继续保留原四模块，网页拆成 rendering/viewer.py、viewer.html、viewer.css、viewer.js，
+共用后端配置位于 gaussian_generation/npu_branch/config.py，initialize 仅协调生命周期。
+源码包纳入网页静态资源；不包含私人输入、生成资产、权重或 SDK。
+本次执行软件回归和冻结文件检查，未新增上板测速；实板证据及待补项见 MAINLINE.md。

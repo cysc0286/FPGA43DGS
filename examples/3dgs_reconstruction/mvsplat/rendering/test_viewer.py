@@ -70,7 +70,16 @@ class ViewerTests(unittest.TestCase):
             return urlopen(request, timeout=5)
         try:
             with urlopen(url, timeout=5) as response:
+                self.assertIn('id="confirm"', response.read().decode())
+            with urlopen(url+'/viewer.js', timeout=5) as response:
                 self.assertIn("createImageBitmap", response.read().decode())
+            with self.assertRaises(HTTPError) as denied:
+                urlopen(url+'/scene',timeout=5)
+            self.assertEqual(denied.exception.code,403)
+            with urlopen(Request(url+'/scene',headers={'Authorization':'Bearer '+server.session_token}),timeout=5) as response:
+                selected=json.load(response)
+                self.assertEqual(selected['base'],BASE)
+                self.assertEqual(selected['focus_distance'],10)
             with self.assertRaises(HTTPError) as failed:
                 post("/render", {}, "bad")
             self.assertEqual(failed.exception.code, 403)

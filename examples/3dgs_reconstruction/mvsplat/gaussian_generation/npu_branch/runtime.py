@@ -8,6 +8,7 @@ import sys
 import threading
 import time
 import numpy as np
+from collections import deque
 
 from common import save, sha
 from gaussian_generation.npu_branch.artifacts import from_wire, to_wire, validate_bundle
@@ -33,7 +34,7 @@ class PartitionRuntime:
         self.backend, self.timeout = backend, timeout
         self.work = Path(work).resolve()
         self.work.mkdir(parents=True, exist_ok=False)
-        self.buffers, self.calls, self.sequence = {}, [], 0
+        self.buffers, self.calls, self.sequence = {}, deque(maxlen=256), 0
         self.arena = None
         self.lock = threading.Lock()
         self.responses = queue.Queue()
@@ -103,7 +104,11 @@ class PartitionRuntime:
             if list(value.shape) != part["meta"]["input_shape"]:
                 raise ValueError("Static network shape mismatch for " + name)
             input_buffer, output_buffer = self.buffers[name]
-            to_wire(value, part["input"], out=input_buffer)
+            # Real-board transport probe: tiling helps large channel planes,
+            # while Python tile dispatch slows small boundaries. Exact copies
+            # only; never reduce precision or skip finite/shape validation.
+            blocked = value.nbytes >= 4*1024**2
+            to_wire(value, part["input"], out=input_buffer, blocked=blocked)
             packed = time.perf_counter()
             command = dict(command="FORWARD", name=name, sequence=self.sequence)
             try:
@@ -121,7 +126,8 @@ class PartitionRuntime:
                 finished = time.perf_counter()
                 response.update(pack_seconds=packed-started, wait_seconds=received-packed,
                     unpack_seconds=finished-received, total_seconds=finished-started,
-                    input_bytes=input_buffer.nbytes, output_bytes=output_buffer.nbytes)
+                    input_bytes=input_buffer.nbytes, output_bytes=output_buffer.nbytes,
+                    input_layout_copy='cache_tiled' if blocked else 'numpy_direct')
                 self.calls.append(response)
                 self.sequence += 1
                 return result
@@ -144,14 +150,19 @@ class PartitionRuntime:
         for name in self.parts:
             replace(model, name, Partition(name))
 
-    def report(self, start=0):
-        calls = self.calls[start:]
+    def report(self, start=None):
+        if self.calls and start is not None and start < self.calls[0]['sequence']:
+            raise ValueError('Requested partition report was evicted; persist per-inference receipts')
+        calls = [c for c in self.calls if start is None or c['sequence'] >= start]
         return dict(backend=self.backend, npu_executed=any(c["npu_executed"] for c in calls),
             selected_partitions=list(self.parts), cpu_partitions=[n for n in PARTITIONS if n not in self.parts],
             cpu_remainder="camera geometry, cost-volume warping, multi-view attention, refinement UNets, Gaussian adapter",
             calls=calls, total_partition_seconds=sum(c["total_seconds"] for c in calls),
+            history_scope='bounded recent calls; complete per-inference slices are persisted separately',
+            total_call_count=self.sequence, history_first_sequence=calls[0]['sequence'] if calls else None,
             transfer_bytes=sum(c["input_bytes"]+c["output_bytes"] for c in calls),
             transfer_bytes_scope="logical partition I/O bytes; not measured DMA/DDR traffic or all memory copies",
+            validation=getattr(self, 'validation', None),
             **self.provenance)
 
     def close(self):
