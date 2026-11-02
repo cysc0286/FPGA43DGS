@@ -5,13 +5,14 @@
 
 ## 推荐生成与渲染配置
 
-离线优化增量：Gaussian head 逐层/单视图/通道补齐候选与可选 C++ SFB 输出拷贝，
-均未替换正式分区或既有桥接库；本轮无新增板端成绩。
-[候选机制、ICraft 逐层结果与复测顺序](examples/3dgs_reconstruction/mvsplat/gaussian_generation/npu_branch/NPU_HEAD_CANDIDATES_20261102.md)。
+最新实板增量：两个局部头已按固定分块接入，随后完成持久存储和内存核验。
+当前保留同协议最快合格场景，其他完整试验回收但保留指标/失败摘要；
+首帧单次 20.075 s、换视角 6 帧平均 41.84 ms，SDK 严格张量门槛仍失败。
+[当前部署、内存、画质和验证边界](examples/3dgs_reconstruction/mvsplat/initialize/NPU_MEMORY_STORAGE_20261102.md)。
 
-- 生成：显式 --backend npu --partitions backbone_cnn depth_head，使用 ICraft 3.36.1；
+- 生成：显式 --backend npu --partitions backbone_cnn depth_head to_gaussians to_disparity，使用 ICraft 3.36.1；
   其余网络、注意力、代价体及位姿仍在 CPU，并非全网 NPU。
-- NPU worker 默认预留 64 MiB PL DDR 工作区，并为 backbone 请求执行两次 SDK forward，
+- NPU worker 默认预留 64 MiB PL DDR 工作区，并为 backbone 及已迁移局部头块执行两次 SDK forward，
   丢弃首份输出、计入两次成本，避免已发现的上一输入残留；SDK 根因尚未关闭。
 - 就绪：交错 oracle、B,B,A,A 输入切换、输出有限性及实际运行身份检查；
   TF32 严格 tensor 门槛不通过时，须使用同资产原生 FPGA 三留出视角生成的图像 receipt。
@@ -25,6 +26,9 @@ initialize 只负责视频前预热和生命周期；scene_preparation.py / warm
 通用 CLI 默认 cpu 仅为兼容旧调用；推荐 NPU 命令见根 README，不会在 NPU 失败后静默回退。
 
 ## 时间与画质
+
+本节后续表格为较早同日历史。最新四子图、四组存储/内存对照及持久部署结果见上述本轮记录，
+不同时间/缓存条件不能作为同轮显著加速证据。
 
 预热及视频输入只记录。场景准备从 VIDEO_COMPLETE 到首个留出视角 FRAME_COMPLETE；
 换视角从已有场景的相机提交到完整 RGB 返回，浏览器封装/网络/绘制另计。

@@ -33,6 +33,7 @@ SOURCE_FILES = ("common.py", "measure.py", "export.py", "scene_preparation.py",
                 "initialize/renderer_runtime.py", "initialize/attributes_resident.cpp",
                 "initialize/validate_resident.py", "initialize/group_sort_resident.cpp",
                 "initialize/run.py", "initialize/session.py",
+                "initialize/result_retention.py",
                 "rendering/__init__.py", "rendering/runtime.py",
                 "rendering/pipeline_adapter.py", "rendering/mainline.json",
                 "video_input/prepare.py", "warm_pipeline.py")

@@ -54,6 +54,26 @@ class TreeRssTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError,'PSS'):
                 tree_memory(100,root,True)
 
+    def test_reaped_address_space_keeps_live_descendant_accounting(self):
+        for state in ('Z (zombie)', 'X (dead)'):
+            with self.subTest(state=state), tempfile.TemporaryDirectory() as directory:
+                root=Path(directory)
+                self.process(root,100,1)
+                with (root/'100/status').open('a') as stream:
+                    stream.write('State:\t'+state+'\n')
+                self.process(root,101,100,1024)
+                (root/'101/smaps_rollup').write_text('Pss: 512 kB\n')
+                self.assertEqual(tree_memory(100,root,True)['pss_bytes'],512*1024)
+
+    def test_live_zero_rss_without_pss_is_still_an_error(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            self.process(root,100,1,0)
+            with (root/'100/status').open('a') as stream:
+                stream.write('State:\tS (sleeping)\n')
+            with self.assertRaisesRegex(RuntimeError,'PSS'):
+                tree_memory(100,root,True)
+
 
 if __name__=='__main__':
     unittest.main()

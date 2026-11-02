@@ -41,6 +41,16 @@ def tree_memory(pid, proc_root=Path('/proc'), include_pss=False):
                     (proc/'smaps_rollup').read_text().splitlines() if ':' in line)
                 pss += int(fields['Pss'].split()[0])*1024
             except (OSError, ValueError, KeyError):
+                # A zombie can retain /proc/PID after its address space has
+                # gone away. Re-read its state rather than treating a live
+                # unreadable process (including zero-RSS ones) as zero PSS.
+                try:
+                    status = dict(line.split(':',1) for line in
+                        (proc/'status').read_text().splitlines() if ':' in line)
+                    if status.get('State', '').strip().split()[0:1] in (['Z'], ['X']):
+                        continue
+                except (OSError, ValueError):
+                    pass
                 if proc.exists():
                     raise RuntimeError('Cannot account process PSS: '+str(current))
                 # A child may exit between status and rollup sampling.

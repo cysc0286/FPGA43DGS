@@ -7,10 +7,48 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import sys
 import time
 
 from common import FULL_WEIGHT_SHA256, SOURCE_COMMIT, load_gaussians, save, sha, validate_gaussians
+
+
+def execution_source_hashes(active_vendor):
+    """Bind qualification to code actually used, including generated schedules.
+
+    Relative, stable keys keep relocation valid while any upstream patch,
+    runtime handoff change or memory-scheduling change invalidates old receipts.
+    """
+    active_vendor = Path(active_vendor)
+    hashes = {f.relative_to(active_vendor).as_posix(): sha(f)
+              for f in sorted((active_vendor/'src').rglob('*.py'))}
+    root = Path(__file__).resolve().parents[1]
+    for relative in ('gaussian_generation/runtime.py', 'memory_runtime.py'):
+        hashes['runtime/'+relative] = sha(root/relative)
+    return hashes
+
+
+def persistent_archive_directory(directory):
+    """Reject RAM-backed output when disk spooling is requested to save RAM."""
+    if not sys.platform.startswith('linux'):
+        return  # Local Windows checks use a regular filesystem directory.
+    target = Path(directory).resolve()
+    candidates = []
+    for line in Path('/proc/self/mountinfo').read_text().splitlines():
+        left, separator, right = line.partition(' - ')
+        if not separator:
+            continue
+        fields = left.split()
+        if len(fields) < 5 or not right.split():
+            continue
+        mount = Path(re.sub(r'\\([0-7]{3})', lambda m: chr(int(m[1], 8)), fields[4]))
+        if target == mount or mount in target.parents:
+            candidates.append((len(mount.parts), right.split()[0]))
+    if not candidates:
+        raise ValueError('Cannot verify persistent Gaussian archive filesystem')
+    if max(candidates)[1] in ('tmpfs', 'ramfs', 'hugetlbfs'):
+        raise ValueError('Disk Gaussian archive policy requires persistent storage, not a RAM filesystem')
 
 
 class ModelRuntime:
@@ -55,8 +93,7 @@ class ModelRuntime:
         self.model, self.torch, self.np = model, torch, np
         self.weights, self.vendor = weights, vendor
         self.weight_hash = sha(weights)
-        self.source_hashes = {str(f.relative_to(vendor)): sha(f)
-                              for f in sorted((vendor / "src").rglob("*.py"))}
+        self.source_hashes = execution_source_hashes(active_vendor)
         self.threads, self.depth_chunk = threads, depth_chunk
         self.config = cfg
         self.load_seconds = time.perf_counter() - started
@@ -105,6 +142,46 @@ class ModelRuntime:
         gc.collect()
         return record
 
+    def prepare_gaussian_archive(self, out, gaussians):
+        """Bind an exact NPZ digest without necessarily retaining its full bytes.
+
+        Disk mode deliberately trades pre-frame filesystem I/O for lower
+        resident memory. It is explicit and rejects Linux RAM filesystems;
+        memory mode keeps the original first-frame scheduling and fallback.
+        """
+        if self._pending_archive is not None:
+            raise ValueError('Previous Gaussian archive audit is pending')
+        policy = os.environ.get('MGS_GAUSSIAN_ARCHIVE', 'memory')
+        out = Path(out)
+        if policy == 'memory':
+            with io.BytesIO() as stream:
+                self.np.savez(stream, **gaussians)
+                payload = stream.getvalue()
+            digest = hashlib.sha256(payload).hexdigest()
+            archive_bytes = resident_bytes = len(payload)
+        elif policy == 'disk':
+            persistent_archive_directory(out)
+            payload = out/'.gaussians.pending.npz'
+            created = False
+            try:
+                with payload.open('xb') as stream:
+                    created = True
+                    self.np.savez(stream, **gaussians)
+                digest = sha(payload)
+                archive_bytes = payload.stat().st_size
+            except BaseException:
+                # Only remove the partial file this call created, never an
+                # earlier pending artifact or a successfully published scene.
+                if created:
+                    payload.unlink(missing_ok=True)
+                raise
+            resident_bytes = 0
+        else:
+            raise ValueError('Unknown Gaussian archive policy: '+policy)
+        self._pending_archive = (out, payload, digest)
+        return dict(policy=policy, sha256=digest, archive_bytes=archive_bytes,
+                    resident_payload_bytes=resident_bytes)
+
     def persist_gaussians(self, record, gaussians):
         """Finish the deferred artifact audit after the first frame is available."""
         pending = self._pending_archive
@@ -112,12 +189,17 @@ class ModelRuntime:
             raise ValueError("No matching deferred Gaussian archive")
         out, payload, digest = pending
         started = time.perf_counter()
-        (out/"gaussians.npz").write_bytes(payload)
-        if sha(out/"gaussians.npz") != digest:
+        disk_archive = isinstance(payload, Path)
+        archive = payload if disk_archive else out/'gaussians.npz'
+        if not disk_archive:
+            archive.write_bytes(payload)
+        if sha(archive) != digest:
             raise ValueError("Deferred Gaussian archive hash mismatch")
-        restored = load_gaussians(out/"gaussians.npz")
+        restored = load_gaussians(archive)
         if any(not self.np.array_equal(restored[key], gaussians[key]) for key in restored):
             raise ValueError("Deferred Gaussian archive differs from rendered parameters")
+        if disk_archive:
+            archive.replace(out/'gaussians.npz')
         self._pending_archive = None
         record["archive_verified"] = True
         record["deferred_archive_seconds"] = time.perf_counter()-started
@@ -184,11 +266,9 @@ class ModelRuntime:
             if backend == 'npu' and not self.partition_runtime.report(call_start)['npu_executed']:
                 raise ValueError('NPU requested but no actual NPU partition executed')
             if defer_archive:
-                stream = io.BytesIO()
-                self.np.savez(stream, **result)
-                payload = stream.getvalue()
-                digest = hashlib.sha256(payload).hexdigest()
-                self._pending_archive = (out, payload, digest)
+                archive = self.prepare_gaussian_archive(out, result)
+                digest = archive['sha256']
+                record['gaussian_archive'] = archive
             else:
                 self.np.savez(out / "gaussians.npz", **result)
                 load_gaussians(out / "gaussians.npz")

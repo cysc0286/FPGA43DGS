@@ -1,0 +1,855 @@
+{
+  "schema": "npu_memory_storage_v1",
+  "date": "2026-11-02",
+  "branch": "feat/npu-memory-storage-20261102",
+  "base_commit": "0405f09",
+  "protocol": "public_nyu_four_npu_128_chunk16_pss700_reserve96_v1",
+  "scope": "One public fixed video; 2 contexts, 3 held-out qualification views; 128x128, all 32768 Gaussians, 128 depth candidates, chunk16. One complete run per configuration; no significance or general-scene claim.",
+  "storage": {
+    "installer_files": 299,
+    "installer_bytes_archived_and_removed": 2148346742,
+    "archive_verified": true,
+    "archive_manifest_sha256": "ebc34232f987b43f728396fe1f91121f076afc295032cc9e3e6a500d948e78c3",
+    "archive_outside_git": "D:\\ADProjects\\FPGA for 3DGS\\outputs\\npu_memory_storage_20261102\\software_package_archive",
+    "arm_mamba_removed": false,
+    "ram_reclaim": {
+      "target": "/dev/shm/fpga43dgs_npu_head_20261102",
+      "active_references": [],
+      "durable_files_verified": 266,
+      "files": 2033,
+      "logical_bytes": 155798400,
+      "before_used": 160878592,
+      "removed": true,
+      "after_used": 0,
+      "reclaimed_tmpfs_bytes": 160878592
+    },
+    "persistent_deployment": "/root/fpga43dgs_reconstruction/npu_mainline_20261102",
+    "final_df_available_kib": 1991748,
+    "final_deployment_mib_rounded": 99
+  },
+  "comparison": {
+    "protocol": "public_nyu_four_npu_128_chunk16_pss700_reserve96_v1",
+    "trials": {
+      "baseline_persistent": {
+        "complete": true,
+        "scene_preparation_seconds": 20.559196599999268,
+        "inference_seconds": 11.597723169999881,
+        "preheat_seconds": 113.69102935999945,
+        "peak_pss_mib": 524.1162109375,
+        "minimum_available_mib": 116.3359375,
+        "measurement_status": "passed",
+        "gaussian_sha256": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+        "gaussian_fields": {
+          "means": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          },
+          "covariances": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          },
+          "harmonics": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          },
+          "opacities": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          }
+        },
+        "gaussian_exact": true,
+        "frame_exact": true,
+        "rgb_exact": true,
+        "image_quality_vs_baseline": {
+          "psnr_db": null,
+          "ssim_rgb_gaussian_11_sigma1p5_valid": 1.0,
+          "mae": 0.0,
+          "max_abs_error": 0.0
+        },
+        "archive": {
+          "policy": "original_memory"
+        },
+        "first_frame_rgb_sha256": "beabcee35be80beb7459b6f0236deaa7d6a387b72278e9e7dec10d75d5845750",
+        "marker": {
+          "schema": "memory_trial_v1",
+          "protocol": "public_nyu_four_npu_128_chunk16_pss700_reserve96_v1",
+          "state": "complete",
+          "correctness_passed": true,
+          "finite_passed": true,
+          "image_passed": true,
+          "memory_passed": true,
+          "scene_preparation_seconds": 20.559196599999268,
+          "memory": {
+            "peak_pss_mib": 524.1162109375,
+            "minimum_available_mib": 116.3359375
+          },
+          "hashes": {
+            "gaussians": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+            "first_frame_rgb": "beabcee35be80beb7459b6f0236deaa7d6a387b72278e9e7dec10d75d5845750"
+          },
+          "config": {
+            "archive": "original_memory",
+            "depth_candidates": 128,
+            "depth_chunk": 16,
+            "gaussians": 32768,
+            "size": 128,
+            "partitions": [
+              "backbone_cnn",
+              "depth_head",
+              "to_gaussians",
+              "to_disparity"
+            ],
+            "threads": 3,
+            "prepare_threads": 1,
+            "overlap": true,
+            "inactive_tmpfs_reclaimed": false
+          }
+        }
+      },
+      "optimized_memory": {
+        "complete": true,
+        "scene_preparation_seconds": 21.05552175000048,
+        "inference_seconds": 11.981113890000415,
+        "preheat_seconds": 111.13396767999984,
+        "peak_pss_mib": 503.0048828125,
+        "minimum_available_mib": 128.6640625,
+        "measurement_status": "passed",
+        "gaussian_sha256": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+        "gaussian_fields": {
+          "means": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          },
+          "covariances": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          },
+          "harmonics": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          },
+          "opacities": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          }
+        },
+        "gaussian_exact": true,
+        "frame_exact": true,
+        "rgb_exact": true,
+        "image_quality_vs_baseline": {
+          "psnr_db": null,
+          "ssim_rgb_gaussian_11_sigma1p5_valid": 1.0,
+          "mae": 0.0,
+          "max_abs_error": 0.0
+        },
+        "archive": {
+          "policy": "memory",
+          "sha256": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+          "archive_bytes": 11535354,
+          "resident_payload_bytes": 11535354
+        },
+        "first_frame_rgb_sha256": "beabcee35be80beb7459b6f0236deaa7d6a387b72278e9e7dec10d75d5845750",
+        "marker": {
+          "schema": "memory_trial_v1",
+          "protocol": "public_nyu_four_npu_128_chunk16_pss700_reserve96_v1",
+          "state": "complete",
+          "correctness_passed": true,
+          "finite_passed": true,
+          "image_passed": true,
+          "memory_passed": true,
+          "scene_preparation_seconds": 21.05552175000048,
+          "memory": {
+            "peak_pss_mib": 503.0048828125,
+            "minimum_available_mib": 128.6640625
+          },
+          "hashes": {
+            "gaussians": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+            "first_frame_rgb": "beabcee35be80beb7459b6f0236deaa7d6a387b72278e9e7dec10d75d5845750"
+          },
+          "config": {
+            "archive": "memory",
+            "depth_candidates": 128,
+            "depth_chunk": 16,
+            "gaussians": 32768,
+            "size": 128,
+            "partitions": [
+              "backbone_cnn",
+              "depth_head",
+              "to_gaussians",
+              "to_disparity"
+            ],
+            "threads": 3,
+            "prepare_threads": 1,
+            "overlap": true,
+            "inactive_tmpfs_reclaimed": false
+          }
+        }
+      },
+      "optimized_disk": {
+        "complete": true,
+        "scene_preparation_seconds": 22.538355079999747,
+        "inference_seconds": 12.58381369000017,
+        "preheat_seconds": 112.2898958800015,
+        "peak_pss_mib": 511.400390625,
+        "minimum_available_mib": 120.40625,
+        "measurement_status": "passed",
+        "gaussian_sha256": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+        "gaussian_fields": {
+          "means": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          },
+          "covariances": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          },
+          "harmonics": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          },
+          "opacities": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          }
+        },
+        "gaussian_exact": true,
+        "frame_exact": true,
+        "rgb_exact": true,
+        "image_quality_vs_baseline": {
+          "psnr_db": null,
+          "ssim_rgb_gaussian_11_sigma1p5_valid": 1.0,
+          "mae": 0.0,
+          "max_abs_error": 0.0
+        },
+        "archive": {
+          "policy": "disk",
+          "sha256": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+          "archive_bytes": 11535354,
+          "resident_payload_bytes": 0
+        },
+        "first_frame_rgb_sha256": "beabcee35be80beb7459b6f0236deaa7d6a387b72278e9e7dec10d75d5845750",
+        "marker": {
+          "schema": "memory_trial_v1",
+          "protocol": "public_nyu_four_npu_128_chunk16_pss700_reserve96_v1",
+          "state": "complete",
+          "correctness_passed": true,
+          "finite_passed": true,
+          "image_passed": true,
+          "memory_passed": true,
+          "scene_preparation_seconds": 22.538355079999747,
+          "memory": {
+            "peak_pss_mib": 511.400390625,
+            "minimum_available_mib": 120.40625
+          },
+          "hashes": {
+            "gaussians": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+            "first_frame_rgb": "beabcee35be80beb7459b6f0236deaa7d6a387b72278e9e7dec10d75d5845750"
+          },
+          "config": {
+            "archive": "disk",
+            "depth_candidates": 128,
+            "depth_chunk": 16,
+            "gaussians": 32768,
+            "size": 128,
+            "partitions": [
+              "backbone_cnn",
+              "depth_head",
+              "to_gaussians",
+              "to_disparity"
+            ],
+            "threads": 3,
+            "prepare_threads": 1,
+            "overlap": true,
+            "inactive_tmpfs_reclaimed": false
+          }
+        }
+      },
+      "optimized_after_reclaim": {
+        "complete": true,
+        "scene_preparation_seconds": 20.07522084000084,
+        "inference_seconds": 11.532041360000221,
+        "preheat_seconds": 106.9301444899993,
+        "peak_pss_mib": 565.072265625,
+        "minimum_available_mib": 288.44140625,
+        "measurement_status": "passed",
+        "gaussian_sha256": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+        "gaussian_fields": {
+          "means": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          },
+          "covariances": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          },
+          "harmonics": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          },
+          "opacities": {
+            "exact": true,
+            "max_abs": 0.0,
+            "rmse": 0.0
+          }
+        },
+        "gaussian_exact": true,
+        "frame_exact": true,
+        "rgb_exact": true,
+        "image_quality_vs_baseline": {
+          "psnr_db": null,
+          "ssim_rgb_gaussian_11_sigma1p5_valid": 1.0,
+          "mae": 0.0,
+          "max_abs_error": 0.0
+        },
+        "archive": {
+          "policy": "memory",
+          "sha256": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+          "archive_bytes": 11535354,
+          "resident_payload_bytes": 11535354
+        },
+        "first_frame_rgb_sha256": "beabcee35be80beb7459b6f0236deaa7d6a387b72278e9e7dec10d75d5845750",
+        "marker": {
+          "schema": "memory_trial_v1",
+          "protocol": "public_nyu_four_npu_128_chunk16_pss700_reserve96_v1",
+          "state": "complete",
+          "correctness_passed": true,
+          "finite_passed": true,
+          "image_passed": true,
+          "memory_passed": true,
+          "scene_preparation_seconds": 20.07522084000084,
+          "memory": {
+            "peak_pss_mib": 565.072265625,
+            "minimum_available_mib": 288.44140625
+          },
+          "hashes": {
+            "gaussians": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+            "first_frame_rgb": "beabcee35be80beb7459b6f0236deaa7d6a387b72278e9e7dec10d75d5845750"
+          },
+          "config": {
+            "archive": "memory",
+            "depth_candidates": 128,
+            "depth_chunk": 16,
+            "gaussians": 32768,
+            "size": 128,
+            "partitions": [
+              "backbone_cnn",
+              "depth_head",
+              "to_gaussians",
+              "to_disparity"
+            ],
+            "threads": 3,
+            "prepare_threads": 1,
+            "overlap": true,
+            "inactive_tmpfs_reclaimed": true
+          }
+        }
+      }
+    },
+    "best": "optimized_after_reclaim"
+  },
+  "qualification": {
+    "complete": true,
+    "gaussian_repeat_exact": true,
+    "strict_tensor_passed": false,
+    "partitions": [
+      "backbone_cnn",
+      "depth_head",
+      "to_gaussians",
+      "to_disparity"
+    ],
+    "views": {
+      "frame_000007.png": {
+        "npu_vs_cpu": {
+          "psnr_db": 44.32754269673556,
+          "ssim": 0.9956127885430194,
+          "mae": 0.0029201133578431373,
+          "max_abs_error": 0.10588235294117643
+        },
+        "cpu_vs_truth": {
+          "psnr_db": 20.10330791919121,
+          "ssim": 0.801890509096982,
+          "mae": 0.06338959737540849,
+          "max_abs_error": 0.8705882352941177
+        },
+        "npu_vs_truth": {
+          "psnr_db": 20.097368744122093,
+          "ssim": 0.8015559786622128,
+          "mae": 0.06349124285130718,
+          "max_abs_error": 0.8666666666666667
+        },
+        "truth_psnr_drop_db": 0.0059391750691162315,
+        "truth_ssim_drop": 0.00033453043476916466,
+        "target_sha256": "4c754e6ed05956ae807b93a76b9d319fdd30af6fec499ac80b278c24ed87f957",
+        "camera_sha256": "99abe8c330853cf3cfb2b1e2ef6b3dde288d61e97ff51ea1d839653311152b3b",
+        "live_frame_ms": 44.12589999992633
+      },
+      "frame_000015.png": {
+        "npu_vs_cpu": {
+          "psnr_db": 43.694316376802114,
+          "ssim": 0.9954106977910964,
+          "mae": 0.003300366370506536,
+          "max_abs_error": 0.15294117647058825
+        },
+        "cpu_vs_truth": {
+          "psnr_db": 20.210331026498423,
+          "ssim": 0.8342562412515921,
+          "mae": 0.043004573248570266,
+          "max_abs_error": 0.9803921568627451
+        },
+        "npu_vs_truth": {
+          "psnr_db": 20.246028343646426,
+          "ssim": 0.8340619040387122,
+          "mae": 0.04277990004595588,
+          "max_abs_error": 0.9803921568627451
+        },
+        "truth_psnr_drop_db": -0.03569731714800284,
+        "truth_ssim_drop": 0.0001943372128799803,
+        "target_sha256": "596c3dd364f7bfc5bf7919ecf4e246123444fe1750d5b10789c8c8b93d373679",
+        "camera_sha256": "6851984da37b3e4e1294803f4136824f9c9aa0f4ede33c6453858b0385ccc348",
+        "live_frame_ms": 52.63086999912048
+      },
+      "frame_000022.png": {
+        "npu_vs_cpu": {
+          "psnr_db": 42.75931249984573,
+          "ssim": 0.9956045658955801,
+          "mae": 0.003538523156658497,
+          "max_abs_error": 0.19999999999999996
+        },
+        "cpu_vs_truth": {
+          "psnr_db": 24.177802802674748,
+          "ssim": 0.8442678114622061,
+          "mae": 0.03500832950367647,
+          "max_abs_error": 0.8039215686274509
+        },
+        "npu_vs_truth": {
+          "psnr_db": 24.18793490807098,
+          "ssim": 0.8443511860090629,
+          "mae": 0.03492974175347222,
+          "max_abs_error": 0.8117647058823529
+        },
+        "truth_psnr_drop_db": -0.010132105396230884,
+        "truth_ssim_drop": -8.337454685680701e-05,
+        "target_sha256": "d2d08fe862d4f7571dc3d880b81b8a16ff7cf62e7ec014d48f8629c63ca7c606",
+        "camera_sha256": "18c6c99acc4c9e506e47b6cc5933f8332c6d692a6069ce127a13e1e1d414c8e1",
+        "live_frame_ms": 42.87020999981905
+      }
+    },
+    "provenance": {
+      "bundle_sha256": "749f59b1b13cffc7220e07b1f17bcddc86920d034fd8f4bc14aeffe12bfa49f0",
+      "oracle_manifest_sha256": "102796c85b107ed3e99eaf57dee3a2e75da4a2ed887f37561f2e0f2e71626c59",
+      "bridge_sha256": "3d5c11b4249e142c8a816eb89c7fdf1bb501e4b18bdea4d51578a8055ccd6ffe"
+    },
+    "source_files": {
+      "src/config.py": "417432dd172886eaace198b8f5d88e6afcda5b9fa1d47d0cd96cf83c89c0144d",
+      "src/dataset/__init__.py": "b1f2e9625d5f6ac3c46f8f9a2adac2e9637af6e639df6005b61ab28d274cd9ca",
+      "src/dataset/data_module.py": "a3dffe3ef4f439607fc8edd1e10830e769e34298f4cbd24b36976f4ac9e26f7e",
+      "src/dataset/dataset.py": "ea2058c23db2038b8c5e2e336a2f59918b70d30102e6855cd9f8627a325ad0a1",
+      "src/dataset/dataset_re10k.py": "341a215fd0907cbdb1163607b05b14790fafe754cabb7efafc1a767589d45ec9",
+      "src/dataset/shims/augmentation_shim.py": "921a2244b9236de3081edb74bb011c80f20db0a837b689a83c398b229ceb0d9b",
+      "src/dataset/shims/bounds_shim.py": "c0800b87f27ae2ba1881eae781504c2fc92777fd407d005b29aea1b61aed3154",
+      "src/dataset/shims/crop_shim.py": "549fc820c836aecd7e4651eceb89e82e1e347a97010d268aa4e8b92528350783",
+      "src/dataset/shims/patch_shim.py": "61db2781840585eddbffe427d625c66620b2bb5c5138b49debf301ebfd2a0708",
+      "src/dataset/types.py": "c36fc53ba823bd1221943509878665f1699346805dc2c539572e339ffdff47de",
+      "src/dataset/validation_wrapper.py": "43c220b4315b6968213abe4f3d4793772a48ba796d338b71a941fb4e6afd22f8",
+      "src/dataset/view_sampler/__init__.py": "ff018c4c955ae57db34506a2c9dd69804356e54ca90d989e011ed641864a00de",
+      "src/dataset/view_sampler/view_sampler.py": "7de5c44e1341cfda80173a8dd3f284ee0bdb3ef1045117c94c96ebb13256ee68",
+      "src/dataset/view_sampler/view_sampler_all.py": "a537c53be15b1738b13f1daabf5150078b47c95f90120ede0720417488c984e0",
+      "src/dataset/view_sampler/view_sampler_arbitrary.py": "b90ac39078d6b1f663161c14154663658ad8f4e79d7c6e49cefcc761af320d7b",
+      "src/dataset/view_sampler/view_sampler_bounded.py": "a087d36e578f77a2ed5969211c49c0dc72acf0734c1cb1491ca3c4d2883da630",
+      "src/dataset/view_sampler/view_sampler_evaluation.py": "d90fce90b10f0ca31ef84fe77b4bda8f4a387a2be91ead0c74a01d34b3edb175",
+      "src/evaluation/evaluation_cfg.py": "5de0a2481066919ddbf7f516537a94aeca47c8e283cd2ae6724ea8b5ced305af",
+      "src/evaluation/evaluation_index_generator.py": "7af74da1a5d28452d3be38f17933ff3afcbe65e46e4c1cdc8169039ef2d50875",
+      "src/evaluation/metric_computer.py": "a611d49105b640dfb5722aed200712d6b1e54259c12f2072909d0ea8f2c76bbe",
+      "src/evaluation/metrics.py": "1fc75ca9f56e3ba2335ade00ea6466d74dbc7f6421d65d6c498eaf173fc0e2fb",
+      "src/geometry/epipolar_lines.py": "a1d94d2b52280c122f57c55d24e2fbb37f961ae0207b82b1a936c23f8388b5fd",
+      "src/geometry/projection.py": "09b66ad4120f1d14deb7a365ab780425fc7f246af69b2aaabb981fe9bf9da08e",
+      "src/global_cfg.py": "6f2e24351774e7819e0dd5af6e1133007401f10641ead7d117463bb49a35d8c2",
+      "src/loss/__init__.py": "31833752d8c7156e103653450e4acf0ca9295432509dbbeb49225c67d1da3c66",
+      "src/loss/loss.py": "f59463992108b77dd9273ece48b687011701efbb698d5c1d05200722d91af12f",
+      "src/loss/loss_depth.py": "e4fbfb32e0b5071c854655a9e59c5d4b6902744fd9fdcc1b53ad65bc1a0dc661",
+      "src/loss/loss_lpips.py": "04aaff112695666496c7820c1694550e01c72580762f9e4c50bc1ef1abb73909",
+      "src/loss/loss_mse.py": "e814d698c36eb7adc3b33967894af3a593a2f372980b629015b0d0cf099f035f",
+      "src/main.py": "8f900f1f4eb46f0a203d35a0e84dbbb0d7d504d98cdafc311c914dfc72e55070",
+      "src/misc/LocalLogger.py": "38aff2bb39f35e069ae66c18fe8f7744c5428bd9194fc6dce91b5dcb4752f42c",
+      "src/misc/benchmarker.py": "f7235588f4f9fa7e5d0250dc8d228e3d8a377e7754b867c74cc5663fca2fa507",
+      "src/misc/collation.py": "f268d816cc90d77630bbd8e1e3c8134b6d70d8371978caa9c60637c840c83edd",
+      "src/misc/discrete_probability_distribution.py": "82853afccd5bb2bc49ad43912ab77d06542a3b1f89dc3b40e1c9c8d980687605",
+      "src/misc/heterogeneous_pairings.py": "334bd6fd430b553fb26107aebcda9fefc9e2e92cbe3162cbbed1dc036a8f7454",
+      "src/misc/image_io.py": "0b3a944fc29a3336d2ec4ccdf70af4f3128b1adfa53b91939f7ab45bb91b3c05",
+      "src/misc/nn_module_tools.py": "948fbb99edfaf8226de0f421d0793dae998ea426716d520519c871c1c0a20df0",
+      "src/misc/sh_rotation.py": "11dae6061e4971f3a0b93a2ace4eb39a999526a104a4bb3eec5e179a10026014",
+      "src/misc/step_tracker.py": "bf1e36499ad74d406b1c8380a061da5521bac1e4f9c7523866915712a3297ae5",
+      "src/misc/wandb_tools.py": "3a257b157e0c79ba854b7c7ccee28b82914ef79046fc92315dc057e68a1cbf5c",
+      "src/model/decoder/__init__.py": "e786d5a903ea216f697d2c2c2de87676819fe0045d3cfa61dab8e489e704bb20",
+      "src/model/decoder/cuda_splatting.py": "cfed6bef404b3cbdcaaaff29b019b2b70eb112252d5dad6d5ae1b293d540f255",
+      "src/model/decoder/decoder.py": "e99a56a2ebb7f1d0eee358685b99541ae50d21278e6ea4420f538f574e0b7473",
+      "src/model/decoder/decoder_splatting_cuda.py": "6331a94f3e65d3996255d1a83d9507309b483bb8f1468f9d3facf0dafd890cb8",
+      "src/model/encoder/__init__.py": "75ece7b18148bc6e17586b684272e1af6779a36cdcdba3e662cceb3558bdc32a",
+      "src/model/encoder/backbone/__init__.py": "39f6ce9f3167bb8a2a4e3778630b53f048279049779241e21d9477fc805b19d0",
+      "src/model/encoder/backbone/backbone_multiview.py": "b2b737edf3e5d375fc562be3d4331e6e7472fc92924829bc5bf8aae05873aeea",
+      "src/model/encoder/backbone/multiview_transformer.py": "28c1346c3c0ae3afff92ed23f8bdcece5eafa3bba014617c3ef28eac4efd5033",
+      "src/model/encoder/backbone/unimatch/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/model/encoder/backbone/unimatch/attention.py": "49be72aef4344042a01bd143eb73155326347ab78ce9c60f8cb5459883cf053d",
+      "src/model/encoder/backbone/unimatch/backbone.py": "eb40bddfa236ce678e9d2257ee1e8860b1b2f3acb19273afd80d230823747703",
+      "src/model/encoder/backbone/unimatch/geometry.py": "efaa55c4650771ab1f7380d84684504206ac830179e17a72f2fce67eeada1c8e",
+      "src/model/encoder/backbone/unimatch/matching.py": "4025d2a8c5380f8dcf665ea1609b746bc0cefb3a34861ea40082f320def2015d",
+      "src/model/encoder/backbone/unimatch/position.py": "ff034a0161a4ab1b33574a88e340dbc8ba10062fceee4da59e8029cef349fc7a",
+      "src/model/encoder/backbone/unimatch/reg_refine.py": "099b3ebce2d5457d884b7c3da125d953666d27d66f31e6fe523717ea3f7e390f",
+      "src/model/encoder/backbone/unimatch/transformer.py": "6ecd2eca854976fca2624fe09c3547f2c5eee3dc823b7f05b52772c5694cc661",
+      "src/model/encoder/backbone/unimatch/trident_conv.py": "08189c1c8310953939ad10902a684f64abf5e7ba6dfaed4edb2fdd8964487180",
+      "src/model/encoder/backbone/unimatch/unimatch.py": "dcb38c162727ca4d322138c399176ef88e0a89441a637a0b0622d79a352c5829",
+      "src/model/encoder/backbone/unimatch/utils.py": "1e5511cec7ad8e1cbd209664ac343a49a5116dd7f20cf096e671c724938f0138",
+      "src/model/encoder/common/gaussian_adapter.py": "2fb9622bdebf90e834267853e45aa06952df1e79fc8a3eccfc51bfc80e044cbd",
+      "src/model/encoder/common/gaussians.py": "1e3d0f67eab91231d681f520d46478f51942c5c0c2c71fbc0e747820dc200847",
+      "src/model/encoder/common/sampler.py": "5fe7f88ce7df5d2916f8a6a90795c41607592a2af05df47bc9beb4552103b8a1",
+      "src/model/encoder/costvolume/conversions.py": "f0cc374923fdb83cfdcabea2d92156dfb81e409729db86131714b01e311e5120",
+      "src/model/encoder/costvolume/depth_predictor_multiview.py": "b9406562cd5420c7d48cf42f21186a526c08984fb8a4b479f46b2ef92a50ad96",
+      "src/model/encoder/costvolume/ldm_unet/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/model/encoder/costvolume/ldm_unet/attention.py": "80bfca21fb8d28b77a0215e3d81223b3533fb0288c90f5d67bad90f5548952e7",
+      "src/model/encoder/costvolume/ldm_unet/unet.py": "6a1b862114b1c6993216493dd6fe4cbdc79bcb21e957e9d9db5348ec99bb5405",
+      "src/model/encoder/costvolume/ldm_unet/util.py": "f1961c45a6a2ddd132c8756693af486854610a7deced73d0e5138be47b194c8a",
+      "src/model/encoder/encoder.py": "617c6b07cef00db268a959b6918fe3e0bb72cda9c573807b7ef84367c4a5f20c",
+      "src/model/encoder/encoder_costvolume.py": "e8ad3ad96c9baff024f03aa7ab81c6f165ca23d0d3f02a44aa0b843b606da975",
+      "src/model/encoder/epipolar/epipolar_sampler.py": "b569b9e7e185d9ced4dc0694efe9291ad31aea5f9b5457d8f9e811273978f452",
+      "src/model/encoder/visualization/encoder_visualizer.py": "a1684369fe1a8dd91a7db5faef15dedf918161184747e37f8fac452ebf89d8f0",
+      "src/model/encoder/visualization/encoder_visualizer_costvolume.py": "9e61e43d2958b200631422514c017d1e12affdc801e2ce15076c99f6a3a639d3",
+      "src/model/encoder/visualization/encoder_visualizer_costvolume_cfg.py": "0c989c7d02d0739e5a50d3379a9d8010290213ac8b4f6eb034fafd9c6fcd2368",
+      "src/model/encodings/positional_encoding.py": "0840262468c4031a826638d654ffc7952efe8c47045417e68a15e7fdef3c94b6",
+      "src/model/model_wrapper.py": "67e3043d8a3219779a800ccade95aa7e6f3bb93c2297077950006c5f567862ea",
+      "src/model/ply_export.py": "047229aa442fbe70c7f732b5c0333595d6155e4173da7b1b3b8c5a8c099f8cf7",
+      "src/model/types.py": "a2ab657b288aca1a3ad89fdc0f430ab44a5ac92c6f0395062384cf527ac43467",
+      "src/paper/generate_point_cloud_figure_mvsplat.py": "fec3859d4845d5fc92c58d1eda073164084d3e4befce650ab53a9c33d3e44050",
+      "src/paper/generate_point_cloud_figure_mvsplat_teaser.py": "dbdc790e97f4d24f5aa05a3a53aeb4f947d8a636a73ed0265c34c81f425fc2e1",
+      "src/scripts/compute_metrics.py": "c627d367e13f195e084cf75fcd2358bf4a66f562b418530ce6af7d18ab4fcbca",
+      "src/scripts/convert_dtu.py": "5a5400253b6d01f0bbabfb9be7765bf50fccdf7817f512829c19308209e572e9",
+      "src/scripts/dump_launch_configs.py": "1f906e505eb3cd00e0270934560683c2c5192e395d8e5bd0322ee41493bb5a9a",
+      "src/scripts/generate_dtu_evaluation_index.py": "45fdba3fa59708e221a44e655162bc903b68139947a95099d4f7642896ffbb4b",
+      "src/scripts/generate_evaluation_index.py": "9be9030782bb1070e6bca206e9c2f3d39bb055d165b8c3fa5c4fb52b912a06ba",
+      "src/scripts/generate_video_evaluation_index.py": "45faffaf355d831eb7fdcdc1a92d831fb11561b5ace394296f6346194f82eb13",
+      "src/scripts/test_splatter.py": "04e6c9117416ceeac33a41daa45f7c0040470e7da96813aeffbc5d462e3116a2",
+      "src/scripts/visualize_epipolar_lines.py": "16ff62607abeb0211bb3e4b90350a7483d301be481493aba6e0070ee97e2b52d",
+      "src/visualization/annotation.py": "1fbca3c98cce56a69434b6d1df1b476784fbad0941f82e058cb6f575997d34c2",
+      "src/visualization/camera_trajectory/interpolation.py": "b29e4c9a16c7eb263df1c202218d93c0fd130b0baea0ac3b479ab9005c16b111",
+      "src/visualization/camera_trajectory/spin.py": "46b98b6acdd9000a0b3c13949166430a46b5e30a3c95d8e32ad1896a0e3280a0",
+      "src/visualization/camera_trajectory/wobble.py": "3d78131361c5d197021d82d74ab026e5e1250b0132fe7d206f23f0bebe36c3ef",
+      "src/visualization/color_map.py": "70aecc3c06ff3f66c4a95d3045abc12e65bde818ae6a37673deabee1c195add8",
+      "src/visualization/colors.py": "bf8686cf9c40182b4db760430809282a179edc3bd96ca9a0ef5f0ebefed78409",
+      "src/visualization/drawing/cameras.py": "735b4f3e69ff2f8a9c1f6e21ffde0d0ed3929365f38e1986657bd3a0890b72d8",
+      "src/visualization/drawing/coordinate_conversion.py": "119a1527d760a434660cd9f375e14c7024c94b36bd4bf40f154f78be57ab1750",
+      "src/visualization/drawing/lines.py": "57011f241bc4475418e6ccf3a1c2cd3d462bfe335f75d3f6b18d25eba05cdf2f",
+      "src/visualization/drawing/points.py": "424ff2430ce99c5f295affb467e5c91265902a933732f31299aec9cfe1824a16",
+      "src/visualization/drawing/rendering.py": "d01785e6aeb78feb3938963f07cba6f89bdfc4f3f0655de089de300b8a49892e",
+      "src/visualization/drawing/types.py": "3c0242fbed17d5eb0aec81eebea80bf1444f9fe9f962832d184c782cea7a5d78",
+      "src/visualization/layout.py": "21eaf2f10443bfc6daa9117dfc28f7ad211df090c48b83c33d0b5b55625c96a6",
+      "src/visualization/validation_in_3d.py": "ff79756ea990f5135d18fdf57d3ac281a421666c1f825de75e2f56bbee2aebb0",
+      "src/visualization/vis_depth.py": "ce84c488b9bcfdc27a5487abafbdd858d2a08246f84c52ee8b9f592afd4fc901",
+      "runtime/gaussian_generation/runtime.py": "e7f7fe84944260f95549a334a18538f1152c18922f1ebf1ff3bc5c5bc7e888e2",
+      "runtime/memory_runtime.py": "376a3ba7dc209c4703413f7b3de416a6eae7237de257bc904983ba7c2b9bf646"
+    }
+  },
+  "web": {
+    "complete": true,
+    "frames": [
+      {
+        "request_id": 1,
+        "yaw": 0,
+        "pitch": 0,
+        "render_ms": 45.97,
+        "http_ms": 73.98319989442825,
+        "sha256": "44f74983bae96114fa72fd357b9c8be0198c9ce97b3ec1feeece73de178e4a28"
+      },
+      {
+        "request_id": 2,
+        "yaw": 8,
+        "pitch": -4,
+        "render_ms": 41.51,
+        "http_ms": 54.42369997035712,
+        "sha256": "167526df65935213461c56fa34a36a116053bb800d752574c8310b46b67433cb"
+      },
+      {
+        "request_id": 3,
+        "yaw": -8,
+        "pitch": 3,
+        "render_ms": 40.69,
+        "http_ms": 72.80520000495017,
+        "sha256": "be1a6350c8a707f816210de1ea3ea80490f8d5cf2016bcd6dca66c00a39e9b1b"
+      },
+      {
+        "request_id": 4,
+        "yaw": 0,
+        "pitch": 0,
+        "render_ms": 41.07,
+        "http_ms": 76.56259997747838,
+        "sha256": "44f74983bae96114fa72fd357b9c8be0198c9ce97b3ec1feeece73de178e4a28"
+      },
+      {
+        "request_id": 5,
+        "yaw": 8,
+        "pitch": -4,
+        "render_ms": 41.06,
+        "http_ms": 53.05879993829876,
+        "sha256": "167526df65935213461c56fa34a36a116053bb800d752574c8310b46b67433cb"
+      },
+      {
+        "request_id": 6,
+        "yaw": -8,
+        "pitch": 3,
+        "render_ms": 40.74,
+        "http_ms": 68.03829991258681,
+        "sha256": "be1a6350c8a707f816210de1ea3ea80490f8d5cf2016bcd6dca66c00a39e9b1b"
+      }
+    ],
+    "same_view_exact": true,
+    "different_views_distinct": true,
+    "scope": "PC HTTP request through PNG response; not browser display latency"
+  },
+  "retention": {
+    "retention": {
+      "protocol": "public_nyu_four_npu_128_chunk16_pss700_reserve96_v1",
+      "apply": true,
+      "best": "optimized_after_reclaim",
+      "kept": {
+        "optimized_after_reclaim": "fastest_qualified"
+      },
+      "planned_removals": [
+        "baseline_persistent",
+        "optimized_disk",
+        "optimized_memory",
+        "qualification"
+      ],
+      "removed": [
+        "baseline_persistent",
+        "optimized_disk",
+        "optimized_memory",
+        "qualification"
+      ],
+      "skipped": {
+        "qualification_verified": "unmarked"
+      },
+      "records": [
+        {
+          "name": "baseline_persistent",
+          "marker_sha256": "a009bd1e7513dc8faada7912972a85646c8d71d5c66d4e55443e5dd1a6541275",
+          "protocol": "public_nyu_four_npu_128_chunk16_pss700_reserve96_v1",
+          "state": "complete",
+          "scene_preparation_seconds": 20.559196599999268,
+          "correctness_passed": true,
+          "finite_passed": true,
+          "image_passed": true,
+          "memory_passed": true,
+          "memory": {
+            "peak_pss_mib": 524.1162109375,
+            "minimum_available_mib": 116.3359375
+          },
+          "hashes": {
+            "gaussians": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+            "first_frame_rgb": "beabcee35be80beb7459b6f0236deaa7d6a387b72278e9e7dec10d75d5845750"
+          },
+          "config": {
+            "archive": "original_memory",
+            "depth_candidates": 128,
+            "depth_chunk": 16,
+            "gaussians": 32768,
+            "size": 128,
+            "partitions": [
+              "backbone_cnn",
+              "depth_head",
+              "to_gaussians",
+              "to_disparity"
+            ],
+            "threads": 3,
+            "prepare_threads": 1,
+            "overlap": true,
+            "inactive_tmpfs_reclaimed": false
+          }
+        },
+        {
+          "name": "optimized_after_reclaim",
+          "marker_sha256": "326d8e3928fb29003022f58d2606af9b4678086830628d0d089802b69648fe2e",
+          "protocol": "public_nyu_four_npu_128_chunk16_pss700_reserve96_v1",
+          "state": "complete",
+          "scene_preparation_seconds": 20.07522084000084,
+          "correctness_passed": true,
+          "finite_passed": true,
+          "image_passed": true,
+          "memory_passed": true,
+          "memory": {
+            "peak_pss_mib": 565.072265625,
+            "minimum_available_mib": 288.44140625
+          },
+          "hashes": {
+            "gaussians": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+            "first_frame_rgb": "beabcee35be80beb7459b6f0236deaa7d6a387b72278e9e7dec10d75d5845750"
+          },
+          "config": {
+            "archive": "memory",
+            "depth_candidates": 128,
+            "depth_chunk": 16,
+            "gaussians": 32768,
+            "size": 128,
+            "partitions": [
+              "backbone_cnn",
+              "depth_head",
+              "to_gaussians",
+              "to_disparity"
+            ],
+            "threads": 3,
+            "prepare_threads": 1,
+            "overlap": true,
+            "inactive_tmpfs_reclaimed": true
+          }
+        },
+        {
+          "name": "optimized_disk",
+          "marker_sha256": "e346e577e463d4844eec8d9ceefbdb987b6af13ed645899944f79dc4faae727a",
+          "protocol": "public_nyu_four_npu_128_chunk16_pss700_reserve96_v1",
+          "state": "complete",
+          "scene_preparation_seconds": 22.538355079999747,
+          "correctness_passed": true,
+          "finite_passed": true,
+          "image_passed": true,
+          "memory_passed": true,
+          "memory": {
+            "peak_pss_mib": 511.400390625,
+            "minimum_available_mib": 120.40625
+          },
+          "hashes": {
+            "gaussians": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+            "first_frame_rgb": "beabcee35be80beb7459b6f0236deaa7d6a387b72278e9e7dec10d75d5845750"
+          },
+          "config": {
+            "archive": "disk",
+            "depth_candidates": 128,
+            "depth_chunk": 16,
+            "gaussians": 32768,
+            "size": 128,
+            "partitions": [
+              "backbone_cnn",
+              "depth_head",
+              "to_gaussians",
+              "to_disparity"
+            ],
+            "threads": 3,
+            "prepare_threads": 1,
+            "overlap": true,
+            "inactive_tmpfs_reclaimed": false
+          }
+        },
+        {
+          "name": "optimized_memory",
+          "marker_sha256": "6901da9435360a70e25eb7dd9df37d9cf01f75738f8480b6c66beca0389f7b03",
+          "protocol": "public_nyu_four_npu_128_chunk16_pss700_reserve96_v1",
+          "state": "complete",
+          "scene_preparation_seconds": 21.05552175000048,
+          "correctness_passed": true,
+          "finite_passed": true,
+          "image_passed": true,
+          "memory_passed": true,
+          "memory": {
+            "peak_pss_mib": 503.0048828125,
+            "minimum_available_mib": 128.6640625
+          },
+          "hashes": {
+            "gaussians": "d6e96394c5e67be5690c1ae30121173ccd25be221c2d502d7e0a77987acd28bc",
+            "first_frame_rgb": "beabcee35be80beb7459b6f0236deaa7d6a387b72278e9e7dec10d75d5845750"
+          },
+          "config": {
+            "archive": "memory",
+            "depth_candidates": 128,
+            "depth_chunk": 16,
+            "gaussians": 32768,
+            "size": 128,
+            "partitions": [
+              "backbone_cnn",
+              "depth_head",
+              "to_gaussians",
+              "to_disparity"
+            ],
+            "threads": 3,
+            "prepare_threads": 1,
+            "overlap": true,
+            "inactive_tmpfs_reclaimed": false
+          }
+        },
+        {
+          "name": "qualification",
+          "marker_sha256": "980df57268fff6bda4b560732a51ada467ed36797a511aa272dd1e0886cc2cff",
+          "protocol": "public_nyu_four_npu_128_chunk16_pss700_reserve96_v1",
+          "state": "failed",
+          "correctness_passed": false,
+          "finite_passed": false,
+          "image_passed": false,
+          "memory_passed": false,
+          "memory": {
+            "peak_pss_mib": 520.5439453125,
+            "minimum_available_mib": 124.25390625
+          },
+          "error": "RuntimeError: Cannot account process PSS: 5566"
+        }
+      ]
+    },
+    "qualification_arrays_removed": [
+      {
+        "path": "/root/fpga43dgs_reconstruction/npu_mainline_20261102/runs/qualification_verified/cpu/gaussians.npz",
+        "bytes": 11535354,
+        "sha256": "dd35ae9ed2eb4e5ea6a0b81d3dca182ab43fa92788aafaba981b7f16786b7e64"
+      },
+      {
+        "path": "/root/fpga43dgs_reconstruction/npu_mainline_20261102/runs/qualification_verified/npu/gaussians.npz",
+        "bytes": 11535354,
+        "sha256": "ef44a8074e3731801c676875c866da85b45b14bcd999d19a586034933e61692d"
+      },
+      {
+        "path": "/root/fpga43dgs_reconstruction/npu_mainline_20261102/runs/qualification_verified/npu_repeat/gaussians.npz",
+        "bytes": 11535354,
+        "sha256": "ef44a8074e3731801c676875c866da85b45b14bcd999d19a586034933e61692d"
+      }
+    ]
+  },
+  "tests": {
+    "core_syntax_files": 136,
+    "mvsplat_tests": 192,
+    "mvsplat_skipped": 6,
+    "interface_tests": 16,
+    "reconstruct_tests": 3,
+    "board_memory_tests": 34,
+    "board_skipped": 0,
+    "frozen_mainline_hash_files": 151,
+    "frozen_branch_hash_files": 197
+  },
+  "guards": {
+    "process_tree_pss_mib": 700,
+    "host_available_reserve_mib": 96,
+    "npu_device_address_guard_mib": 64,
+    "direct_sfb": false
+  },
+  "unmeasured": [
+    "NPU utilization percent",
+    "actual DDR traffic",
+    "board power",
+    "long-run NPU stability",
+    "power-cycle restart",
+    "new FPGA synthesis or timing"
+  ],
+  "limitations": [
+    "SDK numerical/stale-output root cause remains unresolved; strict TF32 tensor gate still fails. Existing bounded double-forward/tile workaround and native three-view image policy remain.",
+    "Only one frame endpoint, not whole-video/global 3D coverage.",
+    "The final measured 20.075 seconds is not strictly below 20 seconds.",
+    "Persistent deployment still verifies the actual mounted BOOT media; reference snapshot is not used as a substitute."
+  ]
+}

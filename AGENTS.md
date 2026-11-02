@@ -1,3 +1,20 @@
+# 2026-11-02：持久部署、内存调度与保优回收
+
+当前增量在 feat/npu-memory-storage-20261102，保留四业务模块与冻结 FPGA/BOOT。
+板端四子图仍为 backbone_cnn/depth_head/to_gaussians/to_disparity；严格 TF32 门槛仍失败，SDK 根因未关闭。
+299 个安装包已逐文件下载、SHA256 复核后清理，释放 2.001 GiB；arm_mamba、正式环境/权重/回退不删。
+正式副本位于 /root/fpga43dgs_reconstruction/npu_mainline_20261102；旧专属 tmpfs 已回收 153.4 MiB。
+回收后真实 NPU→FPGA 首帧 20.075 s（单次，20 s 未严格达到），最低 MemAvailable 288.4 MiB；
+该次 PSS 565.1 MiB，不得与 tmpfs 释放量混算或声称最终 PSS 下降。同背景缓冲单项 PSS 524.1→503.0 MiB。
+四组高斯/完整帧/RGB 精确一致；磁盘 NPZ 方案无整体收益，默认保留 memory，disk 为显式可选。
+source_files 现绑定实际 generated src 与 runtime/memory_runtime；旧 receipt 必须重新资格验收。
+PSS 700 MiB＋MemAvailable 96 MiB＋设备地址隔离 64 MiB 保留；只跳过再次确认 Z/X 的退出进程。
+用户最新要求：同协议只保留最快合格完整结果，其他大输出在原子保存指标/哈希/失败摘要后回收；
+此规则更新下文历史“保留全部原始输出”的要求。保护显示中、运行中、必要回退和未知目录，不删用户录像。
+保优工具归 initialize/result_retention.py；部署清单已包含。当前最佳场景 optimized_after_reclaim，网页 18080 已恢复。
+实板专项 34 全过，本机 MVSplat 192（6 跳过）；冻结包哈希不变。未断电重启、未测 NPU 利用率/功耗/真实 DDR 流量。
+完整对照、画质、负结果与重跑边界见 examples/3dgs_reconstruction/mvsplat/initialize/NPU_MEMORY_STORAGE_20261102.md。
+
 # 2026-11-02：两个局部预测头 NPU 分块迁移
 
 `to_gaussians` 后接 `to_disparity` 已完成真实 NPU＋冻结 FPGA 三留出视角资格与完整公开视频首帧。

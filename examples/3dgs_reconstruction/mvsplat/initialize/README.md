@@ -1,3 +1,12 @@
+# 2026-11-02：内存与持久部署增量
+
+四子图持久部署、代价体缓冲复用、可选磁盘归档与同协议保优回收已做实板核验。
+当前四子图为 backbone_cnn / depth_head / to_gaussians / to_disparity；CPU 回退和冻结后端保留。
+最佳结果首帧单次 20.075 s；旧 tmpfs 回收后最低可用内存 288.4 MiB，PSS 565.1 MiB。
+不要把整体余量与 PSS 混为一项，不以该单次结果声称稳定 20 s 达标。
+详细对照、正确性、画质、持久路径与保留策略见 [本轮记录](NPU_MEMORY_STORAGE_20261102.md)。
+下文双子图配置及未收尾的描述保留为较早历史。
+
 # 2026-11-02：推荐 NPU 整合状态
 
 当前推荐显式 --backend npu --partitions backbone_cnn depth_head，沿用四模块结构。

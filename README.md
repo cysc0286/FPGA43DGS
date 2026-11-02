@@ -1,6 +1,6 @@
 # HeteroGS：板端视频重建与 NPU＋FPGA 渲染
 
-推荐主线：**视频输入 → CPU 位姿 → MVSplat（NPU backbone＋depth_head，CPU 其余网络）→ CPU＋FPGA 渲染 → 网页交互**。
+推荐主线：**视频输入 → CPU 位姿 → MVSplat（NPU backbone＋depth_head＋两个局部预测头，CPU 其余网络）→ CPU＋FPGA 渲染 → 网页交互**。
 平台为悟净 30TAI Lite；使用固定预训练权重，无须为每段视频重新训练。
 NPU 生成高斯后，换视角直接调用常驻渲染器，不重复网络推理。
 
@@ -8,6 +8,9 @@ NPU 生成高斯后，换视角直接调用常驻渲染器，不重复网络推�
 和 [四模块接口](examples/3dgs_reconstruction/modules/INTERFACES.md)。
 当前配置及测量边界见 [MAINLINE.md](MAINLINE.md)；
 部署、验收与网页操作见 [联调说明](examples/3dgs_reconstruction/mvsplat/FINAL_INTEGRATION_20261102.md)。
+最新持久部署和内存核验见 [本轮记录](examples/3dgs_reconstruction/mvsplat/initialize/NPU_MEMORY_STORAGE_20261102.md)：
+128×128、32768 高斯，视频后首帧单次 20.075 s，输出与原四子图精确一致；未严格达到 20 s。
+四子图及新的执行源码必须重新绑定 receipt；SDK 严格逐元素门槛仍失败，不表示全网 NPU 或数值根因修复。
 
 ~~~text
 examples/3dgs_reconstruction/

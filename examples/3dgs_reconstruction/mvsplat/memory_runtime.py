@@ -27,15 +27,30 @@ HELPER = '''
 
 def heterogs_chunked_correlation(feat01, feat10, intrinsics, pose, disparities, chunk):
     # Independent depth hypotheses; keep upstream channel summation and order.
-    pieces = []
+    inference = not torch.is_grad_enabled()
+    pieces = [] if not inference else None
+    output = None
     for first in range(0, disparities.shape[1], chunk):
         depth = 1.0 / disparities[:, first:first + chunk].repeat([1, 1, *feat10.shape[-2:]])
         warped = warp_with_pose_depth_candidates(feat10, intrinsics, pose, depth,
                                                   warp_padding_mode="zeros")
-        correlation = (feat01.unsqueeze(2) * warped).sum(1) / (feat01.shape[1] ** 0.5)
-        pieces.append(correlation)
-        del warped, depth
-    return torch.cat(pieces, dim=1)
+        if inference and warped.dtype == feat01.dtype:
+            # grid_sample owns this disposable result. Reusing it avoids a
+            # second [B,C,chunk,H,W] allocation without changing the reduction.
+            warped.mul_(feat01.unsqueeze(2))
+            correlation = warped.sum(1) / (feat01.shape[1] ** 0.5)
+        else:
+            # Preserve the original differentiable path and type promotion.
+            correlation = (feat01.unsqueeze(2) * warped).sum(1) / (feat01.shape[1] ** 0.5)
+        if inference:
+            if output is None:
+                output = correlation.new_empty((correlation.shape[0], disparities.shape[1],
+                                                *correlation.shape[2:]))
+            output[:, first:first + correlation.shape[1]].copy_(correlation)
+        else:
+            pieces.append(correlation)
+        del warped, depth, correlation
+    return output if inference else torch.cat(pieces, dim=1)
 '''
 
 
@@ -57,6 +72,8 @@ def prepare_chunked_source(vendor, destination, chunk):
     (destination.parent/"cost_volume_chunk.patch").write_text(diff, encoding="utf-8")
     record = dict(depth_chunk=chunk, depth_candidates=128, original_sha256=sha(vendor/target),
                   modified_sha256=sha(destination/target), changed_file=target.as_posix(),
-                  effect="warp and channel dot-product per depth chunk; no candidate pruning or precision change")
+                  inference_scratch="reuse_warp_and_preallocate_correlation",
+                  gradient_schedule="original_multiply_and_concatenate",
+                  effect="warp and channel dot-product per depth chunk; reuse disposable warp in inference; no candidate pruning or precision change")
     save(destination.parent/"memory_schedule.json", record)
     return destination

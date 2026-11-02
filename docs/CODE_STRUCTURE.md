@@ -8,7 +8,7 @@
 |---|---|---|---|
 | 视频输入 | `video_input/receipt.py`、`video_input/decode.py` | 接收已完成视频、选帧、缩放，保留原帧索引 | CPU |
 | 位姿估计 | `pose_estimation/geometry.py` | 两视图 SIFT/匹配/Essential/三角化，留出视角 PnP | CPU |
-| 高斯生成 | `gaussian_generation/runtime.py`、`adapter.py` | 固定权重前向、参数校验、协方差/SH/相机 ABI 转换 | NPU backbone＋depth_head；CPU 其余网络 |
+| 高斯生成 | `gaussian_generation/runtime.py`、`adapter.py` | 固定权重前向、参数校验、协方差/SH/相机 ABI 转换 | NPU backbone＋depth_head＋to_gaussians＋to_disparity；CPU 其余网络 |
 | 渲染 | `rendering/runtime.py`、`live_renderer.cpp`、`render_main/` | 常驻场景、投影、排序、FPGA 求值合成、返回 RGB | CPU＋FPGA |
 
 2026-10-29：视频输入内部新增 `capture.py`（Linux UVC 短片）与 `calibration.py`（针孔标定/校正）；
@@ -30,6 +30,11 @@
 仅保留旧命令/import 兼容，不再维护第二份实现。
 
 ## 如何读代码
+
+2026-11-02 内存增量：`memory_runtime.py` 只负责现有代价体调度；
+`gaussian_generation/runtime.py` 管理内存/磁盘待归档对象与执行源码身份；
+`initialize/result_retention.py` 管理同协议合格结果保优回收，非新增业务模块。
+实板对照和当前持久部署见 [内存与存储记录](../examples/3dgs_reconstruction/mvsplat/initialize/NPU_MEMORY_STORAGE_20261102.md)。
 
 1. `pipeline.py initialize`：统一 CLI。视频前资源由 `initialize/session.py` 管理。
 2. `initialize/run.py`：接收视频与事件记录，驱动 `warm_pipeline.py`。
