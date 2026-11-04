@@ -123,8 +123,7 @@ def main():
     a.out.mkdir(parents=True, exist_ok=False)
     (a.out/"bridge.cpp").write_text(diagnostic_bridge(a.readout), encoding="utf-8")
     (a.out/'output_sink.h').write_bytes(Path(__file__).with_name('output_sink.h').read_bytes())
-    sys.path.insert(0, str(Path(__file__).resolve().parents[4]/"3dgs_compositor/board"))
-    import remote
+    from initialize import transport as remote
     from initialize.board_sync import NPU_SOURCE_FILES, upload_sources
     client = remote.connect()
     root = shlex.quote(a.board_root)

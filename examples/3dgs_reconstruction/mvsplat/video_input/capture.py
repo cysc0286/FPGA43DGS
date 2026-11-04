@@ -31,20 +31,47 @@ def probe(device):
     return results
 
 
-def inspect_clip(path, ffprobe="ffprobe"):
+def inspect_clip(path, ffprobe="ffprobe", *, decoded_frames=False):
+    """Inspect strict acquisition packets or decoded file presentation frames.
+
+    UVC MJPEG capture keeps its original packet-PTS contract by default. A
+    general compressed file may contain B-frames whose packet PTS legitimately
+    reorder; callers must explicitly request decoded presentation order. Never
+    sort timestamps, since that would hide genuinely malformed frame order.
+    """
+    collection = "frames" if decoded_frames else "packets"
+    timestamp = "best_effort_timestamp_time" if decoded_frames else "pts_time"
+    entries = ("frame=best_effort_timestamp_time" if decoded_frames
+               else "packet=pts_time,duration_time")
     result = subprocess.run([ffprobe, "-v", "error", "-select_streams", "v:0",
-        "-show_streams", "-show_packets", "-show_entries",
-        "stream=codec_name,width,height,avg_frame_rate:packet=pts_time,duration_time",
-        "-of", "json", str(path)], capture_output=True, text=True, timeout=30, check=True)
+        "-show_streams", "-show_frames" if decoded_frames else "-show_packets", "-show_entries",
+        "stream=codec_name,width,height,avg_frame_rate:"+entries,
+        "-of", "json", str(path)], capture_output=True, text=True,
+        timeout=120 if decoded_frames else 30, check=True)
     record = json.loads(result.stdout)
-    if len(record.get("streams", [])) != 1 or len(record.get("packets", [])) < 3:
+    if (not isinstance(record, dict) or not isinstance(record.get("streams"), list)
+            or len(record["streams"]) != 1 or not isinstance(record.get(collection), list)
+            or len(record[collection]) < 3):
         raise ValueError("Captured clip needs one video stream and at least three frames")
-    times = [float(packet["pts_time"]) for packet in record["packets"]]
     import math
-    if not all(math.isfinite(v) for v in times) or any(b <= a for a, b in zip(times, times[1:])):
-        raise ValueError("Invalid or non-monotonic captured frame timestamps")
     stream = record["streams"][0]
-    stream["fps"] = float(Fraction(stream["avg_frame_rate"]))
+    try:
+        if (not isinstance(stream["codec_name"], str) or not stream["codec_name"]
+                or any(type(stream[key]) is not int or stream[key] <= 0 for key in ("width", "height"))):
+            raise ValueError("Invalid codec or frame dimensions")
+        fps = float(Fraction(stream["avg_frame_rate"]))
+        if not math.isfinite(fps) or fps <= 0:
+            raise ValueError("Invalid frame rate")
+    except (KeyError, TypeError, ValueError, ZeroDivisionError, OverflowError) as exc:
+        raise ValueError("Invalid or missing video stream metadata") from exc
+    try:
+        times = [float(frame[timestamp]) for frame in record[collection]]
+    except (KeyError, TypeError, ValueError, OverflowError) as exc:
+        raise ValueError("Invalid or missing frame timestamps") from exc
+    if not all(math.isfinite(v) for v in times) or any(b <= a for a, b in zip(times, times[1:])):
+        scope = "decoded" if decoded_frames else "captured"
+        raise ValueError("Invalid or non-monotonic "+scope+" frame timestamps")
+    stream["fps"] = fps
     return stream, times
 
 

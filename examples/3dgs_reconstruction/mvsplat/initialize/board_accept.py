@@ -7,10 +7,8 @@ import sys
 from pathlib import PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT.parent / "3dgs_compositor/board"))
-import remote
-
-
+sys.path.insert(0, str(ROOT / "mvsplat"))
+from initialize import transport as remote
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--board-root", default="/root/fpga43dgs_reconstruction/initialize_candidate_20260929")
@@ -81,7 +79,7 @@ def main():
         args += ["--partition-bundle", a.partition_bundle, "--npu-library", a.npu_library,
                  "--buffer-policy", a.buffer_policy, "--buffer-limit-mib", str(a.buffer_limit_mib),
                  "--partitions"] + a.partitions
-    monitor = ["/usr/bin/python3", "mvsplat/measure.py", "--out", a.run+".measurement.json",
+    monitor = ["/usr/bin/python3", "mvsplat/initialize/measure.py", "--out", a.run+".measurement.json",
                "--rss-mib", "650", "--reserve-mib", "128", "--timeout", "600", "--"]
     command = "cd " + shlex.quote(root) + " && " + shlex.join(monitor + args)
     client = remote.connect()

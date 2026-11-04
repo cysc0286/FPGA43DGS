@@ -1,0 +1,10 @@
+# Export/layout tests run tiny synthetic networks on the host CPU only.
+# This is a test environment, not the board SDK/runtime dependency lock.
+torch>=2.7,<3
+onnx>=1.16,<2
+onnxruntime>=1.18,<2
+onnxscript>=0.3,<1
+omegaconf>=2.3,<3
+einops>=0.8,<1
+jaxtyping>=0.2,<1
+typeguard>=2,<5

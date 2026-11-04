@@ -35,10 +35,11 @@ def decode_selected(video, context, targets, width, threads, *, calibration=None
         count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         fps = float(cap.get(cv2.CAP_PROP_FPS))
         if calibration is not None or candidate_count:
-            # Container frame counts can include empty AVI slots or be duration
-            # estimates for Matroska. Select by actual compressed packet order.
+            # Container counts can include empty AVI slots or duration estimates.
+            # General MP4 B-frame packets are in decode order with reordered PTS;
+            # use actual decoded presentation frames, matching cap.read() order.
             from video_input.capture import inspect_clip
-            stream, timestamps = inspect_clip(video)
+            stream, timestamps = inspect_clip(video, decoded_frames=True)
             count, fps = len(timestamps), stream["fps"]
         if count < 3 or not np.isfinite(fps) or fps <= 0:
             raise ValueError("Video must contain at least three timed frames")

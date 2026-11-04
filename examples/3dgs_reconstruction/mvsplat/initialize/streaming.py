@@ -128,7 +128,7 @@ def main(argv=None):
         import cv2
         cv2.setNumThreads(1)
         from rendering.streaming import SceneExchange
-        from rendering.viewer import make_server
+        from web.viewer import make_server
         from video_input.calibration import Calibration
         calibration=Calibration(a.calibration) if a.calibration else None
         exchange=SceneExchange(renderer.runtime)

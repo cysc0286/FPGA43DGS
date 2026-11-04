@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>摄像头采集与重建</title>
+<style>
+:root{font-family:system-ui,"Microsoft YaHei",sans-serif;color:#17212f;background:#eef2f6;color-scheme:light;--accent:#1764cf;--muted:#526175}
+.navigation{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}.navigation a{padding:10px 16px;border-radius:6px;text-decoration:none;min-height:44px;color:#23564e}.navigation a[aria-current]{background:#dcebe6;font-weight:600}*{box-sizing:border-box}[hidden]{display:none!important}body{max-width:1400px;margin:28px auto;padding:0 20px}h1{font-size:26px;margin:0 0 8px}h2{font-size:20px;margin:0 0 12px}p{line-height:1.65}.hint{color:var(--muted);font-size:14px;line-height:1.65}.page-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:20px}.page-heading p{margin:8px 0}.state-label{font-size:14px;white-space:nowrap;color:#23564e;background:#e1eeeb;padding:8px 14px;border-radius:6px}.state-label.processing{color:#1759a7;background:#e0ebf8}.state-label.error{color:#a52634;background:#fbe9ec}
+.workspace{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start}.workspace>.card{margin:0;min-width:0}.card{background:white;border-radius:12px;padding:22px;margin:20px 0;box-shadow:0 4px 20px #17212f08}#capture-card{order:1}#processing-card{order:2}summary{font-size:17px;font-weight:600;cursor:pointer;min-height:36px}details[open]>summary{margin-bottom:12px}
+img{display:block;width:100%;aspect-ratio:16/9;object-fit:contain;background:#111827;border-radius:6px}.controls{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}button,a.button{font:inherit;border:1px solid transparent;border-radius:6px;padding:11px 18px;min-height:44px;background:#e6ebf2;color:#17212f;text-decoration:none;cursor:pointer}#start,a.button{background:var(--accent);color:white}#stop{background:#d83344;color:white}button:hover:not(:disabled){filter:brightness(.95)}button:disabled{opacity:.45;cursor:default}#clear-all{background:#b21e2f;color:white}:focus-visible{outline:3px solid #2872b9;outline-offset:3px}
+.record-meta{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-top:16px}#time{font-size:25px;font-variant-numeric:tabular-nums}#record-status{font-weight:600;margin:0}.processing-panel{border-top:1px solid #dce3eb;margin-top:20px;padding-top:18px}.processing-heading{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}#processing-time{font-size:32px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.03em}#timer-caption{font-size:13px;color:var(--muted)}#build-status{font-size:16px;margin:12px 0 6px}#progress-detail{min-height:23px;margin:6px 0;color:var(--muted);font-size:14px}#error{color:#b21e2f;white-space:pre-wrap;overflow-wrap:anywhere}#error:empty{display:none}iframe{border:0;width:100%;background:#f4f6f7;border-radius:6px}#result-viewer{height:1200px}#live-viewer{height:1100px}.result-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.result-heading h2{margin:0}.result-heading .button{font-size:14px;background:#e6ebf2;color:#17212f}
+@media(max-width:800px){.workspace{grid-template-columns:minmax(0,1fr)}body{padding:0 14px}.card{padding:18px}.page-heading{align-items:flex-start}#result-viewer,#live-viewer{height:2100px}}
+@media(max-width:480px){body{padding:0 10px;margin:16px auto}.card{padding:14px}button{flex:1;padding:11px 9px}h1{font-size:23px}.page-heading{flex-wrap:wrap;gap:4px}.controls{gap:8px}.result-heading{gap:10px}#processing-time{font-size:29px}}
+/* Keep task status and controls; omit explanatory notes in the display workflow. */
+p.hint:not([role="status"]):not(#file-meta):not(#upload-status):not(#clip):not(#preview-status):not(#progress-detail):not(#connection){display:none}
+</style></head>
+<body>
+<nav class="navigation" aria-label="视频输入方式"><a href="/capture" aria-current="page">USB 摄像头采集</a><a href="/upload">电脑视频输入</a></nav>
+<header class="page-heading"><div><h1>摄像头采集与重建</h1><p class="hint">拍摄时保持镜头中心和高度尽量不变，只水平缓慢转满一圈；俯仰保持不变，不要边走边拍。结束录制后自动生成环视高斯并交给板端渲染。</p></div><span id="workflow-state" class="state-label" role="status">连接中</span></header>
+<main>
+<div class="workspace">
+<section class="card" id="capture-card"><h2>1. 采集环视视频</h2>
+<div class="controls"><button id="start" disabled>开始录制（15秒自动结束）</button><button id="stop" disabled>提前结束并重建</button><button id="pause">暂停显示</button></div>
+<img id="camera" hidden alt="摄像头实时预览"><p id="capture-guidance" class="hint">环视采集约定：固定观察中心，镜头只绕竖直方向旋转 360°；尽量避免平移、俯仰和变焦。这样输入才与当前固定中心环视算法一致。</p><p id="preview-status" class="hint">正在连接摄像头…</p>
+<div class="record-meta"><span id="time">00:00.0</span><p id="record-status" role="status">正在读取状态…</p></div>
+<p id="capture-countdown" class="hint">实际录制开始后计时；到时由板端自动保存并重建，无需手动结束。</p>
+<p id="limits" class="hint"></p><p id="clip" class="hint"></p>
+</section>
+<section class="card" id="processing-card"><h2>2. 自动处理</h2><p class="hint">模型在录制前预热。结束录制后依次检查视频、估计相机方向、使用 NPU 生成高斯，再由 FPGA 输出首帧。</p>
+<div class="processing-panel"><div class="processing-heading"><strong id="processing-time">—</strong><span id="timer-caption">结束录制 → 首帧</span></div>
+<p id="build-status" role="status" aria-live="polite">等待录制</p><p id="progress-detail"></p><p id="error" role="alert"></p>
+<details id="diagnostics" hidden><summary>查看诊断详情</summary><pre id="error-detail" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details>
+</div><div class="controls"><button id="rebuild" disabled>重新处理当前短片</button></div>
+<p class="hint">计时持续到板端实际完成首帧。环视覆盖取决于有效帧对；未拍摄的方向可能空缺。原地旋转不能提供可靠的几何深度。</p>
+</section></div>
+<section class="card" id="result-card"><div class="result-heading"><h2>3. 高斯预览与 FPGA 画面</h2><a id="viewer" class="button" hidden target="_blank" rel="noopener">单独打开查看器</a></div>
+<p id="result-hint" class="hint">首帧完成后，在这里选择观察方向并确认渲染。固定中心模式只改变朝向，不移动观察位置。</p>
+<iframe id="result-viewer" title="高斯预览与 FPGA 确认渲染双栏" hidden></iframe></section>
+<details class="card" id="continuous-card"><summary>连续更新（备用模式）</summary><p class="hint">原有局部重建入口：保持对准起始区域并缓慢横向移动。与固定中心环视分开使用。会话最多 30 分钟，关闭页面不会停止采集。</p>
+<div class="controls"><button id="live-start" disabled>开始连续重建</button><button id="live-stop" disabled>结束连续采集</button></div><p id="live-status" role="status">等待开始</p><iframe id="live-viewer" title="连续点云与高斯场景" hidden></iframe></details>
+<details class="card"><summary>板端存储与历史记录</summary><p class="hint">清理本页面产生的旧录像、失败记录和旧重建文件，保留当前短片及最近成功的场景和来源录像。模型权重和系统文件保留。</p>
+<div class="controls"><button id="cleanup" disabled>清理历史记录（保留最新）</button><button id="clear-all" disabled>清空全部记录（含最新结果）</button></div>
+<p class="hint">清空将关闭当前场景，删除本页面全部录像、重建结果与日志，无法恢复。</p><p id="cleanup-status" class="hint" role="status"></p></details>
+</main>
+<script>
+const token=__TOKEN__;let active=true,busy=false,polling=false,last=null,actionError='',timer={seconds:0,updated:0,running:false,started:false};const $=id=>document.getElementById(id);
+let captureClock={state:'idle',seconds:0,limit:15,updated:0};
+function duration(seconds){const t=Math.max(0,seconds||0);return String(Math.floor(t/60)).padStart(2,'0')+':'+(t%60).toFixed(1).padStart(4,'0');}
+function tickCaptureClock(){const c=captureClock;if(c.state==='recording'){const remaining=Math.max(0,c.limit-c.seconds-(performance.now()-c.updated)/1000);$('capture-countdown').textContent=remaining>0?'约 '+remaining.toFixed(1)+' 秒后自动结束并重建；无需手动点击结束。':'等待板端保存视频并自动重建…';}else if(c.state==='starting')$('capture-countdown').textContent='正在准备录像，'+c.limit+' 秒还未开始计时；请等待“正在录制”后再转动相机。';else if(c.state==='stopping')$('capture-countdown').textContent='录制已结束，正在保存和核验视频…';else $('capture-countdown').textContent='实际录制满 '+c.limit+' 秒后，板端自动保存并重建；无需手动结束。';}
+function tick(){tickCaptureClock();if(!timer.started){$('processing-time').textContent='—';return;}const seconds=timer.seconds+(timer.running?(performance.now()-timer.updated)/1000:0);$('processing-time').textContent=duration(seconds);}
+function updateTimer(s){if(s.input_kind==='uploaded_video'||s.build?.scene_restored){timer={seconds:0,updated:0,running:false,started:false};tick();$('timer-caption').textContent=s.build?.scene_restored?'已恢复历史场景 · 未重新计时':'结束录制 → 首帧';return;}const b=s.build||{},cameraStarted=Number.isFinite(s.processing_started_epoch)&&s.processing_started_epoch>0,started=cameraStarted||Number.isFinite(b.processing_started_epoch)&&b.processing_started_epoch>0;
+const running=started&&!b.processing_complete&&!s.error&&!b.error&&!['starting','recording'].includes(s.state)&&b.phase!=='error';
+const seconds=cameraStarted&&Number.isFinite(s.postcapture_elapsed_seconds)?s.postcapture_elapsed_seconds:(b.processing_elapsed_seconds||0);
+timer={seconds,updated:performance.now(),running,started};tick();$('timer-caption').textContent=b.processing_complete?'结束录制 → 首帧 · 已完成':running?'结束录制 → 首帧 · 处理中':'结束录制 → 首帧';}
+async function command(action){if(busy)return;busy=true;actionError='';buttons();$('error').textContent='';try{
+const headers={'X-Session-Token':token};if(action==='cleanup/all')headers['X-Confirm-Delete']='all-session-records';
+const r=await fetch('/api/'+action,{method:'POST',headers});const d=await r.json();if(!r.ok)throw Error(d.error||'操作失败');
+if(action==='cleanup'||action==='cleanup/all')$('cleanup-status').textContent=(action==='cleanup/all'?'已清空 ':'已清理 ')+d.removed.length+' 项，释放 '+(d.freed_bytes/1048576).toFixed(1)+' MiB；当前可用 '+d.free_mib.toFixed(0)+' MiB。'+(d.skipped&&d.skipped.length?' 有 '+d.skipped.length+' 项因路径或链接异常而保留。':'');
+}catch(e){actionError=e.message;$('error').textContent=actionError}finally{busy=false;await status()}}
+function buttons(){if(!last)return;const b=last.build||{},building=last.maintenance||['initializing','reconstructing','streaming','stopping'].includes(b.phase),recording=['starting','recording','stopping','uploading'].includes(last.state);
+$('start').disabled=busy||building||recording;$('start').textContent=b.phase==='initializing'&&!timer.started?'等待模型预热…':'开始录制（'+last.max_seconds+'秒自动结束）';
+$('stop').disabled=busy||last.state!=='recording';$('rebuild').disabled=busy||building||!last.clip||recording||last.input_kind==='uploaded_video';
+$('cleanup').disabled=busy||building||recording;$('clear-all').disabled=$('cleanup').disabled;
+$('live-start').disabled=busy||building||recording;$('live-stop').disabled=busy||b.mode!=='streaming'||!['initializing','streaming'].includes(b.phase);}
+function attachViewer(id,url){const element=$(id);element.hidden=!url;if(url&&element.getAttribute('src')!==url)element.src=url;else if(!url)element.removeAttribute('src');}
+window.addEventListener('message',event=>{const data=event.data;if(!data||data.type!=='fpga43dgs-viewer-size'||!Number.isFinite(data.height)||data.height<200||data.height>6000)return;
+for(const id of ['result-viewer','live-viewer']){const frame=$(id),src=frame.getAttribute('src');if(src&&event.source===frame.contentWindow&&event.origin===new URL(src,location.href).origin)frame.style.height=Math.ceil(data.height)+'px';}});
+function applyStatus(s){last=s;captureClock={state:s.state,seconds:s.elapsed_seconds||0,limit:s.max_seconds,updated:performance.now()};const b=s.build||{},live=b.live||{},recording=s.state==='recording',failed=!!(s.error||b.error||b.phase==='error');updateTimer(s);
+const labels={idle:'尚未录制',starting:'正在准备，录像尚未开始',recording:'正在录制',stopping:'正在保存和检查短片…',recorded:'短片已保存',error:'本次录制未完成'};
+$('record-status').textContent=s.input_kind==='uploaded_video'?'电脑视频任务：请前往电脑视频输入页查看进度':(labels[s.state]||s.state);$('time').textContent=duration(s.elapsed_seconds);
+$('limits').textContent='实际录制 '+s.max_seconds+' 秒后自动结束并重建 · 可用空间 '+Number(s.free_mib||0).toFixed(0)+' MiB。计时由板端执行，暂停显示或关闭网页不影响自动结束。';
+$('clip').textContent=s.clip?s.clip.frames+' 帧 · '+Number(s.clip.duration_seconds).toFixed(2)+' 秒 · '+Number(s.clip.measured_fps).toFixed(2)+' fps · '+s.clip.stop_label:'';
+const phases={idle:'等待录制',warmed:'模型与渲染环境已预热，可以开始录制',initializing:timer.started?'正在准备处理环境…':'正在预热模型与 FPGA，预热不计入处理时间',reconstructing:'正在生成高斯与渲染首帧…',streaming:'连续更新中',stopping:'正在完成当前更新…',ready:b.processing_complete?'首帧已完成，可以选择观察方向':'等待板端首帧完成确认…',complete:'重建会话已结束',error:'处理失败，请查看原因'};
+$('build-status').textContent=s.state==='stopping'?'正在保存和检查视频，随后自动处理…':b.scene_restored?(b.phase==='ready'?'历史场景已恢复，可以选择观察方向':'正在恢复历史场景查看器…'):(phases[b.phase]||b.phase||'等待录制');
+const progress=b.progress||{},stageNames={decoding:'解码视频',decode:'解码视频',rotation:'估计相机转动',geometry:'准备相机与帧对',preparing:'准备输入',inference:'NPU 生成高斯',rendering:'FPGA 渲染首帧',publishing:'发布交互场景',complete:'首帧完成'};
+$('progress-detail').textContent=b.processing_complete?(Number.isFinite(progress.of)?'已完成 '+progress.of+' 组帧对':''):(progress.stage?(stageNames[progress.stage]||progress.stage):'')+(Number.isFinite(progress.pair)&&Number.isFinite(progress.of)?' · 帧对 '+progress.pair+' / '+progress.of:'');
+const ready=s.input_kind!=='uploaded_video'&&b.mode!=='streaming'&&b.phase==='ready'&&b.processing_complete===true&&b.matches_clip!==false&&!!b.url;
+$('viewer').hidden=!ready;$('viewer').href=ready?b.url:'#';attachViewer('result-viewer',ready?b.url:'');
+$('result-hint').textContent=ready?'左侧选择方向，确认后由 FPGA 返回该视角画面。绿色范围表示已采样方向；未覆盖处可能空缺。':timer.running?'正在处理，请保持板卡供电。实际首帧完成后自动显示双栏查看器。':'首帧完成后，在这里选择观察方向并确认渲染。固定中心模式只改变朝向，不移动观察位置。';
+const liveLabels={warming:'模型预热中',sampling:'等待有效视角',geometry:'估计位姿与点云',inference:'生成高斯模型',publishing:'校验并切换场景',stopped:'采集已结束',error:'更新已停止'};
+$('live-status').textContent=b.mode==='streaming'?(liveLabels[live.phase]||phases[b.phase]||b.phase)+' · 已更新 '+(live.version||0)+' 次'+(live.last_result?' · 最近窗口到首帧 '+live.last_result.window_to_frame_seconds.toFixed(1)+' 秒':'')+(live.message?' · '+live.message:''):'等待开始';
+attachViewer('live-viewer',b.mode==='streaming'&&b.url?b.url:'');
+const workflow=failed?'ERROR':s.state==='starting'?'STARTING':recording?'RECORDING':timer.running?'PROCESSING':ready?'READY':'IDLE';
+$('workflow-state').dataset.state=workflow;$('workflow-state').textContent={IDLE:b.phase==='initializing'?'模型预热中':b.phase==='warmed'?'准备就绪':'等待录制',STARTING:'录像尚未开始',RECORDING:'录制中',PROCESSING:'处理中',READY:'场景就绪',ERROR:'处理异常'}[workflow];$('workflow-state').className='state-label'+(workflow==='PROCESSING'?' processing':workflow==='ERROR'?' error':'');
+if(s.input_kind==='uploaded_video'){$('build-status').textContent='电脑视频任务，请前往电脑视频输入页查看';$('progress-detail').textContent='';$('workflow-state').textContent='电脑视频任务';}
+$('error').textContent=s.error||b.error||actionError;$('diagnostics').hidden=!b.details;$('error-detail').textContent=b.details||'';buttons();}
+async function status(){if(polling)return;polling=true;try{const r=await fetch('/api/status',{cache:'no-store'});if(!r.ok)throw Error('状态连接中断');applyStatus(await r.json());}
+catch(e){$('record-status').textContent=e.message;$('workflow-state').textContent='连接中断';for(const id of ['start','stop','rebuild','live-start','live-stop','cleanup','clear-all'])$(id).disabled=true;tick();}finally{polling=false}}
+async function frame(){if(active){try{const r=await fetch('/frame.jpg?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error(await r.text());const old=$('camera').src;$('camera').src=URL.createObjectURL(await r.blob());$('camera').hidden=false;if(old.startsWith('blob:'))URL.revokeObjectURL(old);$('preview-status').textContent='实时预览 · '+r.headers.get('X-Capture-Fps')+' fps 采集';}catch(e){$('preview-status').textContent=e.message}}setTimeout(frame,250)}
+$('start').onclick=()=>command('start');$('stop').onclick=()=>command('stop');$('rebuild').onclick=()=>command('reconstruct');$('cleanup').onclick=()=>command('cleanup');$('live-start').onclick=()=>command('live/start');$('live-stop').onclick=()=>command('live/stop');$('pause').onclick=e=>{active=!active;e.target.textContent=active?'暂停显示':'继续显示'};
+$('clear-all').onclick=()=>{if(confirm('确定清空全部记录（包括最新结果）？将关闭当前场景，删除本页面的全部录像、重建结果和会话日志。此操作无法恢复。'))command('cleanup/all')};
+status();setInterval(status,500);setInterval(tick,100);frame();
+function sendViewerViewport(frame){const src=frame.getAttribute('src');if(src&&frame.contentWindow)frame.contentWindow.postMessage({type:'fpga43dgs-viewer-viewport',height:Math.max(320,innerHeight-32)},new URL(src,location.href).origin);}
+const viewportFrames=['result-viewer','live-viewer'].map(id=>document.getElementById(id));
+for(const frame of viewportFrames)frame.addEventListener('load',()=>sendViewerViewport(frame));
+window.addEventListener('resize',()=>viewportFrames.forEach(sendViewerViewport));
+</script></body></html>

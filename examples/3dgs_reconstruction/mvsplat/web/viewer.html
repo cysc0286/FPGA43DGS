@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>3DGS 场景查看器</title>
+  <link rel="stylesheet" href="/viewer.css">
+  <script src="/viewer.js" defer></script>
+</head>
+<body>
+  <header><div><h1>3DGS 场景查看器</h1><p id="pipeline-status">正在读取场景状态…</p></div><button id="quit">结束会话</button></header>
+  <main class="workspace">
+    <section aria-labelledby="select-title">
+      <div class="section-heading"><h2 id="select-title">选择观察方向</h2><span id="selection-state">初始视角</span></div>
+      <div class="mode-control"><label for="view-mode">观察方式</label><select id="view-mode"><option value="look" disabled>固定拍摄中心 · 环视</option><option value="orbit" selected>绕场景观察</option></select></div>
+      <canvas id="selector" width="320" height="320" tabindex="0" aria-label="拖动、方向键或滑块选择观察方向，自动更新渲染"></canvas>
+      <div class="actions"><button id="confirm" class="primary" disabled>刷新画面</button><button id="reset">重置选择</button></div>
+      <p id="interaction-hint" class="hint">左侧为简化高斯点云预览。拖动改变角度；选好后确认，才会请求板端渲染。</p>
+      <div class="direction-readout"><span id="heading-detail">相对初始方向 0.0°</span><span id="position-detail">相机 XYZ —</span></div>
+      <div class="controls">
+        <label for="yaw">水平角度 <output id="yaw-value">0°</output></label><input id="yaw" type="range" min="-180" max="180" step="0.5" value="0">
+        <label for="pitch">俯仰角度 <output id="pitch-value">0°</output></label><input id="pitch" type="range" min="-85" max="85" step="0.5" value="0">
+        <label for="distance" id="distance-label">观察距离 <output id="distance-value">1.00 倍</output></label><input id="distance" type="range" min="0.6" max="1.5" step="0.01" value="1">
+      </div>
+      <p id="pose-detail" class="hint">平移：0.00 / 0.00</p>
+    </section>
+    <section aria-labelledby="result-title">
+      <div class="section-heading"><h2 id="result-title">板端渲染结果</h2><span id="frame-state">等待首帧</span></div>
+      <div class="result-surface"><canvas id="view" width="128" height="128" aria-label="板端返回的渲染画面"></canvas><p id="empty-result">场景就绪后显示初始画面</p></div>
+      <p id="status" role="status" aria-live="polite">正在连接板端查看服务…</p>
+      <p class="hint">右侧仅显示已完成的渲染结果。选择新的观察点时，上一帧会保留；点击确认后更新。</p>
+      <dl class="timings"><div><dt>板端渲染</dt><dd id="render-time">—</dd></div><div><dt>请求到画面就绪</dt><dd id="response-time">—</dd></div><div><dt>已返回视角</dt><dd id="returned-pose">—</dd></div></dl>
+      <p id="live-status" role="status" class="hint"></p>
+    </section>
+  </main>
+</body>
+</html>

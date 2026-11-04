@@ -15,6 +15,11 @@ def probe_oracles(worker, graphs, output):
     try:
         names = list(worker.parts)
         meta, _ = validate_bundle(graphs, names, "onnx_reference")
+        record['oracle_reference_provenance'] = {
+            name: dict(oracle_provenance=item.get('oracle_provenance'),
+                       independent_arm_depth_reference=item.get('independent_arm_depth_reference'))
+            for name, item in meta['partitions'].items()
+            if name in names and item.get('oracle_provenance')}
         if sha(graphs/"manifest.json") != worker.provenance["oracle_manifest_sha256"]:
             raise ValueError("Compiled/oracle provenance mismatch")
         # Run all partitions, then revisit them. Immediate same-partition repeats

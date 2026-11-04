@@ -16,6 +16,9 @@ from gaussian_generation.npu_branch.runtime import PartitionRuntime
 from gaussian_generation.npu_branch.verify import errors
 
 
+METHOD_PARTITIONS = frozenset(("corr_depth_pipeline", "refine_heads_pipeline"))
+
+
 def statistics(values):
     a = np.asarray(values, dtype=np.float64)
     return dict(samples=len(a), mean_seconds=float(a.mean()), median_seconds=float(np.median(a)),
@@ -37,6 +40,11 @@ def main(argv=None):
     p.add_argument("--warmup", type=int, default=1)
     p.add_argument("--threads", type=int, default=2)
     a = p.parse_args(argv)
+    if set(a.partitions) & METHOD_PARTITIONS:
+        names = ', '.join(sorted(set(a.partitions) & METHOD_PARTITIONS))
+        p.error('Method partition ' + names + ' requires an explicitly enabled model seam; '
+                'use paired_inference for the continuous candidate. '
+                'This tool benchmarks nn.Module partitions only.')
     if a.repeats < 3 or a.warmup < 1:
         p.error("At least 3 measured repetitions and 1 warmup required")
     out = new_directory(a.out)

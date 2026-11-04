@@ -4,20 +4,13 @@ import hashlib
 import json
 from pathlib import Path
 import struct
-import sys
 import time
 
 import numpy as np
 from plyfile import PlyData, PlyElement
 from scipy.spatial.transform import Rotation
 
-from common import load_gaussians, new_directory, save, sha, validate_gaussians
-
-# The shared renderer contract lives above the mvsplat package.  Put it on the
-# import path before either the full export or deferred-camera path validates
-# camera files.
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
+from common import gaussian_content_sha256, load_gaussians, new_directory, save, sha, validate_gaussians
 
 def _matrix_to_quaternion_wxyz(matrices):
     """Convert a batch of proper 3x3 rotations to scalar-first quaternions.
@@ -134,6 +127,53 @@ def gaussian_rows(gaussians):
     return rows, eigen_clamps
 
 
+def validate_inference_archive(directory, record=None, *, gaussians=None):
+    """Check persisted Gaussian identity; return decoded arrays when reusable.
+
+    Legacy identities identify the NPZ bytes. An explicit array_content_v1
+    identity instead binds both canonical array contents and a separate NPZ
+    digest. Deferred in-memory results cannot be reopened before persistence.
+    This helper is shared by export and the saved-scene viewer.
+    """
+    directory = Path(directory)
+    if record is None:
+        record = json.loads((directory/'inference.json').read_text(encoding='utf-8'))
+    if not isinstance(record, dict) or not record.get('complete'):
+        raise ValueError('Inference not validated or output changed')
+    kind = record.get('gaussian_identity_kind', 'npz_file_v1')
+    if kind not in ('npz_file_v1', 'array_content_v1'):
+        raise ValueError('Unknown Gaussian identity kind')
+    def digest_field(key):
+        value = record.get(key)
+        if (type(value) is not str or len(value) != 64
+                or any(c not in '0123456789abcdef' for c in value)):
+            raise ValueError('Missing or invalid Gaussian identity field: '+key)
+        return value
+    identity = digest_field('gaussian_sha256')
+    if kind == 'array_content_v1':
+        if record.get('archive_verified') is not True:
+            raise ValueError('Gaussian array archive is not verified')
+        expected_archive = digest_field('gaussian_archive_sha256')
+    else:
+        expected_archive = identity
+    archive = directory/'gaussians.npz'
+    if not archive.is_file() or sha(archive) != expected_archive:
+        raise ValueError('Gaussian archive file identity changed')
+    if kind == 'npz_file_v1':
+        return None
+    stored = load_gaussians(archive)
+    if gaussian_content_sha256(stored) != identity:
+        raise ValueError('Gaussian archive content identity changed')
+    if ('gaussian_content_sha256' in record
+            and digest_field('gaussian_content_sha256') != identity):
+        raise ValueError('Gaussian content identity fields disagree')
+    if gaussians is not None:
+        if gaussian_content_sha256(gaussians) != identity:
+            raise ValueError('In-memory Gaussian content differs from verified archive')
+        return None
+    return stored
+
+
 def main(argv=None, gaussians=None):
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--input", type=Path, required=True)
@@ -145,9 +185,8 @@ def main(argv=None, gaussians=None):
     p.add_argument("--out", type=Path, required=True)
     a = p.parse_args(argv)
     t = time.perf_counter()
-    result = json.loads((a.inference / "inference.json").read_text())
-    if not result["complete"] or sha(a.inference / "gaussians.npz") != result["gaussian_sha256"]:
-        raise ValueError("Inference not validated or output changed")
+    result = json.loads((a.inference / "inference.json").read_text(encoding='utf-8'))
+    archived = validate_inference_archive(a.inference, result, gaussians=gaussians)
     if sha(a.input / "context.npz") != result["input_sha256"]:
         raise ValueError("Camera/input provenance mismatch")
     meta_path = a.input / "input.json" if a.input_manifest is None else a.input_manifest
@@ -179,7 +218,7 @@ def main(argv=None, gaussians=None):
         # Re-open every camera through the same runtime contract used by the
         # initial export. This keeps deferred append validation equivalent to
         # the normal path instead of trusting only the file hash.
-        from modules.contracts import RenderInput
+        from rendering.contracts import RenderInput
         for camera in known.values():
             RenderInput.load(out, camera["file"])
         manifest["cameras"] = list(known.values())
@@ -191,7 +230,8 @@ def main(argv=None, gaussians=None):
         save(out / "adapter_validation.json", checks)
         print(json.dumps(checks, indent=2))
         return checks
-    g = load_gaussians(a.inference / "gaussians.npz") if gaussians is None else validate_gaussians(gaussians)
+    g = ((archived if archived is not None else load_gaussians(a.inference/'gaussians.npz'))
+         if gaussians is None else validate_gaussians(gaussians))
     rows, eigen_clamps = gaussian_rows(g)
     n = len(rows)
     props = ["x", "y", "z", "nx", "ny", "nz"] + [f"f_dc_{i}" for i in range(3)]
@@ -224,12 +264,17 @@ def main(argv=None, gaussians=None):
         name = Path(view["name"]).stem + ".bin"
         (out / name).write_bytes(camera_bytes(view))
         cameras.append({**view, "file": name, "sha256": sha(out/name)})
+    identity_metadata = ({'gaussian_identity_kind': result['gaussian_identity_kind']}
+                         if 'gaussian_identity_kind' in result else {})
+    if result.get('gaussian_identity_kind') == 'array_content_v1':
+        identity_metadata['gaussian_archive_sha256'] = result['gaussian_archive_sha256']
     save(out / "manifest.json", dict(schema="mvsplat_renderer_bridge_v1", gaussians=n,
          model_sha256=sha(out / "model.ply"), gaussian_sha256=result["gaussian_sha256"],
          rows_sha256=rows_sha256,
          input_sha256=result["input_sha256"], source_sh_degree=4, exported_sh_degree=3,
-         cameras=cameras, quality_scope="SH degree 4 truncated to 3; validate image impact separately"))
-    from modules.contracts import RenderInput
+         cameras=cameras, quality_scope="SH degree 4 truncated to 3; validate image impact separately",
+         **identity_metadata))
+    from rendering.contracts import RenderInput
     for cam in cameras:
         RenderInput.load(out, cam["file"])
     checks.update(complete=True, gaussians=n, cameras=len(cameras), seconds=time.perf_counter()-t,

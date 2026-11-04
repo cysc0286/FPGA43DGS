@@ -12,7 +12,9 @@ from collections import deque
 
 from common import save, sha
 from gaussian_generation.npu_branch.artifacts import from_wire, to_wire, validate_bundle
-from gaussian_generation.npu_branch.catalog import PARTITIONS, replace
+from gaussian_generation.npu_branch.catalog import (
+    PARTITIONS, CORR_DEPTH_COMPONENTS, REFINE_HEADS_COMPONENTS, replace, validate_selection,
+)
 from gaussian_generation.npu_branch.buffers import buffer_plan, MappedBuffers
 from gaussian_generation.npu_branch.protocol import PROTOCOL_VERSION
 from gaussian_generation.npu_branch.spatial import execute_spatial
@@ -24,15 +26,19 @@ class PartitionRuntime:
                  buffer_policy="shared", buffer_limit_mib=128):
         if backend not in ("onnx_reference", "npu"):
             raise ValueError("Expected an explicit accelerated or host validation backend")
+        names = validate_selection(names)
         data, self.parts = validate_bundle(bundle, names, backend)
-        if backend == 'npu' and any(p['meta'].get('spatial_tiling') for p in self.parts.values()):
-            # Board probes exposed stale results across rapidly changing tiles.
-            # A fresh SDK Tensor and two charged forwards are both required;
-            # the retained-session/input-switch gate still runs before READY.
+        if backend == 'npu' and any(p['meta'].get('spatial_tiling') or p['meta'].get('ffn_adapter')
+                                    or name in ('corr_refine_net', 'refine_unet', 'corr_depth_pipeline', 'refine_heads_pipeline')
+                                    for name, p in self.parts.items()):
+            # Probes exposed stale results in existing large graphs/tiles.
+            # New continuous candidates inherit that conservative policy; it
+            # does not establish that two passes are necessary or sufficient
+            # for a graph that still needs its own board qualification.
             environment = dict(os.environ if environment is None else environment)
             environment.setdefault('MGS_NPU_FRESH_INPUT', '1')
             if environment['MGS_NPU_FRESH_INPUT'] != '1':
-                raise ValueError('Tiled NPU heads require fresh SDK input tensors')
+                raise ValueError('Selected NPU graph requires fresh SDK input tensors')
         plan = buffer_plan(self.parts, buffer_policy)
         limit_bytes = int(buffer_limit_mib*1024**2)
         if limit_bytes <= 0 or plan["allocated_bytes"] > limit_bytes:
@@ -50,6 +56,9 @@ class PartitionRuntime:
         self.process = None
         self.reader = None
         self.closed = False
+        self.model_adapters = []
+        self.model_replacements = []
+        self.attached_model = None
         self.log = None
         self.failed = False
         request = dict(backend=backend, bundle=str(Path(bundle).resolve()), names=list(names),
@@ -156,6 +165,11 @@ class PartitionRuntime:
 
     def attach(self, model):
         import torch
+        if self.closed or self.failed:
+            raise RuntimeError('Cannot attach a closed or failed partition worker')
+        if getattr(self, 'attached_model', None) is not None:
+            raise ValueError('Partition worker is already attached to a model')
+        validate_selection(list(self.parts))
         runtime = self
         class Partition(torch.nn.Module):
             def __init__(self, name):
@@ -166,18 +180,70 @@ class PartitionRuntime:
                     raise ValueError("Expected CPU float32 boundary tensor")
                 result = torch.from_numpy(runtime.execute(self.name, value.detach().numpy()))
                 return [result] if runtime.parts[self.name]["meta"]["returns_list"] else result
+        # Resolve every ordinary/FFN replacement before changing the model.
+        # Whole-method adapters validate original modules before replacements;
+        # fused heads own their two modules/hooks and therefore close first.
+        replacements = []
         for name in self.parts:
-            replace(model, name, Partition(name))
+            if name in ('fused_heads', 'corr_depth_pipeline', 'refine_heads_pipeline'):
+                continue
+            path = PARTITIONS[name].split('.')
+            parent = model
+            for component in path[:-1]:
+                parent = getattr(parent, component)
+            replacements.append((parent, path[-1], getattr(parent, path[-1])))
+        self.model_replacements = replacements
+        try:
+            # This is a generated method seam, never a replaceable nn.Module.
+            # Its adapter validates the untouched method and three CPU modules
+            # before any FFN/head/ordinary replacement changes the model.
+            if 'corr_depth_pipeline' in self.parts:
+                from gaussian_generation.npu_branch.corr_depth import attach_corr_depth
+                self.model_adapters.append(attach_corr_depth(model.depth_predictor,
+                    lambda value: self.execute('corr_depth_pipeline', value)))
+            if 'refine_heads_pipeline' in self.parts:
+                from gaussian_generation.npu_branch.refine_heads import attach_refine_heads
+                self.model_adapters.append(attach_refine_heads(model.depth_predictor,
+                    lambda value: self.execute('refine_heads_pipeline', value)))
+            if any(name.startswith('transformer_ffn_') for name in self.parts):
+                from gaussian_generation.npu_branch.ffn import attach_ffn_partitions
+                attach_ffn_partitions(model, self)
+            for name in self.parts:
+                if name.startswith('transformer_ffn_') or name in ('fused_heads', 'corr_depth_pipeline', 'refine_heads_pipeline'):
+                    continue
+                replace(model, name, Partition(name))
+            # Hook the actual refine module after its possible replacement.
+            if 'fused_heads' in self.parts:
+                from gaussian_generation.npu_branch.fused_heads import attach_fused_heads
+                self.model_adapters.append(attach_fused_heads(model.depth_predictor,
+                    lambda value: self.execute('fused_heads', value)))
+            self.attached_model = model
+        except BaseException:
+            self._restore_model()
+            raise
+
+    def _restore_model(self):
+        for adapter in reversed(getattr(self, 'model_adapters', [])):
+            adapter.close()
+        self.model_adapters = []
+        for parent, attribute, original in reversed(getattr(self, 'model_replacements', [])):
+            setattr(parent, attribute, original)
+        self.model_replacements = []
+        self.attached_model = None
 
     def report(self, start=None):
         if self.calls and start is not None and start < self.calls[0]['sequence']:
             raise ValueError('Requested partition report was evicted; persist per-inference receipts')
         calls = [c for c in self.calls if start is None or c['sequence'] >= start]
         return dict(backend=self.backend, npu_executed=any(c["npu_executed"] for c in calls),
-            selected_partitions=list(self.parts), cpu_partitions=[n for n in PARTITIONS if n not in self.parts],
+            selected_partitions=list(self.parts), cpu_partitions=[n for n in PARTITIONS
+                if n not in self.parts and n not in ('fused_heads', 'corr_depth_pipeline', 'refine_heads_pipeline') and not
+                ('fused_heads' in self.parts and n in ('to_gaussians','to_disparity')) and not
+                ('corr_depth_pipeline' in self.parts and n in CORR_DEPTH_COMPONENTS) and not
+                ('refine_heads_pipeline' in self.parts and n in REFINE_HEADS_COMPONENTS)],
             spatial_execution={n:p['meta']['spatial_tiling'] for n,p in self.parts.items()
                                if p['meta'].get('spatial_tiling')},
-            cpu_remainder="camera geometry, cost-volume warping, multi-view attention, refinement UNets, Gaussian adapter",
+            cpu_remainder="camera geometry, cost-volume warping, backbone window attention/normalization, Gaussian adapter; other unselected modules listed separately",
             calls=calls, total_partition_seconds=sum(c["total_seconds"] for c in calls),
             history_scope='bounded recent calls; complete per-inference slices are persisted separately',
             total_call_count=self.sequence, history_first_sequence=calls[0]['sequence'] if calls else None,
@@ -190,6 +256,7 @@ class PartitionRuntime:
         if self.closed:
             return
         self.closed = True
+        self._restore_model()
         if self.process is not None:
             try:
                 if self.process.poll() is None:

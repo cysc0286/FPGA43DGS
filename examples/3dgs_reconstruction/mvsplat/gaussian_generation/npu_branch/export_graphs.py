@@ -12,6 +12,9 @@ from common import new_directory, save, sha
 from gaussian_generation.runtime import ModelRuntime
 from gaussian_generation.npu_branch.catalog import PARTITIONS, locate
 
+EXPORT_PARTITIONS = ('backbone_cnn', 'regressor_residual', 'depth_head', 'upsampler',
+                     'proj_feature', 'to_gaussians', 'to_disparity')
+
 
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
@@ -19,7 +22,7 @@ def main(argv=None):
     p.add_argument("--weights", type=Path, required=True)
     p.add_argument("--vendor", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
-    p.add_argument("--partitions", nargs="+", choices=list(PARTITIONS), default=list(PARTITIONS))
+    p.add_argument("--partitions", nargs="+", choices=EXPORT_PARTITIONS, default=list(EXPORT_PARTITIONS))
     a = p.parse_args(argv)
     out = new_directory(a.out)
     runtime = ModelRuntime(a.weights, a.vendor, 2, 16, out / "runtime")

@@ -5,7 +5,7 @@ from pathlib import Path
 import time
 import numpy as np
 
-from initialize.renderer_runtime import frozen_renderer_module
+from rendering.resident_runtime import frozen_renderer_module
 from rendering.runtime import LiveRenderer, load_mainline_profile
 
 

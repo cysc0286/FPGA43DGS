@@ -18,7 +18,7 @@ def main():
     # The direct script entry point must also resolve evaluate.py's common.py.
     module_root=Path(__file__).resolve().parents[1]
     sys.path.insert(0,str(module_root))
-    spec=importlib.util.spec_from_file_location("mvsplat_metrics",module_root/"evaluate.py")
+    spec=importlib.util.spec_from_file_location("mvsplat_metrics",module_root/"rendering/evaluate.py")
     metrics=importlib.util.module_from_spec(spec);spec.loader.exec_module(metrics)
     profiles=a.profiles.split(",")
     names=["frame_000007","frame_000015","frame_000022"]

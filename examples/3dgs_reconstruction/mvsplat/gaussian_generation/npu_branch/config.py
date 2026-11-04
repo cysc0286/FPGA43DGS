@@ -3,11 +3,12 @@ from contextlib import ExitStack
 from dataclasses import dataclass
 from pathlib import Path
 
-from gaussian_generation.npu_branch.catalog import PARTITIONS
+from gaussian_generation.npu_branch.catalog import PARTITIONS, validate_selection
 
 
-def add_arguments(parser):
-    parser.add_argument('--backend', choices=('cpu', 'onnx_reference', 'npu'), default='cpu')
+def add_arguments(parser, *, default_backend='cpu'):
+    parser.add_argument('--backend', choices=('cpu', 'onnx_reference', 'npu'),
+                        default=default_backend)
     parser.add_argument('--partition-bundle', type=Path)
     parser.add_argument('--partitions', nargs='+', choices=list(PARTITIONS))
     parser.add_argument('--npu-library', type=Path)
@@ -50,10 +51,9 @@ class BackendConfig:
             if self.partitions or self.partition_bundle or self.npu_library or self.npu_acceptance or self.oracle_graphs:
                 raise ValueError('CPU backend cannot silently ignore NPU configuration')
             return
-        if not self.partition_bundle or not self.partitions or len(set(self.partitions)) != len(self.partitions):
+        if not self.partition_bundle:
             raise ValueError('Non-CPU backend needs a bundle and unique explicit partitions')
-        if any(name not in PARTITIONS for name in self.partitions):
-            raise ValueError('Unknown NPU partition')
+        validate_selection(self.partitions)
         if self.backend == 'npu':
             if not self.npu_library:
                 raise ValueError('NPU requires --npu-library')
@@ -90,6 +90,13 @@ class GenerationSession:
         self.readiness = None
         out = Path(out)
         try:
+            continuous_depth = 'corr_depth_pipeline' in self.config.partitions
+            continuous_refinement = 'refine_heads_pipeline' in self.config.partitions
+            if (continuous_depth or continuous_refinement) and (type(depth_chunk) is not int or not 1 <= depth_chunk <= 128):
+                raise ValueError('Continuous depth requires depth_chunk in 1..128 before worker startup')
+            if continuous_refinement:
+                from gaussian_generation.runtime import validate_refine_heads_config
+                validate_refine_heads_config(args.vendor)
             if self.config.npu_acceptance:
                 if getattr(args, 'render_profile', 'mainline') != 'mainline' or not getattr(args, 'live_renderer', None):
                     raise ValueError('Image-qualified NPU requires the accepted native mainline renderer')
@@ -111,7 +118,13 @@ class GenerationSession:
                                                      acceptance=c.npu_acceptance)
                     self.partitions.validation = self.readiness
             from gaussian_generation.runtime import ModelRuntime
-            self.model = ModelRuntime(args.weights, args.vendor, threads, depth_chunk, out / 'initialize')
+            model_options = {}
+            if continuous_depth:
+                model_options['corr_depth_pipeline'] = True
+            if continuous_refinement:
+                model_options['refine_heads_pipeline'] = True
+            self.model = ModelRuntime(args.weights, args.vendor, threads, depth_chunk,
+                                      out / 'initialize', **model_options)
             if self.config.npu_acceptance:
                 from gaussian_generation.npu_branch.acceptance import validate_model
                 validate_model(self.config.npu_acceptance, self.model)

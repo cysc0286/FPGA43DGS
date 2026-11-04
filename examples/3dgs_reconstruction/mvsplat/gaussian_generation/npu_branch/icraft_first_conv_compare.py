@@ -20,8 +20,7 @@ def main():
     p.add_argument("--oracle", type=Path, required=True)
     p.add_argument("--actual", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
-    p.add_argument("--runner", type=Path, default=Path(__file__).resolve().parents[5]/
-                   "npu_3dgs/.vendor/icraft-3.36.1/bin/icraft-run.exe")
+    p.add_argument("--runner", type=Path, required=True, help="Installed ICraft reference runner")
     a = p.parse_args()
     network = json.loads(a.graph.read_text())
     if sum(op["_type_key"] == "icraft::xir::Conv2d" for op in network["ops"]) != 1:

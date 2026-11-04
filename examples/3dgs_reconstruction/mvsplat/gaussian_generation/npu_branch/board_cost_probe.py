@@ -7,8 +7,7 @@ import sys
 
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT.parent.parent / "3dgs_compositor/board"))
-import remote
+from initialize import transport as remote
 from initialize.board_sync import NPU_SOURCE_FILES, upload_sources
 
 

@@ -25,6 +25,17 @@ def main(argv=None):
     p.add_argument("--candidates", type=int, default=8)
     p.add_argument("--min-parallax", type=float, default=1.)
     p.add_argument("--max-reprojection", type=float, default=2.)
+    p.add_argument('--ring-pairs', type=int, choices=(0, 1, 2, 4, 8), default=0,
+                   help='Explicit approximate fixed-centre rotation panorama; 0 keeps ordinary two-view geometry')
+    p.add_argument('--ring-candidates', type=int, default=24)
+    p.add_argument('--ring-feature-contrast', type=float, default=.04,
+                   help='Explicit SIFT detection contrast for weak texture; rotation acceptance gates are unchanged')
+    p.add_argument('--ring-auto-coverage', action='store_true',
+                   help='Choose multiple pairs by measured angular coverage, bounded by --ring-pairs')
+    p.add_argument('--ring-coverage-target', type=float, default=.95)
+    p.add_argument('--ring-min-pairs', type=int, default=1,
+                   help='Continue auto selection to this many disjoint frame pairs after angular target is met')
+    p.add_argument('--ring-max-gaussians', type=int, default=65536)
     p.add_argument("--interactive", action="store_true", help="Keep the scene resident and serve browser controls")
     p.add_argument("--viewer-host", default="127.0.0.1")
     p.add_argument("--viewer-port", type=int, default=8080)
@@ -32,7 +43,8 @@ def main(argv=None):
     p.add_argument("--weights", type=Path, required=True)
     p.add_argument("--vendor", type=Path, required=True)
     p.add_argument("--renderer", type=Path, required=True)
-    p.add_argument("--resident-binary", type=Path, default=Path(__file__).with_name("render_resident"))
+    p.add_argument("--resident-binary", type=Path,
+                   default=Path(__file__).resolve().parents[1]/"rendering/render_resident")
     p.add_argument("--live-renderer", type=Path,
                    help="Native camera-to-frame backend; replaces the three-process renderer")
     p.add_argument("--render-profile", choices=("mainline", "custom"), default="mainline",
@@ -58,6 +70,8 @@ def main(argv=None):
     from gaussian_generation.npu_branch.config import add_arguments, BackendConfig
     add_arguments(p)
     a = p.parse_args(argv)
+    if a.ring_pairs == 8 and not a.ring_auto_coverage:
+        p.error('eight panorama pairs require automatic coverage; add --ring-auto-coverage')
     try:
         BackendConfig.from_args(a)
     except ValueError as exc:
@@ -77,6 +91,16 @@ def main(argv=None):
             p.error("Calibration image size differs from camera capture mode")
     if a.interactive and a.live_renderer is None:
         p.error("--interactive requires --live-renderer")
+    if (not 8 <= a.ring_candidates <= 64 or not 1024 <= a.ring_max_gaussians <= 131072
+            or (a.ring_pairs and (a.size != 128 or a.live_renderer is None))):
+        p.error('Ring mode requires 128x128, native renderer and bounded sampling/point budget')
+    if not math.isfinite(a.ring_feature_contrast) or not 0 < a.ring_feature_contrast <= .04:
+        p.error('--ring-feature-contrast must be finite and in (0, .04]')
+    if (not math.isfinite(a.ring_coverage_target) or not 0 < a.ring_coverage_target <= 1
+            or (a.ring_auto_coverage and (not a.ring_pairs or
+                                          not 1 <= a.ring_min_pairs <= a.ring_pairs))
+            or (not a.ring_auto_coverage and a.ring_min_pairs != 1)):
+        p.error('Automatic coverage needs an enabled ring pair budget and target in (0,1]')
     if (not 0 <= a.viewer_port <= 65535 or not 3 <= a.candidates <= 12
             or not math.isfinite(a.min_parallax) or a.min_parallax <= 0
             or not math.isfinite(a.max_reprojection) or a.max_reprojection <= 0):
@@ -116,7 +140,9 @@ def main(argv=None):
         if a.camera is not None:
             from video_input.capture import capture_clip
             if not a.capture_now:
-                input("摄像头已就绪，按回车开始采集；请缓慢平移摄像头：")
+                guidance = ("请保持镜头中心固定并水平缓慢转满一圈："
+                            if a.ring_pairs else "请缓慢平移摄像头并保持视野重叠：")
+                input("摄像头已就绪，按回车开始采集；" + guidance)
             record["camera_capture"] = capture_clip(a.camera, out/"capture",
                 width=a.camera_width, height=a.camera_height, fps=a.camera_fps,
                 seconds=a.capture_seconds, settle=a.capture_settle, events=events)
@@ -126,14 +152,25 @@ def main(argv=None):
         from video_input.receipt import receive_file
         receipt = receive_file(a.video, events)
         record["video_receipt"] = receipt
-        from warm_pipeline import prepare_scene
-        record.update(prepare_scene(receipt["path"], out, session.model, session.renderer, events,
-            size=a.size, prepare_threads=a.prepare_threads, focal_ratio=a.focal_ratio,
-            overlap=not a.serial_prepare, calibration=a.calibration,
-            auto_select=a.auto_select or a.camera is not None, candidates=a.candidates,
-            min_parallax=a.min_parallax, max_reprojection=a.max_reprojection))
+        if a.ring_pairs:
+            from initialize.ring import prepare_ring_scene
+            record['mode'] = 'sparse_fixed_centre_rotation_candidate'
+            record.update(prepare_ring_scene(receipt['path'], out, session.model,
+                session.renderer, events, groups='auto' if a.ring_auto_coverage else a.ring_pairs,
+                max_pairs=a.ring_pairs, min_pairs=a.ring_min_pairs,
+                coverage_target=a.ring_coverage_target,
+                candidates=a.ring_candidates, feature_contrast=a.ring_feature_contrast,
+                max_gaussians=a.ring_max_gaussians, size=a.size,
+                prepare_threads=a.prepare_threads, focal_ratio=a.focal_ratio, calibration=a.calibration))
+        else:
+            from initialize.pipeline import prepare_scene
+            record.update(prepare_scene(receipt["path"], out, session.model, session.renderer, events,
+                size=a.size, prepare_threads=a.prepare_threads, focal_ratio=a.focal_ratio,
+                overlap=not a.serial_prepare, calibration=a.calibration,
+                auto_select=a.auto_select or a.camera is not None, candidates=a.candidates,
+                min_parallax=a.min_parallax, max_reprojection=a.max_reprojection))
         if a.interactive:
-            from rendering.viewer import serve_scene
+            from web.viewer import serve_scene
             record["interactive"] = serve_scene(session.renderer.runtime, out/"input", out/"inference",
                                                  host=a.viewer_host, port=a.viewer_port)
         record["complete"] = True

@@ -10,7 +10,8 @@ from unittest.mock import patch
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
-from video_input.recording import CameraRecorder, make_server,prune_stream_candidate
+from video_input.recording import CameraRecorder, prune_stream_candidate
+from web.recording_server import make_server
 
 
 class FakePreview:
@@ -222,7 +223,7 @@ class RecordingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             camera=self.camera(folder)
             calls=[]
-            camera.build=SimpleNamespace(status=lambda:dict(phase='idle',url=None),start=calls.append,close=lambda:None)
+            camera.build=SimpleNamespace(status=lambda:dict(phase='idle',url=None),start=lambda path,**kwargs:calls.append(path),close=lambda:None)
             try:
                 with self.assertRaises(ValueError): camera.reconstruct()
                 camera.state='recorded';camera.clip=dict(path='/validated/capture.mkv')
@@ -235,16 +236,75 @@ class RecordingTests(unittest.TestCase):
             def __init__(self,*args,**kwargs):
                 super().__init__(*args,**kwargs)
                 if kwargs: self.process=SimpleNamespace(poll=lambda:0,returncode=0)
-        for count,expected in ((1201,'recorded'),(121,'error')):
+        for count,expected in ((900,'recorded'),(121,'error')):
             with self.subTest(count=count),tempfile.TemporaryDirectory() as folder,patch(
                     'video_input.recording.inspect_clip',return_value=(
                     dict(codec_name='mjpeg',width=1280,height=720,fps=60),[i/60 for i in range(count)])):
-                camera=CameraRecorder('/dev/video0',1280,720,60,folder,factory=EndedPreview)
+                camera=CameraRecorder('/dev/video0',1280,720,60,folder,max_seconds=15,
+                                      factory=EndedPreview,auto_process=True)
+                submitted=[]
+                camera.build=SimpleNamespace(status=lambda:dict(phase='idle',url=None),
+                    start=lambda path,**kwargs:submitted.append(path),close=lambda:None)
                 try:
-                    camera.start();self.wait(camera,expected)
-                    if expected=='recorded': self.assertEqual(camera.clip['stop_reason'],'time_limit')
-                    else: self.assertIn('断流',camera.error)
+                    camera.start();self.wait(camera,expected);camera.worker.join(3)
+                    self.assertFalse(camera.worker.is_alive())
+                    if expected=='recorded':
+                        self.assertEqual(camera.clip['stop_reason'],'time_limit')
+                        self.assertEqual(submitted,[camera.clip['path']])
+                    else:
+                        self.assertIn('断流',camera.error)
+                        self.assertIsNone(camera.clip)
+                        self.assertEqual(submitted,[])
+                        self.assertFalse(list(Path(folder).glob('clip_*/capture.mkv')))
                 finally: camera.close()
+
+    def test_fifteen_second_automatic_stop_keeps_verified_clip_and_dispatches_once(self):
+        recordings=[]
+        class TimedPreview(FakePreview):
+            def __init__(self,*args,**kwargs):
+                super().__init__(*args,**kwargs)
+                if kwargs:
+                    self.options=kwargs
+                    self.process=SimpleNamespace(poll=lambda:0,returncode=0)
+                    recordings.append(self)
+        with tempfile.TemporaryDirectory() as folder,patch('video_input.recording.inspect_clip',return_value=(
+                dict(codec_name='mjpeg',width=1280,height=720,fps=60),[i/60 for i in range(900)])):
+            camera=CameraRecorder('/dev/video1',1280,720,60,folder,max_seconds=15,
+                                  factory=TimedPreview,auto_process=True)
+            prepared=[];submitted=[]
+            def submit(path,**kwargs):
+                video=Path(path)
+                metadata=json.loads(video.with_name('capture.json').read_text(encoding='utf-8'))
+                # Model dispatch must happen after successful file publication
+                # and metadata verification, never on the partial recording.
+                self.assertTrue(metadata['complete'])
+                self.assertEqual(metadata['stop_reason'],'time_limit')
+                self.assertEqual(metadata['path'],str(video.resolve()))
+                self.assertEqual(video.read_bytes(),b'stub clip')
+                self.assertFalse(video.with_name('capture.partial.mkv').exists())
+                submitted.append(str(video))
+            camera.build=SimpleNamespace(status=lambda:dict(phase='warmed',url=None),
+                prepare_capture=lambda:prepared.append(True),start=submit,close=lambda:None)
+            try:
+                camera.start()
+                camera.worker.join(3)
+                self.assertFalse(camera.worker.is_alive(),camera.status())
+                self.assertEqual(camera.status()['state'],'recorded')
+                self.assertIsNone(camera.error)
+                self.assertEqual(prepared,[True])
+                self.assertEqual(len(recordings),1)
+                self.assertEqual(recordings[0].options['max_seconds'],15)
+                self.assertTrue(recordings[0].finished)
+                self.assertFalse(camera.stop_event.is_set())
+                self.assertEqual(submitted,[camera.clip['path']])
+                self.assertTrue(Path(camera.clip['path']).is_file())
+                self.assertAlmostEqual(camera.clip['duration_seconds'],899/60)
+                self.assertIsNotNone(camera.video_complete_monotonic)
+                # A late UI stop or repeated polling cannot resubmit this clip.
+                with self.assertRaises(ValueError):camera.stop()
+                for _ in range(3):camera.status()
+                self.assertEqual(submitted,[camera.clip['path']])
+            finally:camera.close()
 
     def stream(self,root,name):
         from common import sha

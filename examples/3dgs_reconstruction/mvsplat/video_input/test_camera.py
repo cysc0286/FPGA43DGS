@@ -127,8 +127,92 @@ class CaptureLifecycleTests(unittest.TestCase):
             self.assertFalse(json.loads((out/"capture.json").read_text())["complete"])
 
 
+class ClipTimestampTests(unittest.TestCase):
+    def record(self):
+        # Legal B-frame packet PTS are in decode order, while decoded video
+        # frames are emitted in presentation order. Never sort either sequence.
+        return dict(streams=[dict(codec_name='h264', width=160, height=96,
+                                  avg_frame_rate='10/1')],
+                    packets=[dict(pts_time=str(t)) for t in (0., .3, .1, .2)],
+                    frames=[dict(best_effort_timestamp_time=str(t)) for t in (0., .1, .2, .3)])
+
+    def inspect(self, record, **kwargs):
+        with patch('video_input.capture.subprocess.run', return_value=
+                   subprocess.CompletedProcess([], 0, stdout=json.dumps(record))) as run:
+            result = inspect_clip('unused.mp4', **kwargs)
+        return result, run.call_args.args[0]
+
+    def test_legal_reordered_packets_require_explicit_decoded_frame_mode(self):
+        with self.assertRaisesRegex(ValueError, 'non-monotonic'):
+            self.inspect(self.record())
+        (stream, timestamps), command = self.inspect(self.record(), decoded_frames=True)
+        self.assertEqual(timestamps, [0., .1, .2, .3])
+        self.assertEqual(stream['fps'], 10.)
+        self.assertIn('-show_frames', command)
+        self.assertNotIn('-show_packets', command)
+        self.assertIn('best_effort_timestamp_time', command[command.index('-show_entries')+1])
+
+    def test_file_decode_timeout_is_bounded_without_relaxing_capture_timeout(self):
+        record = self.record()
+        record['packets'] = [dict(pts_time=str(t)) for t in (0., .1, .2)]
+        with patch('video_input.capture.subprocess.run', return_value=
+                   subprocess.CompletedProcess([], 0, stdout=json.dumps(record))) as run:
+            inspect_clip('unused.mkv')
+            self.assertEqual(run.call_args.kwargs['timeout'], 30)
+            inspect_clip('unused.mp4', decoded_frames=True)
+            self.assertEqual(run.call_args.kwargs['timeout'], 120)
+
+    def test_actual_decoded_timestamp_errors_are_rejected_without_sorting(self):
+        for times in ((0., .2, .1), (0., .1, .1), (0., 'NaN', .2),
+                      (0., 'Infinity', .2), (0., 'N/A', .2), (0., None, .2)):
+            with self.subTest(times=times):
+                record = self.record()
+                record['frames'] = [dict(best_effort_timestamp_time=t) for t in times]
+                with self.assertRaises(ValueError):
+                    self.inspect(record, decoded_frames=True)
+        record = self.record()
+        del record['frames'][1]['best_effort_timestamp_time']
+        with self.assertRaises(ValueError):
+            self.inspect(record, decoded_frames=True)
+
+    def test_nonfinite_missing_or_invalid_stream_metadata_rejected(self):
+        for field, value in (('avg_frame_rate', '0/0'), ('avg_frame_rate', '0/1'),
+                             ('avg_frame_rate', 'NaN'), ('avg_frame_rate', None),
+                             ('width', 0), ('height', None), ('codec_name', '')):
+            for decoded in (False, True):
+                record = self.record()
+                # Keep packet mode valid so its metadata rejection is tested.
+                record['packets'] = [dict(pts_time=str(t)) for t in (0., .1, .2)]
+                record['streams'][0][field] = value
+                with self.subTest(field=field, value=value, decoded=decoded),self.assertRaises(ValueError):
+                    self.inspect(record, decoded_frames=decoded)
+        for field in ('avg_frame_rate', 'width', 'height', 'codec_name'):
+            record = self.record()
+            del record['streams'][0][field]
+            with self.subTest(missing=field),self.assertRaises(ValueError):
+                self.inspect(record, decoded_frames=True)
+
+
 @unittest.skipUnless(shutil.which("ffprobe") and shutil.which("ffmpeg"), "FFmpeg tools required")
 class RealClipTests(unittest.TestCase):
+    def test_b_frame_mp4_uses_decoded_presentation_order_in_auto_selection(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder)/'b_frames.mp4'
+            subprocess.run(['ffmpeg', '-hide_banner', '-loglevel', 'error', '-nostdin', '-n',
+                '-f', 'lavfi', '-i', 'testsrc2=size=160x96:rate=10:duration=1.2',
+                '-c:v', 'mpeg4', '-bf', '2', '-g', '12', '-q:v', '4', str(path)],
+                capture_output=True, text=True, check=True, timeout=30)
+            # Confirm the fixture exercises the original rejection, rather than
+            # silently testing an encoder that emitted no reordered frames.
+            with self.assertRaisesRegex(ValueError, 'non-monotonic'):
+                inspect_clip(path)
+            stream, times = inspect_clip(path, decoded_frames=True)
+            self.assertEqual(len(times), 12)
+            self.assertEqual((stream['width'], stream['height']), (160, 96))
+            self.assertTrue(all(b > a for a,b in zip(times,times[1:])))
+            images,count,fps,_,_ = decode_selected(path,[0,-1],None,160,1,candidate_count=3)
+            self.assertEqual((count,fps,sorted(images)),(12,10.,[0,5,11]))
+
     def test_mjpeg_capture_file_is_consumable_by_both_input_paths(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder)/"camera.avi"
@@ -182,7 +266,7 @@ class RealClipTests(unittest.TestCase):
     def test_textured_multidepth_video_to_calibrated_context_with_real_sift(self):
         from contextlib import redirect_stdout
         import io
-        from scene_preparation import main as prepare
+        from initialize.scene_preparation import main as prepare
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             rng = np.random.default_rng(123)

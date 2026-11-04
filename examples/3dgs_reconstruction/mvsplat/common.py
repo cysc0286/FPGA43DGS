@@ -44,3 +44,26 @@ def validate_gaussians(result):
     if np.any(result["opacities"] < 0) or np.any(result["opacities"] > 1):
         raise ValueError("Opacity must already be activated")
     return result
+
+
+def gaussian_content_sha256(result):
+    """Identify validated parameters without allocating an NPZ archive.
+
+    Field names, shapes and dtypes are part of this identity. Byte order and
+    storage strides are normalized, while floating-point precision is retained.
+    This is an array-content identity, never an NPZ-file digest.
+    """
+    import numpy as np
+    validate_gaussians(result)
+    digest = hashlib.sha256(b'mvsplat_gaussian_array_content_v1\0')
+    for key in ('means', 'covariances', 'harmonics', 'opacities'):
+        value = np.asarray(result[key])
+        if value.dtype.kind != 'f':
+            raise ValueError('Gaussian content identity requires floating arrays: '+key)
+        value = np.ascontiguousarray(value, dtype=value.dtype.newbyteorder('<'))
+        header = json.dumps([key, list(value.shape), value.dtype.str],
+                            ensure_ascii=True, separators=(',', ':')).encode('ascii')
+        digest.update(len(header).to_bytes(8, 'little'))
+        digest.update(header)
+        digest.update(memoryview(value).cast('B'))
+    return digest.hexdigest()

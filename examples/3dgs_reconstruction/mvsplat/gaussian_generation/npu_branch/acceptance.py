@@ -8,7 +8,7 @@ import math
 from pathlib import Path
 
 from common import FULL_WEIGHT_SHA256, sha
-from gaussian_generation.npu_branch.catalog import PARTITIONS
+from gaussian_generation.npu_branch.catalog import validate_selection
 
 SCHEMA = 'mvsplat_npu_native_acceptance_v1'
 QUALITY_LIMITS = dict(minimum_psnr_db=40., minimum_ssim=.99,
@@ -34,13 +34,13 @@ def check_views(views):
 
 def check_receipt(record):
     names = record.get('partitions', [])
+    validate_selection(names)
     if (record.get('schema') != SCHEMA or record.get('complete') is not True or
             record.get('diagnostic_only', True) is not False or
             record.get('npu_executed') is not True or record.get('fpga_executed') is not True or
             record.get('gaussian_repeat_exact') is not True or
             record.get('weight_sha256') != FULL_WEIGHT_SHA256 or
-            record.get('quality_limits') != QUALITY_LIMITS or not names or
-            len(set(names)) != len(names) or any(n not in PARTITIONS for n in names)):
+            record.get('quality_limits') != QUALITY_LIMITS):
         raise ValueError('Incomplete or diagnostic NPU qualification receipt')
     if not record.get('runtime_identity', {}).get('sdk_libraries'):
         raise ValueError('NPU qualification lacks SDK identity')
@@ -67,7 +67,7 @@ def load_receipt(path):
 
 def validate_renderer(path, renderer, binary):
     record = load_receipt(path)
-    from initialize.renderer_runtime import frozen_renderer_module
+    from rendering.resident_runtime import frozen_renderer_module
     package = frozen_renderer_module(Path(renderer)).verify()
     from rendering.runtime import load_mainline_profile
     profile = load_mainline_profile()

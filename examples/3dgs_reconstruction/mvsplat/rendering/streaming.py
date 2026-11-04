@@ -3,7 +3,7 @@ import threading
 import time
 import numpy as np
 from gaussian_generation.adapter import camera_bytes
-from rendering.viewer import orbit_view
+from rendering.camera import orbit_view
 
 
 class SceneExchange:

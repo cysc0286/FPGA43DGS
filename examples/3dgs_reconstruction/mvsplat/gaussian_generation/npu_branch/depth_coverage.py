@@ -12,12 +12,16 @@ from gaussian_generation.runtime import ModelRuntime
 
 
 MODULES = ("corr_refine_net", "refine_unet")
+# A method seam has no nn.Module hooks and is absent from the default model.
+# Profile its original component modules; do not implicitly enable the seam.
+METHOD_PARTITIONS = frozenset(("corr_depth_pipeline", "refine_heads_pipeline"))
 
 
 def profile_cpu(runtime, context_path, out, repeats):
     """Time actual nested stages; inclusive parent times must not be added."""
     from gaussian_generation.npu_branch.catalog import PARTITIONS, locate
-    stages = {name: locate(runtime.model, name) for name in PARTITIONS}
+    stages = {name: locate(runtime.model, name) for name in PARTITIONS
+              if name not in METHOD_PARTITIONS}
     stages.update(backbone=runtime.model.backbone,
                   corr_refine_net=runtime.model.depth_predictor.corr_refine_net,
                   refine_unet=runtime.model.depth_predictor.refine_unet,
@@ -50,7 +54,8 @@ def profile_cpu(runtime, context_path, out, repeats):
                 finite=all(np.isfinite(v).all() for v in arrays.values()),
                 gaussian_hashes={k: hashlib.sha256(v.tobytes()).hexdigest() for k,v in arrays.items()}))
             save(out/'cpu_profile.json', dict(npu_executed=False, threads=runtime.threads,
-                scope='Actual board CPU reference; nested stage durations are inclusive', rounds=rounds))
+                scope='Actual board CPU reference; nested stage durations are inclusive',
+                excluded_method_partitions=sorted(set(PARTITIONS) & METHOD_PARTITIONS), rounds=rounds))
             print(json.dumps(rounds[-1]), flush=True)
             del g, arrays
     finally:

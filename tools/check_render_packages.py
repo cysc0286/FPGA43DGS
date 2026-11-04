@@ -29,21 +29,18 @@ def verify_package(folder):
 
 def main():
     stable = verify_package(MVS / "rendering/render_main")
-    candidate = verify_package(MVS / "rendering/render_branch")
     profile = json.loads((MVS / "rendering/mainline.json").read_text(encoding="utf-8"))
     if stable["boot_sha256"] != profile["required_hardware"]["accepted_boot_sha256"]:
         raise ValueError("Default profile does not select frozen four-lane hardware")
-    if not stable["default_enabled"] or profile["required_hardware"]["lanes"] != 4 or candidate["default_enabled"]:
+    if not stable["default_enabled"] or profile["required_hardware"]["lanes"] != 4:
         raise ValueError("Incorrect default renderer selection")
     frozen_profile = json.loads((MVS / "rendering/render_main/profile.json").read_text(encoding="utf-8"))
     if frozen_profile != profile:
         raise ValueError("Frozen mainline profile has drifted from the runtime profile")
-    if candidate["boot_sha256"] == stable["boot_sha256"]:
-        raise ValueError("Mainline and candidate must have different firmware identities")
     checked = 0
     for base in (MVS / "rendering", MVS / "initialize", MVS / "video_input",
                  MVS / "pose_estimation", MVS / "gaussian_generation",
-                 MVS.parent / "modules"):
+                 MVS / "web"):
         for path in base.rglob("*.py"):
             if any(part in {"results", "package", "render_main", "render_branch", "__pycache__"} for part in path.parts):
                 continue
@@ -53,8 +50,8 @@ def main():
             if "render_branch" in source or "pipegs_hgr_v4_coord_2lane" in source:
                 raise ValueError(f"Default source references experimental branch: {path}")
             checked += 1
-    for name in ("pipeline.py", "mvsplat/run.py", "mvsplat/warm_pipeline.py",
-                 "mvsplat/scene_preparation.py"):
+    for name in ("pipeline.py", "mvsplat/run.py", "mvsplat/initialize/pipeline.py",
+                 "mvsplat/initialize/scene_preparation.py"):
         path = MVS.parent / name
         if path.exists() and "render_branch" in path.read_text(encoding="utf-8-sig"):
             raise ValueError(f"Pipeline entry invokes candidate: {path}")

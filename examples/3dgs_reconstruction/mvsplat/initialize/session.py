@@ -60,8 +60,8 @@ class WarmSession:
             self.model, self.partitions = generation.model, generation.partitions
             numerical_readiness = generation.readiness
             # Imports and package/device initialization are outside the video clock.
-            import scene_preparation
-            import export
+            from initialize import scene_preparation
+            from gaussian_generation import adapter as export
             kernel_warmup = None
             if getattr(args, 'warm_kernels', False):
                 kernel_warmup = self.model.warm_kernels(getattr(args, 'size', 128))
@@ -104,7 +104,7 @@ class WarmSession:
             return PipelineRenderer(args.renderer, args.live_renderer, render_environment(),
                 out / "renderer.log", profile=getattr(args, "render_profile", "mainline"),
                 **{key: value for key, value in configuration.items() if value is not None})
-        from initialize.renderer_runtime import RendererRuntime
+        from rendering.resident_runtime import RendererRuntime
         return RendererRuntime(args.renderer, args.resident_binary, render_environment(), out / "renderer.log")
 
     @staticmethod

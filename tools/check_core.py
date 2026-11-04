@@ -26,9 +26,6 @@ def main():
                     ast.parse(p.read_text(encoding="utf-8-sig"), filename=str(p))
                     paths.append(p)
     print(f"Python syntax: {len(paths)} files passed", flush=True)
-    for rel in ("examples/3dgs_reconstruction/tests/test_interfaces.py",
-                "examples/3dgs_reconstruction/tests/test_reconstruct_entry.py"):
-        subprocess.run([sys.executable, str(ROOT/rel), "-v"], cwd=ROOT, check=True)
     subprocess.run([sys.executable, str(ROOT/"examples/3dgs_reconstruction/pipeline.py"), "--help"], check=True)
     if args.mvsplat:
         subprocess.run([sys.executable, "-m", "unittest", "discover", "-v", "-p", "test_*.py"],

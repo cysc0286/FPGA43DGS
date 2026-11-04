@@ -7,7 +7,7 @@ import threading
 import time
 from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from video_input.preview import JpegFrames, Preview
 from video_input.capture import capture_clip
@@ -15,6 +15,37 @@ from video_input.decode import decode_selected,temporal_candidate_spans
 
 
 class PreviewTests(unittest.TestCase):
+    def test_fifteen_second_recording_limits_both_ffmpeg_outputs(self):
+        # FFmpeg output options are scoped per output. Limiting just Matroska
+        # leaves the preview pipe alive and prevents automatic finalization.
+        process = MagicMock()
+        process.pid = 12345
+        process.poll.return_value = 0
+        resource = SimpleNamespace(RLIMIT_FSIZE=1, prlimit=MagicMock())
+        limit = 128*1024**2
+        with tempfile.TemporaryDirectory() as folder:
+            recording = Path(folder)/'capture.partial.mkv'
+            with patch('video_input.preview.Path.exists', return_value=True), \
+                    patch('video_input.preview.subprocess.Popen', return_value=process) as spawn, \
+                    patch('video_input.preview.threading.Thread'), \
+                    patch.dict('sys.modules', {'resource': resource}):
+                preview = Preview('/dev/video1', 1280, 720, 60, Path(folder)/'ffmpeg.log',
+                                  recording=recording, storage_limit=limit, max_seconds=15)
+                try:
+                    command = spawn.call_args.args[0]
+                    source = command.index('-i')+1
+                    saved = command.index(str(recording))
+                    piped = command.index('pipe:1')
+                    self.assertEqual(command[source], '/dev/video1')
+                    self.assertLess(saved, piped)
+                    self.assertNotIn('-t', command[:source])
+                    for output_options in (command[source+1:saved], command[saved+1:piped]):
+                        self.assertEqual(output_options.count('-t'), 1)
+                        self.assertEqual(output_options[output_options.index('-t')+1], '15')
+                    resource.prlimit.assert_called_once_with(12345, 1, (limit, limit))
+                finally:
+                    preview.close()
+
     def test_local_temporal_search_has_fixed_budget_and_valid_original_spans(self):
         self.assertEqual(temporal_candidate_spans(1000,60),[(760,999),(380,619),(0,239)])
         self.assertEqual(temporal_candidate_spans(240,60),[])

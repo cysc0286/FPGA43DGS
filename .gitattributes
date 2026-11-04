@@ -1,38 +1,4 @@
-# Keep frozen reference and patch bytes stable across collaborators.
-releases/3dgs_renderer_v1_20260928/** -text
 *.patch -text
-/archive/history_20261009/*.zip binary
-/archive/history_20261102_cleanup/*.zip binary
-# Standalone board shell scripts must also work after a Windows checkout.
 *.sh text eol=lf
-# Preserve the exact bytes of the versioned NPU validation receipts and images.
-examples/3dgs_reconstruction/mvsplat/results/20260929/npu_deployment_v2/** -text whitespace=cr-at-eol
-
-# Preserve on-board receipts and measured framebuffers exactly.
-examples/3dgs_reconstruction/mvsplat/results/20260929/board_warm_npu/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
-
-# Exact circuit/board evidence: retain tool-produced bytes and binary pixels.
-examples/3dgs_flicker_hw/physical_opt/results/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
-examples/3dgs_flicker_hw/pipeline/exp_rom/results/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
-examples/3dgs_flicker_hw/pipeline/exp_rom/*.cpp -text whitespace=cr-at-eol
-examples/3dgs_flicker_hw/pipeline/exp_rom/*.hpp -text whitespace=cr-at-eol
-examples/3dgs_flicker_hw/pipeline/exp_rom/*.tcl -text whitespace=cr-at-eol
-examples/3dgs_reconstruction/mvsplat/results/20260930/fpga_exp_rom/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
-examples/3dgs_reconstruction/mvsplat/results/20260930/compiler_full_after/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
-examples/3dgs_reconstruction/mvsplat/results/20260930/fpga_exp_rom/images/**/*.ppm binary
-examples/3dgs_reconstruction/mvsplat/results/20260930/fpga_exp_rom/images/**/*.bin binary
-examples/3dgs_reconstruction/mvsplat/results/20260930/view_switch_v4/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
-examples/3dgs_reconstruction/mvsplat/results/20260930/view_switch_v4/images/**/*.ppm binary
-examples/3dgs_reconstruction/mvsplat/results/20260930/view_switch_v4/images/**/*.bin binary
-
-# Preserve exact HLS candidate receipts, including rejected experiments.
-examples/3dgs_flicker_hw/pipeline/lane_workset/results/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
-examples/3dgs_flicker_hw/pipeline/lane_workset/results/**/*.flk binary
-examples/3dgs_flicker_hw/pipeline/lane_workset/results/**/*.raw binary
-
-# Resource allocation and physical/board comparisons retain measured bytes.
-examples/3dgs_flicker_hw/pipeline/resource_balance/results/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
-examples/3dgs_flicker_hw/pipeline/resource_balance/results/**/*.flk binary
-examples/3dgs_flicker_hw/pipeline/resource_balance/results/**/*.raw binary
-examples/3dgs_flicker_hw/pipeline/resource_balance/results/**/*.bin binary
-examples/3dgs_flicker_hw/pipeline/resource_balance/results/**/*.ppm binary
+# Frozen hardware, evidence and sources must remain byte-identical.
+examples/3dgs_reconstruction/mvsplat/rendering/render_main/** -text

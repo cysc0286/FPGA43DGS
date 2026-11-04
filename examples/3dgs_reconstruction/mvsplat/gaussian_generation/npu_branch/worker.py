@@ -9,11 +9,13 @@ import time
 import numpy as np
 from common import sha
 from gaussian_generation.npu_branch.artifacts import validate_bundle
+from gaussian_generation.npu_branch.catalog import validate_selection
 from gaussian_generation.npu_branch.buffers import MappedBuffers
 from gaussian_generation.npu_branch.protocol import PROTOCOL_VERSION, check_bridge, check_command, check_direct_sfb
 
 
-def runtime_identity(spatial_heads=()):
+def runtime_identity(spatial_heads=(), ffn_partitions=(), refinement_partitions=(), corr_depth_partitions=(),
+                     refine_heads_partitions=()):
     """Hash loaded SDK binaries once, after session creation, outside video timing."""
     libraries = {}
     for line in Path('/proc/self/maps').read_text().splitlines():
@@ -25,6 +27,10 @@ def runtime_identity(spatial_heads=()):
     return dict(machine=platform.machine().lower(), sdk_libraries=libraries,
                 ddr_guard_mib=int(os.environ.get('MGS_NPU_DDR_GUARD_MIB', '0')),
                 **({'spatial_head_settle_passes': 2, 'spatial_heads': list(spatial_heads)} if spatial_heads else {}),
+                **({'ffn_settle_passes': 2, 'ffn_partitions': list(ffn_partitions)} if ffn_partitions else {}),
+                **({'refinement_settle_passes': 2, 'refinement_partitions': list(refinement_partitions)} if refinement_partitions else {}),
+                **({'corr_depth_settle_passes': 2, 'corr_depth_partitions': list(corr_depth_partitions)} if corr_depth_partitions else {}),
+                **({'refine_heads_settle_passes': 2, 'refine_heads_partitions': list(refine_heads_partitions)} if refine_heads_partitions else {}),
                 **({'session_reapply': True} if os.environ.get('MGS_NPU_REAPPLY') == '1' else {}),
                 **({'fresh_input_tensor': True} if os.environ.get('MGS_NPU_FRESH_INPUT') == '1' else {}),
                 **({'force_output_wait': True} if os.environ.get('MGS_NPU_FORCE_WAIT') == '1' else {}),
@@ -33,9 +39,28 @@ def runtime_identity(spatial_heads=()):
 
 
 def sdk_passes(name, meta):
-    if meta.get('spatial_tiling') and name in ('to_gaussians', 'to_disparity'):
+    # Continuous candidates inherit the existing conservative two-pass policy.
+    # All calls are real and charged; this does not qualify a new graph or
+    # establish that its own SDK input-switch control needs exactly two.
+    if meta.get('ffn_adapter') or name in ('corr_refine_net', 'refine_unet', 'corr_depth_pipeline', 'refine_heads_pipeline'):
+        return 2
+    if meta.get('spatial_tiling') and name in ('to_gaussians', 'to_disparity', 'fused_heads'):
         return 2
     return 2 if name == 'backbone_cnn' and os.environ.get('MGS_NPU_SETTLE_BACKBONE') == '1' else 1
+
+
+def _forward_sdk(name, meta, context, input_buffer, output_buffer, forward, error, width):
+    """Execute and account for every real SDK pass; no uncharged settling."""
+    execution_passes = sdk_passes(name, meta)
+    stages = [0.] * width
+    for _ in range(execution_passes):
+        measured = (ct.c_double*width)()
+        rc = forward(context, input_buffer.ctypes.data, input_buffer.nbytes,
+                     output_buffer.ctypes.data, output_buffer.nbytes, measured)
+        if rc:
+            raise RuntimeError(error().decode())
+        stages = [a+b for a,b in zip(stages, measured)]
+    return stages, execution_passes
 
 
 def main():
@@ -49,7 +74,11 @@ def main():
     backend = request["backend"]
     if backend not in ("npu", "onnx_reference"):
         raise ValueError("Unknown backend")
-    _, parts = validate_bundle(request["bundle"], request["names"], backend)
+    names = validate_selection(request['names'])
+    if (backend == 'npu' and any(name in names for name in ('corr_depth_pipeline', 'refine_heads_pipeline'))
+            and os.environ.get('MGS_NPU_FRESH_INPUT') != '1'):
+        raise ValueError('Continuous NPU graph requires fresh SDK input tensors')
+    _, parts = validate_bundle(request["bundle"], names, backend)
     sessions, buffers, sequence = {}, {}, 0
     library, device_lock, arena = None, None, None
     detailed_forward = None
@@ -120,7 +149,12 @@ def main():
                 sessions[name] = ort.InferenceSession(part["graph"], sess_options=options, providers=["CPUExecutionProvider"])
                 bindings[name] = 0
         reply(dict(event="READY", backend=backend, npu_executed=False, bindings=bindings,
-                   runtime_identity=runtime_identity([n for n,p in parts.items() if p['meta'].get('spatial_tiling')]) if library else None,
+                   runtime_identity=runtime_identity(
+                       [n for n,p in parts.items() if p['meta'].get('spatial_tiling')],
+                       [n for n,p in parts.items() if p['meta'].get('ffn_adapter')],
+                       [n for n in parts if n in ('corr_refine_net', 'refine_unet')],
+                       [n for n in parts if n == 'corr_depth_pipeline'],
+                       [n for n in parts if n == 'refine_heads_pipeline']) if library else None,
                    protocol_version=PROTOCOL_VERSION, buffer_plan=arena.plan))
         for line in sys.stdin:
             command = json.loads(line)
@@ -139,18 +173,11 @@ def main():
             if library:
                 width = 5 if detailed_forward is not None else 3
                 forward = detailed_forward or library.mgs_forward
-                execution_passes = sdk_passes(name, parts[name]['meta'])
-                stages = [0.] * width
                 # Explicit workaround for a board-observed one-request stale
                 # result. Both full SDK calls are charged; this is not a cache
                 # hit, zero-copy, or a claim that the underlying SDK is fixed.
-                for _ in range(execution_passes):
-                    measured = (ct.c_double*width)()
-                    rc = forward(sessions[name], input_buffer.ctypes.data, input_buffer.nbytes,
-                                 output_buffer.ctypes.data, output_buffer.nbytes, measured)
-                    if rc:
-                        raise RuntimeError(library.mgs_error().decode())
-                    stages = [a+b for a,b in zip(stages, measured)]
+                stages, execution_passes = _forward_sdk(name, parts[name]['meta'], sessions[name],
+                    input_buffer, output_buffer, forward, library.mgs_error, width)
                 if detailed_forward is not None:
                     stage_names = ["input_write", "forward_submit", "wait", "output_convert", "sdk_total"]
             else:

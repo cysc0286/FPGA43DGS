@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 from common import new_directory, save, sha, load_gaussians
 from gaussian_generation.runtime import ModelRuntime
-from gaussian_generation.npu_branch.catalog import PARTITIONS
+from gaussian_generation.npu_branch.catalog import PARTITIONS, validate_selection
 from gaussian_generation.npu_branch.runtime import PartitionRuntime
 
 
@@ -37,13 +37,16 @@ def main(argv=None):
     p.add_argument("--buffer-limit-mib", type=int, default=128)
     p.add_argument("--partitions", nargs="+", choices=list(PARTITIONS), required=True)
     a = p.parse_args(argv)
+    validate_selection(a.partitions)
     out = new_directory(a.out)
     record = dict(complete=False, backend=a.backend, npu_executed=False,
                   scope="partition/Gaussian checks; image quality and first frame not measured",
                   tolerances=dict(partition=dict(rtol=2e-3, atol=2e-4),
                                   gaussian=dict(rtol=5e-3, atol=1e-3)))
     try:
-        runtime = ModelRuntime(a.weights, a.vendor, 2, 16, out / "runtime")
+        model_options = {name: True for name in ('corr_depth_pipeline', 'refine_heads_pipeline')
+                         if name in a.partitions}
+        runtime = ModelRuntime(a.weights, a.vendor, 2, 16, out / "runtime", **model_options)
         baseline = runtime.infer(a.input, out / "cpu", sha(a.input / "context.npz"))
         meta = json.loads((a.graphs / "manifest.json").read_text())
         if meta["weight_sha256"] != sha(a.weights) or meta["context_sha256"] != baseline["input_sha256"]:

@@ -5,8 +5,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
 from common import new_directory, save, load_gaussians, sha
-from evaluate import quality, local_error, passes
-from reference import render
+from rendering.evaluate import quality, local_error, passes
+from rendering.reference import render
 
 
 def main(argv=None):
@@ -27,7 +27,7 @@ def main(argv=None):
         if meta["context_sha256"] != receipt[kind]["input_sha256"]:
             raise ValueError("Camera/context provenance mismatch")
         sources[kind] = load_gaussians(a.verification/kind/"gaussians.npz")
-    gate = json.loads(Path(__file__).resolve().parents[2].joinpath("acceptance.json").read_text())["reconstruction_vs_rgb"]
+    gate = json.loads(Path(__file__).resolve().parents[2].joinpath("rendering/acceptance.json").read_text())["reconstruction_vs_rgb"]
     result = dict(backend=receipt["backend"], npu_executed=receipt["npu_executed"], board_renderer_executed=False,
                   scene_preparation_seconds=None, quality_gate=gate, views={},
                   scope="Same independent CPU SH3 renderer; not FPGA or official CUDA output")

@@ -33,7 +33,7 @@ def write_rgb(path, image):
 
 
 def image_metrics(actual, expected):
-    from evaluate import quality
+    from rendering.evaluate import quality
     q = quality(actual, expected)
     # Identical images have unbounded PSNR. Use a finite documented display cap.
     return dict(psnr_db=120. if q['psnr_db'] is None else min(120., q['psnr_db']),
@@ -89,7 +89,9 @@ def main(argv=None):
             raise ValueError('Prepared input context checksum mismatch')
         # Torch before OpenCV, including the evaluator's lazy imports.
         from gaussian_generation.runtime import ModelRuntime
-        model = ModelRuntime(a.weights, a.vendor, a.threads, 16, out / 'initialize')
+        model_options = {name: True for name in ('corr_depth_pipeline', 'refine_heads_pipeline')
+                         if name in config.partitions}
+        model = ModelRuntime(a.weights, a.vendor, a.threads, 16, out / 'initialize', **model_options)
         record['source_files'] = model.source_hashes
         import numpy as np
         import cv2

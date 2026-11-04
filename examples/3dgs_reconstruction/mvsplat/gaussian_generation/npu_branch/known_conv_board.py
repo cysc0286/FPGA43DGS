@@ -23,8 +23,7 @@ def main():
     if a.out.exists():
         p.error("Output evidence directory already exists")
     a.out.mkdir(parents=True)
-    sys.path.insert(0, str(Path(__file__).resolve().parents[4]/"3dgs_compositor/board"))
-    import remote
+    from initialize import transport as remote
     from initialize.board_sync import NPU_SOURCE_FILES, upload_sources
     client = remote.connect()
     root = a.board_root

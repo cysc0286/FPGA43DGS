@@ -1,6 +1,7 @@
-# Offline contract checks only; no Torch, model checkpoint or ICraft SDK needed.
+# Offline software checks; no model checkpoint, ICraft SDK or board needed.
 -r requirements-core.txt
 scipy>=1.15,<2
 Pillow>=10,<13
 opencv-python-headless>=4.8,<5
 paramiko>=3,<6
+-r examples/3dgs_reconstruction/mvsplat/gaussian_generation/npu_branch/tests/requirements.txt

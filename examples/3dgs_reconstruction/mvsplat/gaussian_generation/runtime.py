@@ -11,7 +11,8 @@ import re
 import sys
 import time
 
-from common import FULL_WEIGHT_SHA256, SOURCE_COMMIT, load_gaussians, save, sha, validate_gaussians
+from common import (FULL_WEIGHT_SHA256, SOURCE_COMMIT, gaussian_content_sha256,
+                    load_gaussians, save, sha, validate_gaussians)
 
 
 def execution_source_hashes(active_vendor):
@@ -24,9 +25,33 @@ def execution_source_hashes(active_vendor):
     hashes = {f.relative_to(active_vendor).as_posix(): sha(f)
               for f in sorted((active_vendor/'src').rglob('*.py'))}
     root = Path(__file__).resolve().parents[1]
-    for relative in ('gaussian_generation/runtime.py', 'memory_runtime.py'):
+    for relative in ('gaussian_generation/runtime.py', 'gaussian_generation/memory.py', 'common.py'):
         hashes['runtime/'+relative] = sha(root/relative)
+    # Optional candidate execution seams are part of image qualification too.
+    # Existing deployment copies keep their own code/receipt until a candidate
+    # is requalified; adding a token/head adapter must never inherit that receipt.
+    for name in ('artifacts.py', 'catalog.py', 'runtime.py', 'worker.py', 'spatial.py',
+                 'ffn.py', 'ffn_contract.py', 'fused_heads.py', 'corr_depth.py', 'refine_heads.py'):
+        relative = 'gaussian_generation/npu_branch/'+name
+        if (root/relative).is_file():
+            hashes['runtime/'+relative] = sha(root/relative)
     return hashes
+
+
+def validate_refine_heads_config(vendor):
+    """Check the explicit candidate's YAML ablation before a worker is created.
+
+    This reads the same merged encoder configuration as ModelRuntime and does
+    not import Torch, open weights or construct a model. The constructor checks
+    its own actual merged configuration again before loading the checkpoint.
+    """
+    from omegaconf import OmegaConf
+    vendor = Path(vendor)
+    cfg = OmegaConf.merge(OmegaConf.load(vendor / "config/model/encoder/costvolume.yaml"),
+                          OmegaConf.load(vendor / "config/experiment/re10k.yaml").model.encoder)
+    if getattr(cfg, 'wo_depth_refine', None) is not False:
+        raise ValueError('Refinement-head pipeline requires wo_depth_refine=False before worker startup')
+    return cfg
 
 
 def persistent_archive_directory(directory):
@@ -52,7 +77,16 @@ def persistent_archive_directory(directory):
 
 
 class ModelRuntime:
-    def __init__(self, weights, vendor, threads, depth_chunk, runtime_dir):
+    def __init__(self, weights, vendor, threads, depth_chunk, runtime_dir, *, corr_depth_pipeline=False,
+                 refine_heads_pipeline=False):
+        if type(corr_depth_pipeline) is not bool:
+            raise ValueError('corr_depth_pipeline must be an explicit boolean')
+        if type(refine_heads_pipeline) is not bool:
+            raise ValueError('refine_heads_pipeline must be an explicit boolean')
+        if corr_depth_pipeline and (type(depth_chunk) is not int or not 1 <= depth_chunk <= 128):
+            raise ValueError('Correlation-depth pipeline requires a nonzero depth_chunk within 1..128')
+        if refine_heads_pipeline and (type(depth_chunk) is not int or not 1 <= depth_chunk <= 128):
+            raise ValueError('Refinement-head pipeline requires a nonzero depth_chunk within 1..128')
         weights, vendor, runtime_dir = Path(weights), Path(vendor), Path(runtime_dir)
         if threads < 1 or sha(weights) != FULL_WEIGHT_SHA256:
             raise ValueError("Invalid thread count or MVSplat checkpoint")
@@ -67,17 +101,35 @@ class ModelRuntime:
         if torch.get_num_interop_threads() != 1:
             torch.set_num_interop_threads(1)
         torch.manual_seed(0)
-        from runtime import load_encoder
+        from gaussian_generation.upstream import load_encoder
         active_vendor = vendor
         if depth_chunk:
-            from memory_runtime import prepare_chunked_source
-            active_vendor = prepare_chunked_source(vendor, runtime_dir / "runtime_source", depth_chunk)
+            from gaussian_generation.memory import prepare_chunked_source
+            source_options = {}
+            if corr_depth_pipeline:
+                source_options['corr_depth_pipeline'] = True
+            if refine_heads_pipeline:
+                source_options['refine_heads_pipeline'] = True
+            if source_options:
+                active_vendor = prepare_chunked_source(vendor, runtime_dir / "runtime_source", depth_chunk,
+                                                       **source_options)
+            else:
+                active_vendor = prepare_chunked_source(vendor, runtime_dir / "runtime_source", depth_chunk)
         EncoderCostVolume, set_cfg = load_encoder(active_vendor)
         cfg = OmegaConf.merge(OmegaConf.load(vendor / "config/model/encoder/costvolume.yaml"),
                               OmegaConf.load(vendor / "config/experiment/re10k.yaml").model.encoder)
+        if refine_heads_pipeline and getattr(cfg, 'wo_depth_refine', None) is not False:
+            raise ValueError('Refinement-head pipeline requires wo_depth_refine=False before checkpoint loading')
         cfg.unimatch_weights_path = None
         set_cfg(OmegaConf.create({"mode": "test", "dataset": {"view_sampler": {"num_context_views": 2}}}))
         model = EncoderCostVolume(cfg).eval()
+        if refine_heads_pipeline:
+            from gaussian_generation.npu_branch.refine_heads import MARKER, METHOD, SCHEMA
+            predictor = model.depth_predictor
+            if (getattr(predictor, 'wo_depth_refine', None) is not False or
+                    getattr(type(predictor), MARKER, None) != SCHEMA or
+                    not callable(getattr(predictor, METHOD, None))):
+                raise ValueError('Refinement-head pipeline requires the non-ablation generated method seam')
         checkpoint = torch.load(weights, map_location="cpu", weights_only=True, mmap=True)
         state = checkpoint["state_dict"] if "state_dict" in checkpoint else checkpoint
         encoder_state = {k[len("encoder."):]: v for k, v in state.items() if k.startswith("encoder.")}
@@ -88,6 +140,10 @@ class ModelRuntime:
                              checkpoint_load="memory mapped; temporary state released before inference",
                              versions={name: importlib.metadata.version(name)
                                        for name in ("torch", "einops", "e3nn", "numpy")})
+        if corr_depth_pipeline:
+            self.metadata['corr_depth_pipeline'] = True
+        if refine_heads_pipeline:
+            self.metadata['refine_heads_pipeline'] = True
         del encoder_state, state, checkpoint
         gc.collect()
         self.model, self.torch, self.np = model, torch, np
@@ -95,6 +151,8 @@ class ModelRuntime:
         self.weight_hash = sha(weights)
         self.source_hashes = execution_source_hashes(active_vendor)
         self.threads, self.depth_chunk = threads, depth_chunk
+        self.corr_depth_pipeline = corr_depth_pipeline
+        self.refine_heads_pipeline = refine_heads_pipeline
         self.config = cfg
         self.load_seconds = time.perf_counter() - started
         self.partition_runtime = None
@@ -212,7 +270,28 @@ class ModelRuntime:
         self.partition_runtime = partitions
         gc.collect()
 
-    def infer(self, input_dir, out, context_sha256, defer_archive=False):
+    def detach_partitions(self):
+        """Close selected sessions and restore CPU modules before clearing them.
+
+        Reusing the loaded model for a subsequent candidate must not label a
+        partially restored model as CPU. Keep the worker reference on every
+        close/restoration failure so callers cannot silently continue.
+        """
+        partitions = self.partition_runtime
+        if partitions is None:
+            return
+        partitions.close()
+        if (not getattr(partitions, 'closed', False) or
+                getattr(partitions, 'attached_model', None) is not None or
+                getattr(partitions, 'model_adapters', []) or
+                getattr(partitions, 'model_replacements', [])):
+            raise RuntimeError('Partition worker closure or model restoration is incomplete')
+        self.partition_runtime = None
+        gc.collect()
+
+    def infer(self, input_dir, out, context_sha256, defer_archive=False, *, memory_only=False):
+        if memory_only and defer_archive:
+            raise ValueError('Memory-only handoff and deferred NPZ archive are exclusive')
         if getattr(self, "_pending_archive", None) is not None:
             raise ValueError("Previous Gaussian archive audit is pending")
         self._pending_gaussians = None
@@ -265,7 +344,13 @@ class ModelRuntime:
             validate_gaussians(result)
             if backend == 'npu' and not self.partition_runtime.report(call_start)['npu_executed']:
                 raise ValueError('NPU requested but no actual NPU partition executed')
-            if defer_archive:
+            if memory_only:
+                digest = gaussian_content_sha256(result)
+                record['gaussian_content_sha256'] = digest
+                record['gaussian_identity_kind'] = 'array_content_v1'
+                record['gaussian_archive'] = dict(policy='memory_only', archive_bytes=0,
+                                                   resident_payload_bytes=0)
+            elif defer_archive:
                 archive = self.prepare_gaussian_archive(out, result)
                 digest = archive['sha256']
                 record['gaussian_archive'] = archive
@@ -275,7 +360,9 @@ class ModelRuntime:
                 digest = sha(out / "gaussians.npz")
             record.update(complete=True, gaussians=len(result["means"]), sh_degree=4,
                           gaussian_sha256=digest, training_steps=0,
-                          archive_verified=not defer_archive)
+                          archive_verified=not (defer_archive or memory_only))
+            if not memory_only:
+                record['gaussian_identity_kind'] = 'npz_file_v1'
             self._pending_gaussians = (record["gaussian_sha256"], result)
             del gaussians, context, result
             gc.collect()
@@ -284,7 +371,8 @@ class ModelRuntime:
             raise
         finally:
             record["process_seconds"] = time.perf_counter() - started
-            record["scope"] = ("Warm inference and validated memory output; archive audit follows first frame"
+            record["scope"] = ("Warm inference and validated array-content handoff; no per-pair NPZ archive"
+                if memory_only else "Warm inference and validated memory output; archive audit follows first frame"
                 if defer_archive else "Warm inference and output save; fixed weights loaded before video")
             record["npu_executed"] = False
             if self.partition_runtime is not None:

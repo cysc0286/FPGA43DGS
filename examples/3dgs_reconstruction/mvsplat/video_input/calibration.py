@@ -472,3 +472,9 @@ def main(argv=None):
 
 if __name__ == "__main__":
     main()
+
+
+def centered_affine(width, height, cx, cy, output_size):
+    scale = output_size / min(width, height)
+    return np.array([[scale, 0, (output_size - 1) / 2 - scale * cx],
+                     [0, scale, (output_size - 1) / 2 - scale * cy]], dtype=np.float64)

@@ -47,3 +47,22 @@ class EventLog:
             if before in by_name and after in by_name:
                 result[field] = by_name[after]["monotonic"] - by_name[before]["monotonic"]
         return result
+
+
+def first_frame_timing(pipeline):
+    """Normalize pre- and post-input-receipt timing records without inventing a receipt."""
+    if "first_verified_fpga_target" in pipeline:
+        return dict(
+            input_end_to_first_verified_fpga_frame_seconds=pipeline.get(
+                "input_end_to_first_verified_fpga_frame_seconds"),
+            pipeline_start_to_first_verified_fpga_frame_seconds=pipeline[
+                "pipeline_start_to_first_verified_fpga_frame_seconds"],
+            first_verified_fpga_target=pipeline["first_verified_fpga_target"],
+        )
+    return dict(
+        input_end_to_first_verified_fpga_frame_seconds=None,
+        pipeline_start_to_first_verified_fpga_frame_seconds=pipeline[
+            "video_to_first_fpga_image_seconds"],
+        first_verified_fpga_target=None,
+        legacy_timing_note="No input-end receipt was recorded by this historical run.",
+    )

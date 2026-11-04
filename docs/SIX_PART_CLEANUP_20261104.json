@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-04",
+  "base_head": "9efdd52120516bbdf4c72ee8c98ef578700aea90",
+  "branch": "feat/npu-memory-storage-20261102",
+  "scope": "six-owner working-tree cleanup; no commit, push or board execution",
+  "owners": ["initialize", "video_input", "pose_estimation", "gaussian_generation", "rendering", "web"],
+  "precleanup_backup_files_hash_verified": 793,
+  "software_regression": {"tests": 653, "passed": 646, "skipped": 7, "failed": 0, "errors": 0},
+  "skip_reasons": {"windows_symlink_permissions": 3, "ffmpeg_ffprobe_pair_unavailable": 4},
+  "synthetic_browser_scenarios_passed": ["viewer_orbit", "viewer_look", "recording", "upload"],
+  "frozen_render_main_hash_verified_files": 151,
+  "source_only_isolated_regression_passed": true,
+  "board_executed": false,
+  "firmware_changed": false,
+  "new_performance_measurement": false,
+  "requalification_required_after_deployment": true,
+  "user_reported_board_verification": {
+    "reported_on": "2026-11-04",
+    "test_date": "2026-11-03 night",
+    "status": "passed",
+    "source": "user confirmation; no new agent board measurement in this release"
+  },
+  "protected": ["current NPU path", "explicit CPU fallback", "readiness and identity gates", "device and memory guards", "frozen render_main", "private media", "other worktrees"]
+}

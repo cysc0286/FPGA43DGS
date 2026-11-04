@@ -24,13 +24,6 @@ BOOT.bin
 /TEAM_MODULES.md
 /team_workplan_2026-09-22.md
 
-# Reproducible simulation output.
-# Removed demo sources; keep local generated output out of source releases.
-/archive/basic_demos_20260928/
-# Packed tracked history is versioned; local raw runs/build leftovers stay local.
-/archive/local_workspace_20261009/
-!/archive/history_20261009/*.zip
-!/archive/history_20261102_cleanup/*.zip
 __pycache__/
 /examples/3dgs_fpga_eval/build/
 .Xil/
@@ -38,3 +31,8 @@ __pycache__/
 *.log
 *.wdb
 *.pb
+
+# Local outputs, private footage and credentials never enter source bundles.
+/outputs/
+**/private/
+**/private_results/

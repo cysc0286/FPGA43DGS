@@ -5,39 +5,29 @@ import shlex
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT.parent / "3dgs_compositor/board"))
-import remote
+sys.path.insert(0, str(ROOT / "mvsplat"))
+from initialize import transport as remote
+# The six owners supply one deployment manifest; tests and frozen assets do not.
+OWNERS = ('initialize', 'video_input', 'pose_estimation', 'gaussian_generation', 'rendering', 'web')
+def deployment_sources():
+    base = ROOT / 'mvsplat'
+    selected = ['common.py']
+    for owner in OWNERS:
+        for path in sorted((base / owner).rglob('*')):
+            if (not path.is_file() or path.name.startswith('test_')
+                    or any(part in {'tests', '__pycache__', 'render_main', 'docs', 'validation'}
+                           for part in path.relative_to(base).parts)):
+                continue
+            # Historical validation receipts are documentation, not runtime assets.
+            if path.suffix == '.json' and path.name not in {'mainline.json', 'acceptance.json'}:
+                continue
+            if path.suffix in {'.py', '.cpp', '.h', '.hpp', '.html', '.css', '.js', '.json', '.sh'}:
+                selected.append(path.relative_to(base).as_posix())
+    return tuple(dict.fromkeys(selected))
 
-# Relocated NPU sources must accompany a candidate even when its board base
-# predates the gaussian_generation package. Do not depend on an old npu/ copy.
-NPU_SOURCE_FILES = ("common.py", "runtime.py", "memory_runtime.py",
-                    "gaussian_generation/__init__.py",
-                    "gaussian_generation/runtime.py", "initialize/__init__.py",
-                    "initialize/session.py") + tuple(
-    path.relative_to(ROOT / "mvsplat").as_posix()
-    for path in sorted((ROOT / "mvsplat/gaussian_generation/npu_branch").iterdir())
-    if path.is_file() and path.suffix in (".py", ".cpp", ".h"))
-
-SOURCE_FILES = ("common.py", "measure.py", "export.py", "scene_preparation.py",
-                "gaussian_generation/__init__.py", "gaussian_generation/runtime.py",
-                "gaussian_generation/adapter.py", "pose_estimation/__init__.py",
-                "pose_estimation/geometry.py", "video_input/decode.py",
-                "video_input/__init__.py", "video_input/receipt.py",
-                "video_input/calibration.py", "video_input/capture.py",
-                "video_input/preview.py", "video_input/recording.py", "initialize/camera_ui.py",
-                "video_input/streaming.py", "pose_estimation/streaming.py",
-                "rendering/streaming.py", "initialize/streaming.py",
-                "initialize/events.py", "rendering/viewer.py", "rendering/viewer.html",
-                "rendering/viewer.js", "rendering/viewer.css", "evaluate.py",
-                "initialize/model_runtime.py",
-                "initialize/renderer_runtime.py", "initialize/attributes_resident.cpp",
-                "initialize/validate_resident.py", "initialize/group_sort_resident.cpp",
-                "initialize/run.py", "initialize/session.py",
-                "initialize/result_retention.py",
-                "rendering/__init__.py", "rendering/runtime.py",
-                "rendering/pipeline_adapter.py", "rendering/mainline.json",
-                "video_input/prepare.py", "warm_pipeline.py")
-SOURCE_FILES = tuple(dict.fromkeys(SOURCE_FILES + NPU_SOURCE_FILES))
+SOURCE_FILES = deployment_sources()
+NPU_SOURCE_FILES = tuple(name for name in SOURCE_FILES
+                         if name.startswith('gaussian_generation/'))
 
 
 def upload_sources(client, board_mvsplat, files=SOURCE_FILES):
@@ -66,18 +56,14 @@ def main():
         qbase, qdest = shlex.quote(a.base), shlex.quote(a.dest)
         remote.run(client, "test ! -e " + qdest)
         remote.run(client, "mkdir -p " + qdest)
-        for name in ("mvsplat", "modules", "pipeline.py"):
-            remote.run(client, "cp -a " + qbase + "/" + name + " " + qdest + "/" + name,
-                       timeout=30)
+        remote.run(client, "mkdir -p " + qdest + "/mvsplat")
         for name in ("deps", "input", "vendor", "weights"):
             remote.run(client, "ln -s " + qbase + "/" + name + " " + qdest + "/" + name)
         files = SOURCE_FILES
         upload_sources(client, a.dest + "/mvsplat", files)
-        # mvsplat/evaluate.py shares the root evaluator's SSIM implementation.
-        # Old board bases did not copy this file into new candidates.
+        # The public CLI is copied once, outside the six implementation directories.
         sftp = client.open_sftp()
         try:
-            sftp.put(str(ROOT / 'evaluate.py'), a.dest + '/evaluate.py')
             sftp.put(str(ROOT / 'pipeline.py'), a.dest + '/pipeline.py')
         finally:
             sftp.close()
@@ -87,13 +73,13 @@ def main():
             "/root/fpga43dgs_reconstruction/arm_env/bin/python3 -m py_compile " + script,
             timeout=30)
         build = ("g++ -O3 -std=gnu++17 -ffp-contract=off -DPACKED_SORT -Wall -Wextra "
-                 + shlex.quote(a.dest + "/mvsplat/initialize/group_sort_resident.cpp")
-                 + " -o " + shlex.quote(a.dest + "/mvsplat/initialize/group_sort_resident")
+                 + shlex.quote(a.dest + "/mvsplat/rendering/group_sort_resident.cpp")
+                 + " -o " + shlex.quote(a.dest + "/mvsplat/rendering/group_sort_resident")
                  + " -I" + shlex.quote(a.renderer + "/src/cpu"))
         remote.run(client, build, timeout=120)
         attributes_build = ("g++ -O3 -std=gnu++17 -ffp-contract=off -Wall -Wextra "
-                 + shlex.quote(a.dest + "/mvsplat/initialize/attributes_resident.cpp")
-                 + " -o " + shlex.quote(a.dest + "/mvsplat/initialize/attributes_resident")
+                 + shlex.quote(a.dest + "/mvsplat/rendering/attributes_resident.cpp")
+                 + " -o " + shlex.quote(a.dest + "/mvsplat/rendering/attributes_resident")
                  + " -I" + shlex.quote(a.renderer + "/src/cpu"))
         remote.run(client, attributes_build, timeout=120)
         print(output or "Board candidate source compiled", flush=True)

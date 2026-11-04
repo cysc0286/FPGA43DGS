@@ -6,23 +6,13 @@
     "AGENTS.md",
     "MAINLINE.md",
     "requirements-core.txt",
-    "requirements-mvsplat-checks.txt",
-    "releases/README.md",
-    "releases/3dgs_renderer_v1_20260928/README.md",
-    "releases/3dgs_renderer_v1_20260928/INTERFACE.md",
-    "releases/3dgs_renderer_v1_20260928/LICENSE-GraphDECO.md",
-    "releases/3dgs_renderer_v1_20260928/manifest.json",
-    "releases/3dgs_renderer_v1_20260928/render.py",
-    "releases/3dgs_renderer_v1_20260928/pack_camera.py",
-    "releases/3dgs_renderer_v1_20260928/rebuild_cpu.sh",
-    "examples/3dgs_compositor/board/remote.py"
+    "requirements-mvsplat-checks.txt"
   ],
   "trees": [
     "tools",
     "docs",
     "third_party",
-    "examples/3dgs_reconstruction",
-    "releases/3dgs_renderer_v1_20260928/src"
+    "examples/3dgs_reconstruction"
   ],
   "skip_directories": [
     ".git",

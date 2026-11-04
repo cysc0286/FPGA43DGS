@@ -16,7 +16,7 @@ from video_input.test_camera import calibration_file
 
 class CameraPipelineTests(unittest.TestCase):
     def test_failed_global_sampling_uses_local_span_and_keeps_original_indices(self):
-        from scene_preparation import main as prepare
+        from initialize.scene_preparation import main as prepare
         image=np.zeros((270,480,3),np.uint8)
         pose=np.eye(4)
         pair=(pose,{},[],None,dict(translation_scale=1.))
@@ -27,8 +27,8 @@ class CameraPipelineTests(unittest.TestCase):
             return {i:image for i in keys},1000,60,[keys[0],keys[-1]],[keys[1]]
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);video=root/'input.mkv';video.write_bytes(b'input')
-            with patch('scene_preparation.decode_selected',side_effect=decode),patch(
-                    'scene_preparation.select_views',side_effect=[ValueError('No valid context pair'),
+            with patch('initialize.scene_preparation.decode_selected',side_effect=decode),patch(
+                    'initialize.scene_preparation.select_views',side_effect=[ValueError('No valid context pair'),
                     ([760,999],[879],pair,{879:(pose,dict(pnp_inliers=80))},dict(kind='test'))]),redirect_stdout(io.StringIO()):
                 prepare(['--video',str(video),'--out',str(root/'out'),'--auto-select'])
             record=json.loads((root/'out/input.json').read_text(encoding='utf-8'))
@@ -66,8 +66,8 @@ class CameraPipelineTests(unittest.TestCase):
             with patch("initialize.run.platform.machine", return_value="aarch64"), \
                     patch("initialize.session.WarmSession", return_value=session), \
                     patch("video_input.capture.capture_clip", side_effect=capture), \
-                    patch("warm_pipeline.prepare_scene", side_effect=prepare), \
-                    patch("rendering.viewer.serve_scene", side_effect=viewer), redirect_stdout(io.StringIO()):
+                    patch("initialize.pipeline.prepare_scene", side_effect=prepare), \
+                    patch("web.viewer.serve_scene", side_effect=viewer), redirect_stdout(io.StringIO()):
                 main(["--camera", "/dev/video0", "--camera-width", "640", "--camera-height", "360",
                       "--capture-now", "--calibration", str(cal), "--out", str(root/"run"),
                       "--weights", str(weights), "--vendor", "unused", "--renderer", "unused",
@@ -88,7 +88,7 @@ class CameraPipelineTests(unittest.TestCase):
             warm.assert_not_called()
 
     def test_calibrated_preparation_publishes_centered_network_and_camera(self):
-        from scene_preparation import main as prepare
+        from initialize.scene_preparation import main as prepare
         image = np.zeros((270, 480, 3), np.uint8)
         k = np.array([[300., 0, 239.5], [0, 310., 134.5], [0, 0, 1.]])
         pose = np.eye(4)
@@ -102,8 +102,8 @@ class CameraPipelineTests(unittest.TestCase):
             video = root/"camera.avi"
             video.write_bytes(b"input")
             cal = calibration_file(root)
-            with patch("scene_preparation.decode_selected", side_effect=decoded), \
-                    patch("scene_preparation.select_views", return_value=([0, 2], [1], pair,
+            with patch("initialize.scene_preparation.decode_selected", side_effect=decoded), \
+                    patch("initialize.scene_preparation.select_views", return_value=([0, 2], [1], pair,
                         {1: (pose, {"pnp_inliers": 100})}, {"kind": "test"})), redirect_stdout(io.StringIO()):
                 prepare(["--video", str(video), "--out", str(root/"out"), "--calibration", str(cal), "--auto-select"])
             with np.load(root/"out/context.npz") as context:
