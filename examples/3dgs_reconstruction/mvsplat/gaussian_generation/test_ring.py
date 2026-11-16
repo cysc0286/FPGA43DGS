@@ -39,6 +39,52 @@ class RingTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             angular_owned_indices(g, directions[::-1], directions, [0, 1], 3)
 
+    def test_streaming_merge_compensates_thinning_and_preserves_archive_and_rollback(self):
+        y,x = np.mgrid[:32,:32]
+        front = np.stack([(x.ravel()-15.5)/32,(y.ravel()-15.5)/32,np.ones(x.size)],axis=1)
+        source = points(np.concatenate([front,-front]))
+        originals = {k:v.copy() for k,v in source.items()}
+        directions = np.array([axis(0),axis(180)])
+        camera = dict(width=32,height=32,c2w=np.eye(4).tolist(),
+                      intrinsics_normalized=[[1.,0.,.5],[0.,1.,.5],[0.,0.,1.]])
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            folder = root/'pair'
+            folder.mkdir()
+            (folder/'context.npz').write_bytes(b'validated fake runtime input')
+            prepared = dict(pairs=[dict(directory=str(folder),context=[0,1],
+                                       context_sha256=sha(folder/'context.npz'))],
+                            depth_observable=False,context_sha256='c'*64,
+                            coverage=dict(directions=directions.tolist()),
+                            views=[dict(camera,index=0),dict(camera,index=1,
+                                   c2w=np.diag([-1.,1.,-1.,1.]).tolist())])
+            record,result = generate_ring(self.model([source]),prepared,root/'corrected',max_gaussians=1024,
+                                          reduction='footprint')
+            selected = angular_owned_indices(source,directions,directions,[0,1],512,
+                                               sampling='balanced')
+            self.assertEqual(len(result['means']),1024)
+            self.assertEqual(record['pairs'][0]['pre_thinning_owned_counts'],[1024,1024])
+            self.assertEqual([r['footprint_area_factor'] for r in record['pairs'][0]['footprint_retention']],[2.,2.])
+            for key in ('means','harmonics','opacities'):
+                np.testing.assert_array_equal(result[key],source[key][selected])
+            self.assertTrue(np.all(np.linalg.eigvalsh(result['covariances']-source['covariances'][selected])>0))
+            self.assertTrue(record['archive_verified'])
+            merged_record,merged = generate_ring(self.model([source]),prepared,root/'merged',max_gaussians=1024,
+                                                 transition_degrees=8.)
+            self.assertEqual(merged_record['retention_reduction'],'moments')
+            self.assertEqual(merged_record['transition_degrees'],8.)
+            self.assertEqual(len(merged['means']),1024)
+            self.assertTrue(merged_record['archive_verified'])
+            self.assertTrue(np.all(np.linalg.eigvalsh(merged['covariances'])>0))
+            self.assertTrue(np.all(merged['opacities']<=.99))
+            rollback,old = generate_ring(self.model([source]),prepared,root/'rollback',max_gaussians=1024,
+                                         sampling='legacy_linear',footprint_compensation=False)
+            old_index = angular_owned_indices(source,directions,directions,[0,1],512,sampling='legacy_linear')
+            self.assertEqual(rollback['footprint_compensation'],'none')
+            for key in source:
+                np.testing.assert_array_equal(old[key],source[key][old_index])
+                np.testing.assert_array_equal(source[key],originals[key])
+
     def test_actual_rotation_drives_pair_selection(self):
         poses = {}
         for i, angle in enumerate(np.linspace(0, 360, 25)):
@@ -56,6 +102,34 @@ class RingTest(unittest.TestCase):
         self.assertFalse({i for p in pairs for i in p['context']} & {p['target'] for p in pairs})
         with self.assertRaisesRegex(ValueError,'Insufficient'):
             select_ring_pairs(dict(list(poses.items())[:5]), 2)
+
+    def test_streaming_blending_retains_both_sources_splits_opacity_and_can_restore_hard_ownership(self):
+        source = points([axis(0)]*4)
+        originals = {k:v.copy() for k,v in source.items()}
+        camera = dict(width=2,height=1,c2w=np.eye(4).tolist(),
+                      intrinsics_normalized=[[1.,0.,.5],[0.,1.,.5],[0.,0.,1.]])
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            folder = root/'pair'
+            folder.mkdir()
+            (folder/'context.npz').write_bytes(b'validated duplicate-view input')
+            prepared = dict(pairs=[dict(directory=str(folder),context=[0,1],
+                                       context_sha256=sha(folder/'context.npz'))],
+                            depth_observable=False,context_sha256='c'*64,
+                            coverage=dict(directions=[axis(0).tolist()]*2),
+                            views=[dict(camera,index=0),dict(camera,index=1)])
+            record,blended = generate_ring(self.model([source]),prepared,root/'blended',
+                max_gaussians=1024,footprint_compensation=False,transition_degrees=8.)
+            self.assertEqual(len(blended['means']),4)
+            np.testing.assert_allclose((1-blended['opacities'])**2,1-source['opacities'],atol=1e-7)
+            self.assertTrue(record['archive_verified'])
+            rollback,hard = generate_ring(self.model([source]),prepared,root/'hard',
+                max_gaussians=1024,footprint_compensation=False,transition_degrees=0.)
+            self.assertEqual(len(hard['means']),2)
+            self.assertEqual(rollback['transition_degrees'],0.)
+            for key in source:
+                np.testing.assert_array_equal(hard[key],source[key][:2])
+                np.testing.assert_array_equal(source[key],originals[key])
 
     def test_one_model_reused_and_aggregate_budget(self):
         class Model:

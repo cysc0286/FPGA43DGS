@@ -2,3 +2,7 @@
 *.sh text eol=lf
 # Frozen hardware, evidence and sources must remain byte-identical.
 examples/3dgs_reconstruction/mvsplat/rendering/render_main/** -text
+examples/3dgs_reconstruction/mvsplat/video_input/firmware/** -text
+examples/3dgs_reconstruction/mvsplat/video_input/rtl/*.v text eol=lf
+examples/3dgs_reconstruction/mvsplat/video_input/rtl/*.xdc text eol=lf
+examples/3dgs_reconstruction/vendor/MVSplat_reference/** -text

@@ -268,7 +268,7 @@ class AutomaticCoverageSelectionTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'overlapping panorama pair'):
             select_ring_pairs(poses,2,intrinsic_normalized=intrinsics(10.))
 
-    def test_every_target_and_context_is_globally_disjoint_and_comes_from_one_triple(self):
+    def test_every_target_is_held_between_its_contexts_and_globally_disjoint(self):
         poses=self.poses();indices=sorted(poses)
         pairs,meta=select_ring_pairs(poses,'auto',intrinsic_normalized=intrinsics(1.))
         context=[i for pair in pairs for i in pair['context']];targets=[pair['target'] for pair in pairs]
@@ -276,8 +276,8 @@ class AutomaticCoverageSelectionTest(unittest.TestCase):
         self.assertFalse(set(context)&set(targets))
         for pair,separation,limit in zip(pairs,meta['selected_context_axis_separation_degrees'],
                                         meta['selected_context_axis_limit_degrees']):
-            start=indices.index(pair['context'][0])
-            self.assertEqual([pair['context'][0],pair['target'],pair['context'][1]],indices[start:start+3])
+            self.assertLess(pair['context'][0], pair['target'])
+            self.assertLess(pair['target'], pair['context'][1])
             self.assertLessEqual(separation,limit+1e-10)
 
     def test_partial_capture_does_not_turn_into_a_full_circle(self):

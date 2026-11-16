@@ -36,6 +36,21 @@ def framebuffer_rgb(raw):
     return width, height, rgb.reshape(height, width, 3)
 
 
+def framebuffer_linear(raw):
+    """Read frozen premultiplied RGB and coverage, preserving float precision."""
+    if len(raw)<16 or raw[:8]!=b'GSSOUT01':
+        raise ValueError('Framebuffer ABI')
+    width,height = struct.unpack_from('<II',raw,8)
+    if not width or not height or len(raw)!=16+20*width*height:
+        raise ValueError('Framebuffer size')
+    # The fifth 32-bit word is an integer status, possibly NaN as float bits.
+    values = np.frombuffer(raw,dtype='<f4',offset=16).reshape(height,width,5)[:,:,:4]
+    if (not np.isfinite(values).all() or np.any(values[:,:,:3]<0)
+            or np.any(values[:,:,3]<0) or np.any(values[:,:,3]>1)):
+        raise ValueError('Invalid linear framebuffer')
+    return values[:,:,:3],1-values[:,:,3]
+
+
 class RendererRuntime:
     def __init__(self, renderer, binary, environment, log_path):
         self.renderer, self.binary = Path(renderer), Path(binary)

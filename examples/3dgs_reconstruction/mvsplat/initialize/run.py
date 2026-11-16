@@ -32,10 +32,14 @@ def main(argv=None):
                    help='Explicit SIFT detection contrast for weak texture; rotation acceptance gates are unchanged')
     p.add_argument('--ring-auto-coverage', action='store_true',
                    help='Choose multiple pairs by measured angular coverage, bounded by --ring-pairs')
-    p.add_argument('--ring-coverage-target', type=float, default=.95)
+    p.add_argument('--ring-coverage-target', type=float, default=1.)
     p.add_argument('--ring-min-pairs', type=int, default=1,
                    help='Continue auto selection to this many disjoint frame pairs after angular target is met')
+    p.add_argument('--ring-selection-policy', choices=('balanced', 'legacy'), default='balanced',
+                   help='Direction-balanced coverage or the previous consecutive-triple greedy selection')
     p.add_argument('--ring-max-gaussians', type=int, default=65536)
+    p.add_argument('--ring-appearance-strength',type=float,default=None,
+                   help='Ring colour correction [0,1], default 1 in ring mode; 0 restores the previous colours')
     p.add_argument("--interactive", action="store_true", help="Keep the scene resident and serve browser controls")
     p.add_argument("--viewer-host", default="127.0.0.1")
     p.add_argument("--viewer-port", type=int, default=8080)
@@ -70,6 +74,11 @@ def main(argv=None):
     from gaussian_generation.npu_branch.config import add_arguments, BackendConfig
     add_arguments(p)
     a = p.parse_args(argv)
+    if a.ring_appearance_strength is None:
+        a.ring_appearance_strength = 1. if a.ring_pairs else 0.
+    if (not math.isfinite(a.ring_appearance_strength) or not 0<=a.ring_appearance_strength<=1
+            or (a.ring_appearance_strength and not a.ring_pairs)):
+        p.error('--ring-appearance-strength requires ring mode and a finite value in [0,1]')
     if a.ring_pairs == 8 and not a.ring_auto_coverage:
         p.error('eight panorama pairs require automatic coverage; add --ring-auto-coverage')
     try:
@@ -158,10 +167,12 @@ def main(argv=None):
             record.update(prepare_ring_scene(receipt['path'], out, session.model,
                 session.renderer, events, groups='auto' if a.ring_auto_coverage else a.ring_pairs,
                 max_pairs=a.ring_pairs, min_pairs=a.ring_min_pairs,
+                selection_policy=a.ring_selection_policy,
                 coverage_target=a.ring_coverage_target,
                 candidates=a.ring_candidates, feature_contrast=a.ring_feature_contrast,
                 max_gaussians=a.ring_max_gaussians, size=a.size,
-                prepare_threads=a.prepare_threads, focal_ratio=a.focal_ratio, calibration=a.calibration))
+                prepare_threads=a.prepare_threads, focal_ratio=a.focal_ratio, calibration=a.calibration,
+                appearance_strength=a.ring_appearance_strength))
         else:
             from initialize.pipeline import prepare_scene
             record.update(prepare_scene(receipt["path"], out, session.model, session.renderer, events,

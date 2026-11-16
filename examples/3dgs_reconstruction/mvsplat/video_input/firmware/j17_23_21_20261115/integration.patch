@@ -1,0 +1,64 @@
+--- a/rtl/ai7030_edif_top.v
++++ b/rtl/ai7030_edif_top.v
+@@ -70,6 +70,8 @@
+  
+   output    [  1 : 0]    led                       ,
+ 
++  output                 camera_pan_pwm,
++  output                 camera_tilt_pwm,
+   input                  PJTAG_TCK                 ,
+   input                  PJTAG_TMS                 ,
+   input                  PJTAG_TDI                 ,
+@@ -240,17 +242,42 @@
+ assign User_Ddr_awwinfo = {1'b0, {64{1'b1}}, 6'b0, 1'b1};
+ assign User_Ddr_arinfo  = {25'h0, 6'b0, 1'b1};
+ 
++
++// Candidate servo router; unchanged renderer follows.
++wire [31:0] Render_Reg_awwaddr;
++wire [31:0] Render_Reg_awwdata;
++wire Render_Reg_awwvalid;
++wire Render_Reg_awwready;
++wire [31:0] Render_Reg_araddr;
++wire Render_Reg_arvalid;
++wire Render_Reg_arready;
++wire [31:0] Render_Reg_rdata;
++wire Render_Reg_rvalid;
++wire Render_Reg_rready;
++camera_servo_bus #(.CLOCK_HZ(100000000)) U_camera_servo_bus (
++ .clk(gp_clk), .rst_n(~gp_clk_rst),
++ .awaddr(User_Reg_awwaddr), .awdata(User_Reg_awwdata),
++ .awvalid(User_Reg_awwvalid), .awready(User_Reg_awwready),
++ .araddr(User_Reg_araddr), .arvalid(User_Reg_arvalid), .arready(User_Reg_arready),
++ .rdata(User_Reg_rdata), .rvalid(User_Reg_rvalid), .rready(User_Reg_rready),
++ .downstream_awaddr(Render_Reg_awwaddr), .downstream_awdata(Render_Reg_awwdata),
++ .downstream_awvalid(Render_Reg_awwvalid), .downstream_awready(Render_Reg_awwready),
++ .downstream_araddr(Render_Reg_araddr), .downstream_arvalid(Render_Reg_arvalid),
++ .downstream_arready(Render_Reg_arready), .downstream_rdata(Render_Reg_rdata),
++ .downstream_rvalid(Render_Reg_rvalid), .downstream_rready(Render_Reg_rready),
++ .pan_pwm(camera_pan_pwm), .tilt_pwm(camera_tilt_pwm)
++);
+ adder_top U_adder_top(
+-  .itf_ra_awaddr    (User_Reg_awwaddr      ),
+-  .itf_ra_awdata    (User_Reg_awwdata      ),
+-  .itf_ra_awvalid   (User_Reg_awwvalid     ),
+-  .itf_ra_awready   (User_Reg_awwready     ),
+-  .itf_ra_araddr    (User_Reg_araddr       ),
+-  .itf_ra_arvalid   (User_Reg_arvalid      ),
+-  .itf_ra_arready   (User_Reg_arready      ),
+-  .itf_ra_rdata     (User_Reg_rdata        ),
+-  .itf_ra_rvalid    (User_Reg_rvalid       ),
+-  .itf_ra_rready    (User_Reg_rready       ),
++  .itf_ra_awaddr    (Render_Reg_awwaddr      ),
++  .itf_ra_awdata    (Render_Reg_awwdata      ),
++  .itf_ra_awvalid   (Render_Reg_awwvalid     ),
++  .itf_ra_awready   (Render_Reg_awwready     ),
++  .itf_ra_araddr    (Render_Reg_araddr       ),
++  .itf_ra_arvalid   (Render_Reg_arvalid      ),
++  .itf_ra_arready   (Render_Reg_arready      ),
++  .itf_ra_rdata     (Render_Reg_rdata        ),
++  .itf_ra_rvalid    (Render_Reg_rvalid       ),
++  .itf_ra_rready    (Render_Reg_rready       ),
+    
+   .itf_awaddr       (User_Ddr_awwaddr      ),
+   .itf_awdata       (User_Ddr_awwdata      ),

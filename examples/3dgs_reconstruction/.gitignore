@@ -1,7 +1,9 @@
 .venv/
 .venv_mvsplat/
 models/
-vendor/
+vendor/*
+!vendor/MVSplat_reference/
+!vendor/MVSplat_reference/**
 data/
 runs/
 __pycache__/

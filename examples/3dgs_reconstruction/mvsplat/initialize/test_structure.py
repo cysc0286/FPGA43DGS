@@ -36,6 +36,46 @@ class StructureTests(unittest.TestCase):
                 packed = {p.relative_to(root).as_posix() for p in package.source_files()}
             self.assertEqual(packed, set(files[:2]))
 
+    def test_source_package_includes_hash_verified_frozen_fpga_assets(self):
+        tool = MVS.parents[2]/'tools/package_core.py'
+        spec = importlib.util.spec_from_file_location('core_package_assets_test', tool)
+        package = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(package)
+        packed = {path.relative_to(package.ROOT).as_posix() for path in package.source_files()}
+        prefix = 'examples/3dgs_reconstruction/mvsplat/rendering/render_main/'
+        for relative in ('hardware/BOOT.bin',
+                         'hardware/ai7030_edif_top_disable_icap.bit',
+                         'rtl/evaluate_group_0uCeG_rom.dat',
+                         'hardware/reports/utilization.rpt'):
+            with self.subTest(relative=relative):
+                self.assertIn(prefix + relative, packed)
+        self.assertEqual(package.MAX_ARCHIVE_BYTES, 200 * 1024 * 1024)
+
+    def test_final_bundle_contains_complete_runtime_and_pinned_upstream_source(self):
+        tool = MVS.parents[2]/'tools/package_core.py'
+        spec = importlib.util.spec_from_file_location('core_package_final_test', tool)
+        package = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(package)
+        files = {path.relative_to(package.ROOT).as_posix() for path in
+                 package.source_files(include_working_tree=True)}
+        required = {
+            'examples/3dgs_reconstruction/pipeline.py',
+            'examples/3dgs_reconstruction/mvsplat/initialize/run.py',
+            'examples/3dgs_reconstruction/mvsplat/video_input/upload.py',
+            'examples/3dgs_reconstruction/mvsplat/pose_estimation/geometry.py',
+            'examples/3dgs_reconstruction/mvsplat/gaussian_generation/npu_branch/runtime.py',
+            'examples/3dgs_reconstruction/mvsplat/rendering/live_renderer.cpp',
+            'examples/3dgs_reconstruction/mvsplat/web/viewer.html',
+            'examples/3dgs_reconstruction/vendor/MVSplat_reference/src/model/encoder/encoder_costvolume.py',
+            'examples/3dgs_reconstruction/mvsplat/rendering/render_main/hardware/reports/timing_summary.rpt',
+            'examples/3dgs_reconstruction/mvsplat/rendering/render_main/hardware/reports/utilization.rpt',
+        }
+        self.assertTrue(required <= files, sorted(required - files))
+        self.assertFalse(any('/tests/' in name or '/diagnostics/' in name or
+                             name.startswith('outputs/') for name in files))
+        self.assertFalse(any(name.lower().endswith(('.mp4', '.mkv', '.avi', '.ckpt', '.pth'))
+                             for name in files))
+
     def test_public_help_and_dispatch_do_not_load_weights(self):
         sys.path.insert(0, str(MVS.parent))
         import pipeline
@@ -62,6 +102,7 @@ class StructureTests(unittest.TestCase):
                          'web/viewer.html', 'web/viewer.css', 'web/viewer.js',
                          'web/recording_page.html', 'web/upload_page.html',
                          'initialize/measure.py', 'gaussian_generation/memory.py',
+                         'video_input/ring_balance.py',
                          'gaussian_generation/upstream.py', 'rendering/contracts.py'):
             self.assertIn(relative, SOURCE_FILES)
         self.assertFalse(any('/tests/' in name or name.startswith('test_') for name in SOURCE_FILES))

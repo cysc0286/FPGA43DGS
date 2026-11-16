@@ -60,9 +60,11 @@ class ResidentCameraTests(unittest.TestCase):
                              ring_auto_coverage=True,ring_coverage_target=1.,ring_min_pairs=8)
         self.assertEqual(ring_pipeline_args(args),[
             '--ring-pairs','8','--ring-candidates','64','--ring-max-gaussians','65536',
-            '--ring-auto-coverage','--ring-coverage-target','1.0','--ring-min-pairs','8'])
+            '--ring-auto-coverage','--ring-coverage-target','1.0','--ring-min-pairs','8',
+            '--ring-selection-policy','balanced',
+            '--ring-appearance-strength','1.0'])
 
-    def test_default_capture_uses_eight_sparse_ring_pairs(self):
+    def test_default_capture_uses_adaptive_pairs_with_eight_pair_limit(self):
         required=['--out','sessions','--weights','weights','--vendor','vendor',
                   '--renderer','renderer','--live-renderer','live','--focal-ratio','.525',
                   '--viewer-public-url','http://127.0.0.1:18434/']
@@ -74,10 +76,13 @@ class ResidentCameraTests(unittest.TestCase):
         self.assertEqual(args.ring_candidates,64)
         self.assertTrue(args.ring_auto_coverage)
         self.assertEqual(args.ring_coverage_target,1.)
-        self.assertEqual(args.ring_min_pairs,8)
+        self.assertEqual(args.ring_min_pairs,1)
+        self.assertEqual(args.ring_selection_policy,'balanced')
         self.assertEqual(ring_pipeline_args(args),[
             '--ring-pairs','8','--ring-candidates','64','--ring-max-gaussians','65536',
-            '--ring-auto-coverage','--ring-coverage-target','1.0','--ring-min-pairs','8'])
+            '--ring-auto-coverage','--ring-coverage-target','1.0','--ring-min-pairs','1',
+            '--ring-selection-policy','balanced',
+            '--ring-appearance-strength','1.0'])
         with self.assertRaisesRegex(ValueError,'Non-CPU backend needs a bundle'):
             from gaussian_generation.npu_branch.config import BackendConfig
             BackendConfig.from_args(args)
@@ -88,6 +93,31 @@ class ResidentCameraTests(unittest.TestCase):
                   '--viewer-public-url','http://127.0.0.1:18434/']
         _,args=parse_args(required+['--backend','cpu'])
         self.assertEqual(args.backend,'cpu')
+
+    def test_ring_colour_correction_can_be_disabled_before_pipeline_launch(self):
+        required=['--out','sessions','--weights','weights','--vendor','vendor',
+                  '--renderer','renderer','--live-renderer','live','--focal-ratio','.525',
+                  '--viewer-public-url','http://127.0.0.1:18434/']
+        _,args=parse_args(required+['--ring-appearance-strength','0'])
+        cli=ring_pipeline_args(args)
+        self.assertEqual(cli[cli.index('--ring-appearance-strength')+1],'0.0')
+        for value in ('nan','inf','-1','1.1'):
+            with self.subTest(value=value), redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit):
+                    parse_args(required+['--ring-appearance-strength',value])
+
+    def test_direct_entry_enables_colour_only_for_ring_and_honours_rollback(self):
+        for flags,strength in ((['--ring-pairs','2'],1.),
+                               (['--ring-pairs','2','--ring-appearance-strength','0'],0.),
+                               ([],0.)):
+            with self.subTest(flags=flags), tempfile.TemporaryDirectory() as folder:
+                with patch('initialize.run.platform.machine',return_value='aarch64'), \
+                     patch('initialize.session.WarmSession',side_effect=RuntimeError('stop_before_devices')) as warm:
+                    with self.assertRaisesRegex(RuntimeError,'stop_before_devices'):
+                        initialize(['--out',str(Path(folder)/'run'),'--weights','unused',
+                                    '--vendor','unused','--renderer','unused','--live-renderer','unused',
+                                    '--backend','cpu']+flags)
+                self.assertEqual(warm.call_args.args[0].ring_appearance_strength,strength)
 
     def test_ring_selection_mode_can_be_overridden_or_disabled(self):
         required=['--out','sessions','--weights','weights','--vendor','vendor',
@@ -100,6 +130,10 @@ class ResidentCameraTests(unittest.TestCase):
         self.assertFalse(ordinary.ring_auto_coverage)
         self.assertEqual(ordinary.ring_min_pairs,1)
         self.assertEqual(ring_pipeline_args(ordinary),[])
+        _,legacy=parse_args(required+['--ring-selection-policy','legacy','--ring-min-pairs','8'])
+        cli=ring_pipeline_args(legacy)
+        self.assertEqual(cli[cli.index('--ring-selection-policy')+1],'legacy')
+        self.assertEqual(cli[cli.index('--ring-min-pairs')+1],'8')
 
     def test_eight_fixed_pairs_are_rejected_before_model_warmup(self):
         required=['--out','sessions','--weights','weights','--vendor','vendor',

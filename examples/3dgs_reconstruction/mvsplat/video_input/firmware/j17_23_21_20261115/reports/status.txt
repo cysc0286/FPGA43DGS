@@ -1,0 +1,8 @@
+CLOCK_SOURCE=clk_wiz_0.clk_out1 -> gp_axi_aclk -> ps_clk_out -> gp_clk; requested 100 MHz
+RUN=synth_1 STATUS=synth_design Complete! PROGRESS=100%
+RUN=impl_1 STATUS=write_bitstream Complete! PROGRESS=100%
+PIN=camera_pan_pwm BALL=AE13 IOSTANDARD=LVCMOS33
+PIN=camera_tilt_pwm BALL=W13 IOSTANDARD=LVCMOS33
+SERVO_REGISTERS=214
+SERVO_CLOCK=clk_out1_clk_wiz_0 PERIOD=10.000
+BITSTREAM_GENERATION=COMPLETE_REQUIRES_REVIEW_NOT_DEPLOYED

@@ -1,6 +1,14 @@
 # HeteroGS：板端视频重建与 NPU＋FPGA 渲染
 
-## test-branch：四步相机测试
+## 当前固件与画质流程
+
+[2026-11-16更新说明](docs/RELEASE_20261116.md)汇总本次固件、渲染与画质代码。已验收的200MHz四路渲染包位于`rendering/render_main/`；最新J17 23/21相机PWM整板候选的[BOOT、位流和报告](examples/3dgs_reconstruction/mvsplat/video_input/firmware/j17_23_21_20261115/)已随源码提交，候选尚未完成实板运动验收。
+
+环视流程加入真实视野驱动选组、邻近高斯归并、重叠区平滑过渡和上下文低频颜色修正，仍由一个合并场景经CPU投影排序与FPGA渲染。画质修正在场景准备阶段修改高斯参数，不替换FPGA返回画面；NPU覆盖范围和既有资格门槛保持不变。
+
+仓库根目录可执行`python tools/check_render_packages.py`与`python tools/check_camera_firmware.py`核对固件及配套源码。六部分结构和四步相机测试继续保留。
+
+## 四步相机测试
 
 按顺序运行四个独立入口，详见[测试说明](examples/3dgs_reconstruction/mvsplat/video_input/acceptance/README.md)和[检查清单](examples/3dgs_reconstruction/mvsplat/video_input/acceptance/CHECKLIST.md)。全部命令默认预览；确认现场条件后才加 `--execute`。
 

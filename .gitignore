@@ -20,6 +20,10 @@ BOOT.bin
 *.pem
 *.key
 
+# Explicitly published, manifest-verified camera PWM candidate firmware.
+!/examples/3dgs_reconstruction/mvsplat/video_input/firmware/j17_23_21_20261115/BOOT.bin
+!/examples/3dgs_reconstruction/mvsplat/video_input/firmware/j17_23_21_20261115/ai7030_edif_top_disable_icap.bit
+
 # Local-only planning documents.
 /TEAM_MODULES.md
 /team_workplan_2026-09-22.md

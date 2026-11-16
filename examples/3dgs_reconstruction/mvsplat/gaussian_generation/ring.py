@@ -1,21 +1,35 @@
-"""One retained inference session, bounded angular ownership, no depth alignment."""
+"""One retained inference session, bounded angular support, no depth alignment."""
 import gc
 import hashlib
 import json
+import math
 import time
 from pathlib import Path
 
 import numpy as np
 
 from common import gaussian_content_sha256, load_gaussians, save, sha, validate_gaussians
+from gaussian_generation.blending import AngularFeathering, SOURCE_FEATHER, attenuate_opacity
+from gaussian_generation.sampling import (BALANCED_SAMPLING, FOOTPRINT_COMPENSATION, MOMENT_MERGE,
+                                          SPATIAL_SAMPLING, balanced_sample_indices,compensate_covariances,
+                                          merge_retained_neighbours,spatial_sample_indices)
 
 
 def angular_owned_indices(gaussians, pair_directions, all_directions, global_view_indices,
-                          max_per_view):
-    """Overlap is owned by the nearest source axis, not merged at unknown depths."""
+                          max_per_view, *, source_shape=None, sampling='legacy_linear',
+                          return_counts=False,contribution_weights=None):
+    """Select hard owners or explicitly weighted source support within a budget.
+
+    Optional contribution weights retain observed overlap; neither branch fits
+    a shared depth across independently predicted source views.
+    """
     g = validate_gaussians(gaussians)
-    if len(g['means']) % 2 or max_per_view < 1:
+    if len(g['means']) % 2 or type(max_per_view) is not int or max_per_view < 1:
         raise ValueError('Expected equal two-view Gaussian blocks and a positive budget')
+    if sampling not in ('spatial', 'legacy_linear','balanced'):
+        raise ValueError('Unknown ring sampling policy')
+    if type(return_counts) is not bool:
+        raise ValueError('Ownership counts must be explicitly requested')
     directions = np.asarray(all_directions, np.float64)
     if directions.ndim != 2 or directions.shape[1] != 3 or not np.isfinite(directions).all():
         raise ValueError('Invalid source directions')
@@ -29,19 +43,41 @@ def angular_owned_indices(gaussians, pair_directions, all_directions, global_vie
     points = np.asarray(g['means'], np.float64)
     lengths = np.linalg.norm(points, axis=1)
     valid = lengths > 1e-8
-    rays = points/np.maximum(lengths[:, None], 1e-8)
-    owner = np.argmax(rays @ directions.T, axis=1)
+    if contribution_weights is None:
+        rays = points/np.maximum(lengths[:, None], 1e-8)
+        owner = np.argmax(rays @ directions.T, axis=1)
+    else:
+        weights = np.asarray(contribution_weights)
+        if (weights.shape!=(len(points),) or not np.isfinite(weights).all()
+                or np.any(weights<0) or np.any(weights>1)):
+            raise ValueError('Invalid source contribution weights')
+        valid &= weights>0
+        owner = None
     per_view = len(points)//2
-    selected = []
+    if source_shape is None:
+        side = math.isqrt(per_view)
+        # The locked MVSplat model emits one row-major Gaussian per source pixel.
+        # Non-image test fixtures retain an explicit one-row fallback.
+        source_shape = (side, side) if side*side == per_view else (1, per_view)
+    if (not isinstance(source_shape, (tuple, list)) or len(source_shape) != 2
+            or any(type(x) is not int or x < 1 for x in source_shape)
+            or math.prod(source_shape) != per_view):
+        raise ValueError('Source image shape differs from one-Gaussian-per-pixel output')
+    selected,owned_counts = [],[]
     for local, global_index in enumerate(global_view_indices):
         index = np.arange(local*per_view, (local+1)*per_view)
-        index = index[valid[index] & (owner[index] == global_index)]
-        # Uniform deterministic point thinning is explicit lossy sampling. It
-        # bounds accumulated scene memory; no footprint/opacity compensation.
+        index = index[valid[index] & ((owner[index] == global_index) if owner is not None else True)]
+        owned_counts.append(len(index))
         if len(index) > max_per_view:
-            index = index[np.linspace(0, len(index)-1, max_per_view, dtype=int)]
+            if sampling == 'legacy_linear':
+                index = index[np.linspace(0, len(index)-1, max_per_view, dtype=int)]
+            else:
+                start = local*per_view
+                select = balanced_sample_indices if sampling=='balanced' else spatial_sample_indices
+                index = start+select(index-start,max_per_view,source_shape)
         selected.append(index)
-    return np.concatenate(selected)
+    retained = np.concatenate(selected)
+    return (retained,owned_counts) if return_counts else retained
 
 
 def persist_ring_archive(record, gaussians, out):
@@ -98,10 +134,19 @@ def persist_ring_archive(record, gaussians, out):
 
 
 def generate_ring(runtime, prepared, out, *, max_gaussians=65536, progress=None,
-                  defer_archive=False):
+                  defer_archive=False, sampling='balanced', footprint_compensation=True,
+                  reduction='moments',transition_degrees=0.,source_edge_margin=.04):
     if (type(max_gaussians) is not int or not 1024 <= max_gaussians <= 131072
             or prepared.get('depth_observable') is not False):
         raise ValueError('Invalid bounded rotation-only generation contract')
+    if (type(footprint_compensation) is not bool or sampling not in ('legacy_linear','spatial','balanced')
+            or reduction not in ('footprint','moments')):
+        raise ValueError('Invalid ring retention policy')
+    if (type(transition_degrees) not in (int,float) or not np.isfinite(transition_degrees)
+            or not 0<=transition_degrees<=12
+            or type(source_edge_margin) not in (int,float) or not np.isfinite(source_edge_margin)
+            or not 0<=source_edge_margin<=.25):
+        raise ValueError('Invalid ring transition width')
     out = Path(out)
     out.mkdir(exist_ok=False)
     pairs = prepared['pairs']
@@ -112,6 +157,14 @@ def generate_ring(runtime, prepared, out, *, max_gaussians=65536, progress=None,
     shapes = dict(means=(3,), covariances=(3, 3), harmonics=(3, 25), opacities=())
     accumulated = {k:np.empty((max_gaussians, *shape), np.float32) for k, shape in shapes.items()}
     records, position, generated_payload_bytes = [], 0, 0
+    source_views = {view['index']:view for view in prepared.get('views', [])}
+    feather = None
+    if transition_degrees:
+        try:
+            cameras = [source_views[i] for pair in pairs for i in pair['context']]
+        except KeyError as exc:
+            raise ValueError('Source feathering requires actual camera metadata for every context') from exc
+        feather = AngularFeathering(directions,cameras,transition_degrees,source_edge_margin)
     started = time.monotonic()
     for n, pair in enumerate(pairs):
         folder = Path(pair['directory'])
@@ -132,21 +185,53 @@ def generate_ring(runtime, prepared, out, *, max_gaussians=65536, progress=None,
         payload_bytes = sum(value.nbytes for value in g.values())
         generated_payload_bytes += payload_bytes
         global_indices = [2*n, 2*n+1]
-        index = angular_owned_indices(g, np.asarray(directions)[global_indices], directions,
-                                      global_indices, per_view)
+        contribution_weights = None
+        if feather is not None:
+            if not len(g['means']) or len(g['means']) % 2:
+                raise ValueError('Feathering requires two equal Gaussian source blocks')
+            weights = feather.weights(g['means'])
+            local_source = np.arange(len(g['means']))//(len(g['means'])//2)
+            contribution_weights = weights[np.arange(len(g['means'])),2*n+local_source]
+            g = dict(g,opacities=attenuate_opacity(g['opacities'],contribution_weights))
+            del weights,local_source
+        source_shape = None
+        if source_views:
+            shapes_in = [(source_views[i]['height'],source_views[i]['width']) for i in pair['context']]
+            if len(shapes_in) != 2 or shapes_in[0] != shapes_in[1]:
+                raise ValueError('Ring contexts must have the same source image dimensions')
+            source_shape = shapes_in[0]
+        index,owned_counts = angular_owned_indices(g, np.asarray(directions)[global_indices], directions,
+                                      global_indices, per_view, source_shape=source_shape,
+                                      sampling=sampling, return_counts=True,
+                                      contribution_weights=contribution_weights)
         if not len(index):
             raise ValueError('No angularly owned Gaussians in a requested pair')
         end = position+len(index)
+        corrected_covariance,corrected_fields,retention = None,None,None
+        if footprint_compensation:
+            cameras = [source_views.get(i) for i in pair['context']]
+            if reduction=='moments':
+                owned = angular_owned_indices(g,np.asarray(directions)[global_indices],directions,
+                    global_indices,len(g['means']),source_shape=source_shape,
+                    contribution_weights=contribution_weights)
+                corrected_fields,retention = merge_retained_neighbours(g,index,owned,cameras)
+                del owned
+            else:
+                corrected_covariance,retention = compensate_covariances(g,index,cameras,owned_counts)
         for key in shapes:
-            accumulated[key][position:end] = g[key][index]
+            accumulated[key][position:end] = (corrected_fields[key] if corrected_fields is not None
+                else corrected_covariance if key=='covariances' and corrected_covariance is not None
+                else g[key][index])
         records.append(dict(context=pair['context'], context_sha256=pair['context_sha256'],
                             gaussian_sha256=inference['gaussian_sha256'], generated=len(g['means']),
                             gaussian_identity_kind=inference['gaussian_identity_kind'],
                             archive_policy='memory_only', generated_payload_bytes=payload_bytes,
-                            retained=len(index), inference_seconds=inference['inference_seconds'],
+                            retained=len(index), pre_thinning_owned_counts=owned_counts,
+                            footprint_retention=retention,
+                            inference_seconds=inference['inference_seconds'],
                             backend=inference['backend'], npu_executed=inference['npu_executed']))
         position = end
-        del g, index
+        del g,index,corrected_covariance,corrected_fields,contribution_weights
         gc.collect()
     result = {k:v[:position] for k, v in accumulated.items()}
     validate_gaussians(result)
@@ -171,8 +256,17 @@ def generate_ring(runtime, prepared, out, *, max_gaussians=65536, progress=None,
                       scope='Excludes NPZ headers, filesystem/cache effects, content hashing and final aggregate archive'),
                   coordinate_frame='common_rotation_origin_zero_translation',
                   learned_depth_observable=False, full_3d_reconstruction=False,
-                  overlap_policy='nearest source optical axis; no averaging of unobservable depths',
-                  quality_scope='Fixed-centre angular candidate; uniform sampling may reduce detail')
+                  overlap_policy=(SOURCE_FEATHER if feather is not None else
+                                  'nearest source optical axis; no averaging of unobservable depths'),
+                  transition_degrees=transition_degrees,source_edge_margin=source_edge_margin,
+                  point_sampling=({'spatial':SPATIAL_SAMPLING,'balanced':BALANCED_SAMPLING,
+                                   'legacy_linear':'legacy_linear'}[sampling]),
+                  footprint_compensation=(FOOTPRINT_COMPENSATION if reduction=='footprint' else MOMENT_MERGE)
+                      if footprint_compensation else 'none',
+                  retention_reduction=reduction if footprint_compensation else 'none',
+                  quality_scope=('Fixed-centre angular candidate; local reduction may smooth details; depth remains unobservable'
+                      if footprint_compensation else
+                      'Fixed-centre angular candidate; uncompensated thinning may lose pixel coverage; depth remains unobservable'))
     save(out/'inference.json', record)
     if not defer_archive:
         persist_ring_archive(record, result, out)

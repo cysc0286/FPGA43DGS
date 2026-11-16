@@ -1,0 +1,127 @@
+{
+  "schema": "camera_servo_firmware_v1",
+  "packaged_on": "2026-11-16",
+  "built_on": "2026-11-15",
+  "status": "compiled_candidate_not_board_qualified",
+  "default_enabled": false,
+  "board": "Wujing 30TAI Lite",
+  "reference_part": "xc7z030ffg676-2",
+  "toolchain": "Vivado 2018.3 + vendor Procise",
+  "render_clock_mhz": 200,
+  "servo_clock_mhz": 100,
+  "pwm_hz": 50,
+  "servo_abi": 2,
+  "wiring": {
+    "pan_j17": 23,
+    "tilt_j17": 21,
+    "ground_j17": 2
+  },
+  "boot_sha256": "22c06060f52d590d589fda2cb027cce9a6732c4f243ba68c47d5d70bd2075f35",
+  "bit_sha256": "0f5d5352bbc5d307d29b5187abede57cefa94c08600b5cc4744ed03b555ff524",
+  "files": [
+    {
+      "path": "ai7030_edif_top_disable_icap.bit",
+      "bytes": 5980609,
+      "sha256": "0f5d5352bbc5d307d29b5187abede57cefa94c08600b5cc4744ed03b555ff524"
+    },
+    {
+      "path": "BOOT.bin",
+      "bytes": 7023552,
+      "sha256": "22c06060f52d590d589fda2cb027cce9a6732c4f243ba68c47d5d70bd2075f35"
+    },
+    {
+      "path": "boot_comparison.json",
+      "bytes": 2255,
+      "sha256": "ceec1c49ce822e2ae84ffac643779ed08af5a7b7c9c4ae92cdd628cf16cd511f"
+    },
+    {
+      "path": "reports/drc.rpt",
+      "bytes": 844996,
+      "sha256": "a23b71a7b53ca28ac76e0de15af67bec73772c2c02f1860325b6d8626c59789a"
+    },
+    {
+      "path": "reports/io.rpt",
+      "bytes": 221032,
+      "sha256": "e6257e8998ec9fb3b4d5e384e71f0fb5e29c8c03f61eb77dcb34e4931bcd41e4"
+    },
+    {
+      "path": "reports/servo_hold.rpt",
+      "bytes": 111971,
+      "sha256": "95a38cf3c333ffc82137e6b47ccae468f8a6e9c0c88830f5cf384fa3b0d62582"
+    },
+    {
+      "path": "reports/servo_setup.rpt",
+      "bytes": 132990,
+      "sha256": "bdb651d52cdc954baa56b561a9228328e79958e178a2d1cb526aa9f0a2949d62"
+    },
+    {
+      "path": "reports/status.txt",
+      "bytes": 434,
+      "sha256": "b80ca7ce9a93320543fa79f4bb3e08f09ec72a5519bfa6e912f09069b434bb79"
+    },
+    {
+      "path": "reports/timing_summary.rpt",
+      "bytes": 1271642,
+      "sha256": "25ece04a364fa4df07b0717888011ad9fadc2f24d81a6b3716862d806d9c2466"
+    },
+    {
+      "path": "reports/utilization.rpt",
+      "bytes": 14714,
+      "sha256": "80cdbd49f4fc81b543ebabb5d89dbd8c5aa636efcec7c2127daab3bafdd49d85"
+    },
+    {
+      "path": "integration.patch",
+      "bytes": 2784,
+      "sha256": "bfce44891925744e2d1c60497d26046593b6d70ca6c7b3c7b0a4738acbccbfc0"
+    }
+  ],
+  "sources": [
+    {
+      "path": "examples/3dgs_reconstruction/mvsplat/video_input/rtl/camera_servo_pwm.v",
+      "bytes": 7089,
+      "sha256": "69dddb83de1cc2c46aa4d3927e089d4d022fc0561d378d670aec81b2db373f98"
+    },
+    {
+      "path": "examples/3dgs_reconstruction/mvsplat/video_input/rtl/camera_servo_bus.v",
+      "bytes": 2840,
+      "sha256": "4064bc9cd87a8007484536ffbfd6accf4d39c84fc14b9a2ab12ba7014e2a3926"
+    },
+    {
+      "path": "examples/3dgs_reconstruction/mvsplat/video_input/rtl/camera_servo_j17_23_21.xdc",
+      "bytes": 765,
+      "sha256": "51bb4364ea20550a687c5864edd8d0756cdea8586ca48a3d319f8d983b556b49"
+    },
+    {
+      "path": "vendor_platform/rtl/ai7030_edif_top.v",
+      "packaged": false,
+      "bytes": 13533,
+      "sha256": "bdd4b0d0aa37614fb8c3a6dc510c29776cf6c78233c37e38b64bf6ca28ee54ab"
+    },
+    {
+      "path": "vendor_platform/rtl/ps_ai_peripheral.sv",
+      "packaged": false,
+      "bytes": 91758,
+      "sha256": "f04ddbdf681cda2c893c9a1176cb2010c2bb847d806c2aa4815ba7b5081967f2"
+    },
+    {
+      "path": "vendor_platform/rtl/ps_ai_wrapper.sv",
+      "packaged": false,
+      "bytes": 57282,
+      "sha256": "fb4a10daf8891317ff9f34943b1723febaa383232bfd74b11f542277ad71063c"
+    }
+  ],
+  "validation": {
+    "bitstream_generated": true,
+    "boot_payload_comparison_passed": true,
+    "rtl_pwm_checks": 53,
+    "rtl_bus_checks": 18,
+    "board_tested": false,
+    "servo_motion_tested": false
+  },
+  "timing": {
+    "whole_board_setup_ns": 0.015,
+    "whole_board_hold_ns": 0.029,
+    "inherited_vendor_pulse_width_slack_ns": -0.409,
+    "full_board_timing_signoff": false
+  }
+}

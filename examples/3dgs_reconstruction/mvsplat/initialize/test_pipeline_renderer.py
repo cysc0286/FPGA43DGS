@@ -106,6 +106,23 @@ class PipelineRendererTests(unittest.TestCase):
         self.assertEqual(record["resident_scene"]["gaussians"], 2)
         self.assertIn("archived", record["endpoint"])
 
+    def test_internal_linear_frame_preserves_float_rgb_and_coverage_without_archive(self):
+        renderer=self.renderer()
+        raw=b'GSSOUT01'+struct.pack('<II',1,1)+struct.pack('<4fI',.12345,.23456,.34567,.25,0xffffffff)
+        rgb=bytes([31,60,88])
+        header=dict(width=1,height=1,rgb_bytes=3,raw_bytes=len(raw))
+        camera=b'FLCAM001'+struct.pack('<4I',1,1,1,1)+struct.pack('<14d',*([1.]*14))
+        self.line.side_effect=[b'SCENE 2 2 0.1',b'FRAME '+json.dumps(header).encode()]
+        with patch.object(renderer.runtime,'_send'), \
+                patch.object(renderer.runtime,'_exact',side_effect=[rgb,raw]):
+            renderer.load_rows(np.zeros((2,62),np.float32))
+            linear,coverage,record=renderer.render_linear(camera)
+        np.testing.assert_allclose(linear,[[[.12345,.23456,.34567]]],atol=1e-7)
+        np.testing.assert_allclose(coverage,[[.75]])
+        self.assertTrue(record['complete'])
+        self.assertFalse((self.root/'frame').exists())
+        self.assertIsNone(renderer.last_rgb)
+
     def warm_args(self, **options):
         defaults = dict(backend="cpu", weights="unused", vendor="unused", threads=4,
                         prepare_threads=1, renderer=self.root / "frozen", live_renderer="native-renderer",

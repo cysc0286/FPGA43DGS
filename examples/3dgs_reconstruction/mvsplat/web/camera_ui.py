@@ -44,9 +44,11 @@ def ring_pipeline_args(args):
          '--ring-max-gaussians',str(args.ring_max_gaussians)]
     if getattr(args,'ring_auto_coverage',False):
         cli+=['--ring-auto-coverage','--ring-coverage-target',str(args.ring_coverage_target),
-              '--ring-min-pairs',str(args.ring_min_pairs)]
+              '--ring-min-pairs',str(args.ring_min_pairs),
+              '--ring-selection-policy',getattr(args,'ring_selection_policy','balanced')]
     contrast=getattr(args,'ring_feature_contrast',.04)
     if contrast != .04:cli+=['--ring-feature-contrast',str(contrast)]
+    cli+=['--ring-appearance-strength',str(getattr(args,'ring_appearance_strength',1.))]
     return cli
 
 
@@ -374,7 +376,7 @@ def build_parser():
                    help='Maximum capture duration; increase only within the camera/storage limits')
     p.add_argument('--manual-process',action='store_true',help='Legacy explicit reconstruct button instead of automatic stop-to-process')
     p.add_argument('--ring-pairs',type=int,choices=(0,1,2,4,8),default=DEFAULT_RING_PAIRS,
-                   help='Fixed-centre 360-degree capture defaults to eight sparse MVSplat pairs; 0 selects ordinary translation mode')
+                   help='Fixed-centre capture defaults to at most eight adaptive pairs; 0 selects ordinary translation mode')
     p.add_argument('--ring-candidates',type=int,default=DEFAULT_RING_CANDIDATES)
     p.add_argument('--ring-feature-contrast',type=float,default=.04,
                    help='Explicit weak-texture feature detection; does not relax rotation validation')
@@ -386,8 +388,11 @@ def build_parser():
     p.set_defaults(ring_auto_coverage=DEFAULT_RING_AUTO_COVERAGE)
     p.add_argument('--ring-coverage-target',type=float,default=DEFAULT_RING_COVERAGE_TARGET)
     p.add_argument('--ring-min-pairs',type=int,default=None,
-                   help='Defaults to --ring-pairs in automatic mode, otherwise one')
+                   help='Defaults to one, matching the direct entry; set explicitly to force more pairs')
+    p.add_argument('--ring-selection-policy',choices=('balanced','legacy'),default='balanced')
     p.add_argument('--ring-max-gaussians',type=int,default=65536)
+    p.add_argument('--ring-appearance-strength',type=float,default=1.,
+                   help='Context-only colour correction for ring scenes; 0 restores previous colours')
     p.add_argument('--host',default='127.0.0.1')
     p.add_argument('--port',type=int,default=8081)
     p.add_argument('--out',type=Path,required=True)
@@ -415,10 +420,12 @@ def build_parser():
 def parse_args(argv=None):
     p = build_parser()
     a = p.parse_args(argv)
+    if not math.isfinite(a.ring_appearance_strength) or not 0<=a.ring_appearance_strength<=1:
+        p.error('--ring-appearance-strength must be finite and in [0,1]')
     if a.ring_pairs == 0:
         a.ring_auto_coverage = False
     if a.ring_min_pairs is None:
-        a.ring_min_pairs = a.ring_pairs if a.ring_auto_coverage and a.ring_pairs else 1
+        a.ring_min_pairs = 1
     if a.ring_pairs == 8 and not a.ring_auto_coverage:
         p.error('eight panorama pairs require automatic coverage; fixed selection supports 1, 2 or 4')
     return p, a

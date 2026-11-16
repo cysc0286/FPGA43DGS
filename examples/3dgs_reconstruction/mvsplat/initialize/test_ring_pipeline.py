@@ -7,10 +7,48 @@ from unittest.mock import patch
 import numpy as np
 
 from common import gaussian_content_sha256, sha
-from initialize.ring import prepare_ring_scene
+from initialize.ring import prepare_ring_scene,calibrate_ring_appearance
 
 
 class RingPipelineTests(unittest.TestCase):
+    def test_appearance_calibration_uses_original_scene_and_updates_content_identity(self):
+        from PIL import Image
+        from gaussian_generation.test_ring_blending import camera
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory)
+            (out/'input/images').mkdir(parents=True)
+            (out/'inference').mkdir()
+            g=dict(means=np.array([[0.,0.,2.]],np.float32),
+                   covariances=np.eye(3,dtype=np.float32)[None]*.01,
+                   harmonics=np.zeros((1,3,25),np.float32),opacities=np.full(1,.8,np.float32))
+            parent=gaussian_content_sha256(g)
+            image=out/'input/images/source.png'
+            Image.fromarray(np.full((128,128,3),100,np.uint8)).save(image)
+            view=dict(camera(0),index=0,name=image.name,prepared_sha256=sha(image))
+            prepared=dict(views=[view],pairs=[dict(context=[0,0])],
+                          coverage=dict(directions=[[0,0,1],[0,0,1]]))
+            record=dict(gaussian_content_sha256=parent,gaussian_sha256=parent,
+                        gaussian_identity_kind='array_content_v1',archive_verified=False)
+            order=[]
+            class Renderer:
+                def load_rows(self,rows):order.append('load')
+                def render_linear(self,camera):
+                    order.append('internal_frame')
+                    return np.full((128,128,3),.2,np.float32),np.ones((128,128),np.float32),dict(complete=True)
+            updated,corrected=calibrate_ring_appearance(g,record,prepared,Renderer(),out,1.,8.)
+            self.assertEqual(order,['load','internal_frame','internal_frame'])
+            self.assertEqual(gaussian_content_sha256(g),parent)
+            self.assertNotEqual(updated['gaussian_content_sha256'],parent)
+            self.assertEqual(updated['gaussian_sha256'],gaussian_content_sha256(corrected))
+            self.assertEqual(updated['appearance']['parent_gaussian_content_sha256'],parent)
+            self.assertFalse(updated['appearance']['targets_used'])
+            self.assertFalse(updated['archive_verified'])
+            self.assertEqual(record['gaussian_sha256'],parent)
+            self.assertTrue((out/'inference/inference.json').is_file())
+            image.write_bytes(b'changed')
+            with self.assertRaisesRegex(ValueError,'context changed'):
+                calibrate_ring_appearance(g,record,prepared,Renderer(),out,1.,8.)
+
     def scenario(self, directory, bad_frame=False):
         arrays = dict(means=np.array([[0., 0., 2.]], np.float32),
                       covariances=np.eye(3, dtype=np.float32)[None]*.01,
@@ -59,6 +97,7 @@ class RingPipelineTests(unittest.TestCase):
                                           groups='auto', max_pairs=8, min_pairs=8,
                                           coverage_target=.95, feature_contrast=.01)
             self.assertTrue(generate.call_args.kwargs['defer_archive'])
+            self.assertEqual(generate.call_args.kwargs['transition_degrees'],8.)
             self.assertEqual(prepare.call_args.kwargs['groups'], 'auto')
             self.assertEqual(prepare.call_args.kwargs['max_pairs'], 8)
             self.assertEqual(prepare.call_args.kwargs['min_pairs'], 8)

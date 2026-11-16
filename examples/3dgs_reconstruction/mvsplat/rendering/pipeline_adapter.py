@@ -5,7 +5,7 @@ from pathlib import Path
 import time
 import numpy as np
 
-from rendering.resident_runtime import frozen_renderer_module
+from rendering.resident_runtime import frozen_renderer_module, framebuffer_linear
 from rendering.runtime import LiveRenderer, load_mainline_profile
 
 
@@ -58,6 +58,16 @@ class PipelineRenderer:
                       endpoint="first-frame compatibility: raw frame and evidence archived")
         (Path(out)/"result.json").write_text(json.dumps(record, indent=2), encoding="utf-8")
         return record
+
+    def render_linear(self, camera):
+        """One in-memory calibration view; never publish it as FRAME_COMPLETE."""
+        frame = self.runtime.render_camera(camera,include_raw=True)
+        rgb,coverage = framebuffer_linear(frame.raw)
+        if rgb.shape!=frame.rgb.shape:
+            raise ValueError('Calibration framebuffer differs from the live RGB shape')
+        return rgb,coverage,dict(frame.metadata,
+            frame_sha256=hashlib.sha256(frame.raw).hexdigest(),
+            endpoint='internal appearance calibration; not the delivered first frame')
 
     def render(self, model, camera, out, work_root=None):
         if model is not None:

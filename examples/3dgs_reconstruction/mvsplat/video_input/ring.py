@@ -76,17 +76,20 @@ def _decode_ring_pass(video, width, candidates, threads, calibration, *, count=N
 
 
 def select_ring_pairs(poses, groups=2, *, intrinsic_normalized=None, size=128,
-                      max_pairs=8, min_pairs=1, coverage_target=.95):
-    """Select a fixed count or greedily cover actual cropped horizontal frusta.
+                      max_pairs=8, min_pairs=1, coverage_target=.95,
+                      selection_policy='balanced'):
+    """Select fixed anchors or balance actual cropped horizontal frusta.
 
     Uniform time is only a sampling proposal: actual image-estimated rotations
     determine placement. A video that fails to cover a full circle stays partial.
     Explicit 1/2/4 groups retain yaw-anchor selection. ``auto`` requires final
     cropped K and stops at the sampled coverage target or its bounded budget.
     """
+    if selection_policy not in ('balanced', 'legacy'):
+        raise ValueError('Unknown panorama selection policy')
     if groups == 'auto':
         return _select_coverage_pairs(poses, intrinsic_normalized, size, max_pairs,
-                                      min_pairs, coverage_target)
+                                      min_pairs, coverage_target, selection_policy)
     if min_pairs != 1:
         raise ValueError('Minimum pair count is only valid with automatic coverage selection')
     if type(groups) is not int or groups not in (1, 2, 4):
@@ -196,7 +199,7 @@ def _cropped_pair_overlap(frusta, first, second, separation):
 
 
 def _select_coverage_pairs(poses, intrinsic_normalized, size, max_pairs, min_pairs,
-                           coverage_target):
+                           coverage_target, selection_policy):
     """Bounded greedy coverage, not an exponential eight-group exact search."""
     if (type(max_pairs) is not int or not 1 <= max_pairs <= 8
             or type(min_pairs) is not int or not 1 <= min_pairs <= max_pairs
@@ -221,10 +224,10 @@ def _select_coverage_pairs(poses, intrinsic_normalized, size, max_pairs, min_pai
         separation = float(np.degrees(np.arccos(np.clip(np.dot(forward[n], forward[n+2]), -1, 1))))
         if not 5 <= separation <= 55 or not _cropped_pair_overlap(frusta, n, n+2, separation):
             continue
-        candidates.append(dict(position=n, mask=7 << n, separation=separation,
+        candidates.append(dict(position=n, frames=(n, n+1, n+2), mask=7 << n, separation=separation,
                                centre=float((yaw[n]+yaw[n+2])/2),
                                visible=frusta['masks'][n] | frusta['masks'][n+2]))
-    if not candidates:
+    if not candidates and selection_policy == 'legacy':
         raise ValueError('No panorama pair with real cropped-frustum overlap; increase candidate sampling or check intrinsics')
     covered = np.zeros(360, dtype=bool)
     selected, used, gains = [], 0, []
@@ -257,31 +260,79 @@ def _select_coverage_pairs(poses, intrinsic_normalized, size, max_pairs, min_pai
     if (reason == 'pair_budget' and len(selected) >= max_pairs
             and int(covered.sum()) >= target_samples and len(selected) >= min_pairs):
         reason = 'pair_budget_after_minimum'
+    balance = {}
+    if selection_policy == 'balanced':
+        from video_input.ring_balance import allocate, interior_support
+        support = interior_support(cameras, frusta['intrinsic'])
+        existing = {(c['frames'][0], c['frames'][2]) for c in candidates}
+        # Variable frame spacing handles slow/paused motion without inventing
+        # uniform rotation. Three angular proposals per first view bound cost.
+        for first in range(len(indices)-2):
+            options = []
+            for second in range(first+2, len(indices)):
+                if np.ptp(yaw[first:second+1]) > np.radians(55)+1e-10:
+                    continue
+                separation = float(np.degrees(np.arccos(np.clip(
+                    np.dot(forward[first], forward[second]), -1, 1))))
+                if not 5 <= separation <= 55 or not _cropped_pair_overlap(frusta, first, second, separation):
+                    continue
+                options.append((second, separation))
+            limit = min(55., .85*float(frusta['min_fov_degrees'][first]))
+            for desired in (.25*limit, .5*limit, .75*limit):
+                if not options:
+                    break
+                second, separation = min(options, key=lambda item: (abs(item[1]-desired), item[0]))
+                if (first, second) in existing:
+                    continue
+                middle_ray = forward[first]+forward[second]
+                target = max(range(first+1, second), key=lambda j: (float(forward[j] @ middle_ray), -j))
+                existing.add((first, second))
+                candidates.append(dict(position=len(indices)+len(candidates),
+                    frames=(first, target, second), mask=(1 << first) | (1 << target) | (1 << second),
+                    separation=separation, centre=float((yaw[first]+yaw[second])/2),
+                    visible=frusta['masks'][first] | frusta['masks'][second]))
+        if not candidates:
+            raise ValueError('No panorama pair with real cropped-frustum overlap; increase candidate sampling or check intrinsics')
+        for candidate in candidates:
+            first, _, second = candidate['frames']
+            candidate['support'] = np.maximum(support[first], support[second])
+        selected, balance = allocate(candidates, selected, max_pairs, min_pairs, target_samples)
+        covered = np.zeros(360, bool)
+        gains = []
+        for candidate in selected:
+            gains.append(int(np.count_nonzero(candidate['visible'] & ~covered)))
+            covered |= candidate['visible']
+        reason = ('pair_budget_after_minimum' if covered.sum() >= target_samples and len(selected) == max_pairs else
+                  'coverage_target' if covered.sum() >= target_samples else
+                  'pair_budget' if len(selected) == max_pairs else 'no_positive_coverage_gain')
     if len(selected) < min_pairs:
         raise ValueError(f'Panorama selection found {len(selected)} usable disjoint pairs; '
                          f'minimum required is {min_pairs}. '
                          'Record a slower, sharper full rotation or explicitly select a smaller pair budget')
     pairs = []
     for candidate in selected:
-        first, target, second = indices[candidate['position']:candidate['position']+3]
+        first, target, second = [indices[i] for i in candidate['frames']]
         pairs.append(dict(context=[first, second], target=target))
-    contexts = [i for c in selected for i in (c['position'], c['position']+2)]
+    contexts = [i for c in selected for i in (c['frames'][0], c['frames'][2])]
     measured = horizontal_frustum_coverage(cameras[contexts], frusta['intrinsic'][contexts], size)
-    return pairs, dict(measured, observed_yaw_span_degrees=float(np.degrees(extent)),
+    return pairs, dict(measured, **balance, observed_yaw_span_degrees=float(np.degrees(extent)),
         pair_groups=len(pairs), pair_count=len(pairs), max_pairs=max_pairs,
         min_pairs=min_pairs, minimum_pair_count_met=len(pairs) >= min_pairs,
         coverage_target=float(coverage_target), achieved_fraction=measured['sample_covered_fraction'],
         target_met=measured['sample_covered_degrees'] >= target_samples,
         uncovered_yaw_sample_degrees=np.flatnonzero(~covered).tolist(),
-        selection_mode='auto', selection_method=('bounded_greedy_cropped_frustum_gain_then_farthest_yaw'
-            if min_pairs > 1 else 'bounded_greedy_cropped_frustum_coverage_gain'),
+        selection_mode='auto', selection_policy=selection_policy,
+        selection_method=('bounded_angle_balanced_cropped_frustum_coverage' if selection_policy == 'balanced' else
+            'bounded_greedy_cropped_frustum_gain_then_farthest_yaw' if min_pairs > 1 else
+            'bounded_greedy_cropped_frustum_coverage_gain'),
         selection_stop_reason=reason, coverage_gain_degrees_per_pair=gains,
-        eligible_triples=len(candidates), cropped_overlap_fov_ratio=.85,
+        eligible_triples=sum(c['frames'][2]-c['frames'][0] == 2 for c in candidates),
+        eligible_pair_candidates=len(candidates), cropped_overlap_fov_ratio=.85,
         selected_context_axis_separation_degrees=[c['separation'] for c in selected],
-        selected_context_axis_limit_degrees=[.85*float(min(frusta['min_fov_degrees'][c['position']],
-            frusta['min_fov_degrees'][c['position']+2])) for c in selected],
+        selected_context_axis_limit_degrees=[.85*float(min(frusta['min_fov_degrees'][c['frames'][0]],
+            frusta['min_fov_degrees'][c['frames'][2]])) for c in selected],
         sampling='image_rotation_not_uniform_time', full_360_geometry=False,
-        selection_guarantee='Greedy sampled angular coverage only; no optimality, visibility, spherical or image-quality guarantee')
+        selection_guarantee='Bounded sampled angular selection only; no optimality, visibility, spherical or image-quality guarantee')
 
 
 def _fixed_centre_cameras(poses):
@@ -358,7 +409,8 @@ def horizontal_frustum_coverage(context_poses, intrinsic_normalized, size=128):
 
 def prepare_ring(video, out, *, groups=2, candidates=24, size=128,
                  width=480, threads=1, focal_ratio=.9, calibration=None,
-                 max_pairs=8, min_pairs=1, coverage_target=.95, feature_contrast=.04):
+                 max_pairs=8, min_pairs=1, coverage_target=.95, feature_contrast=.04,
+                 selection_policy='balanced'):
     import cv2
 
     from pose_estimation.rotation import estimate_rotation_sequence
@@ -385,7 +437,7 @@ def prepare_ring(video, out, *, groups=2, candidates=24, size=128,
     poses, geometry = estimate_rotation_sequence(frames, intrinsic, feature_contrast=feature_contrast)
     pairs, coverage = select_ring_pairs(poses, groups, intrinsic_normalized=k, size=size,
                                          max_pairs=max_pairs, min_pairs=min_pairs,
-                                         coverage_target=coverage_target)
+                                         coverage_target=coverage_target, selection_policy=selection_policy)
     out = new_directory(out)
     (out/'images').mkdir()
     contexts = [i for pair in pairs for i in pair['context']]

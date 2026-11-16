@@ -3,12 +3,14 @@
     "repository": "https://github.com/donydchen/mvsplat",
     "commit": "01f9a28edb5eb68416e7e63b01f8d90c3bdfbf01",
     "revision_source": "GitHub codeload ZIP comment",
-    "source_archive_sha256": "55b9dd485902313366c304d435cc32b5ad3000efaf1274aa26d53cee5a6da9fe",
+    "source_archive_sha256": "264f0c6d938bfeaae09b51c898aae3c621f0a6acce14b3f92a3ace814741aa2f",
     "license": "MIT; see MVSplat-LICENSE.txt",
     "local_path": "examples/3dgs_reconstruction/vendor/MVSplat_reference",
     "deployment_status": "CPU plus explicitly selected NPU partitions, including accepted six FFNs; asset-bound numerical and input-switch qualification required; see MAINLINE.md",
     "weights_sha256": "83d0d9eaa753fa4a1f925288dc1f90b8c3297fad0ab0f6ed1f11a1c5946da25a",
-    "weights_distribution": "Not included in this repository; obtain from the author's README"
+    "weights_distribution": "Not included in this repository; obtain from the author's README",
+    "source_included": true,
+    "source_excluded_paths": []
   },
   "GraphDECO": {
     "repository": "https://github.com/graphdeco-inria/gaussian-splatting",
