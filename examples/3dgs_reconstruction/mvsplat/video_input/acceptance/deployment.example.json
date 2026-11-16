@@ -1,0 +1,21 @@
+{
+  "python": "/root/fpga43dgs_reconstruction/arm_env/bin/python3",
+  "weights": "/REPLACE_WITH_QUALIFIED_DEPLOYMENT/weights/re10k.ckpt",
+  "vendor": "/REPLACE_WITH_QUALIFIED_DEPLOYMENT/vendor/MVSplat_reference",
+  "renderer": "/REPLACE_WITH_QUALIFIED_DEPLOYMENT/3dgs_renderer_v1",
+  "live_renderer": "/REPLACE_WITH_QUALIFIED_DEPLOYMENT/live_exact",
+  "calibration": "../calibrations/hf868_1280x720_20261102.json",
+  "backend": "npu",
+  "partition_bundle": "/REPLACE_WITH_QUALIFIED_DEPLOYMENT/partition_bundle.json",
+  "npu_library": "/REPLACE_WITH_QUALIFIED_DEPLOYMENT/libnpu_bridge.so",
+  "npu_acceptance": "/REPLACE_WITH_QUALIFIED_DEPLOYMENT/acceptance.json",
+  "oracle_graphs": "/REPLACE_WITH_QUALIFIED_DEPLOYMENT/graphs",
+  "worker_python": "/REPLACE_WITH_QUALIFIED_DEPLOYMENT/bin/python3",
+  "partitions": [
+    "backbone_cnn", "depth_head", "to_gaussians", "to_disparity",
+    "transformer_ffn_0", "transformer_ffn_1", "transformer_ffn_2",
+    "transformer_ffn_3", "transformer_ffn_4", "transformer_ffn_5"
+  ],
+  "buffer_policy": "shared",
+  "buffer_limit_mib": 128
+}

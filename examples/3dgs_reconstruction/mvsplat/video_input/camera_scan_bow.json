@@ -1,0 +1,21 @@
+{
+  "name": "three_tilt_bow_scan_balanced20",
+  "calibration": {
+    "pan": {"kind": "position", "us_per_degree": 11.11111111111111, "direction": 1, "min_deg": -60, "max_deg": 60},
+    "tilt": {"kind": "position", "us_per_degree": 11.11111111111111, "direction": 1, "min_deg": -45, "max_deg": 45}
+  },
+  "scan": {
+    "mode": "sweep",
+    "pan_start_deg": -30,
+    "pan_end_deg": 30,
+    "pan_step_deg": 15,
+    "tilt_rows_deg": [30, 0, -30],
+    "pan_speed_deg_s": 20,
+    "tilt_speed_deg_s": 20,
+    "settle_s": 0.2,
+    "dwell_s": 0,
+    "start_hold_s": 0.2,
+    "end_hold_s": 0.1,
+    "cycles": 1
+  }
+}

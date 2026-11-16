@@ -1,0 +1,52 @@
+{
+  "board": "JFMQL30TAI_LITE",
+  "source": {
+    "file": "JFMQL30TAI_LITE.pdf",
+    "sha256": "cdec19cef2b65fb09340c89bcc0fd8d98fdaaa79421b210112940de488b5e1b6",
+    "package_mapping_pdf_page": 9,
+    "header_pdf_page": 16,
+    "header_drawing_sheet": 17
+  },
+  "status": "user_selected_j17_23_21_bank12_3V3_candidate",
+  "pins": {
+    "camera_pan_pwm": {
+      "header": "J17",
+      "physical_pin": 23,
+      "net": "HR_IO13_1P",
+      "package_pin": "AE13",
+      "pin_function": "IO_L10P_T1_12",
+      "io_bank": 12,
+      "schematic_vcco_V": 3.3,
+      "schematic_iostandard": "LVCMOS33"
+    },
+    "camera_tilt_pwm": {
+      "header": "J17",
+      "physical_pin": 21,
+      "net": "HR_IO13_2P",
+      "package_pin": "W13",
+      "pin_function": "IO_L5P_T0_12",
+      "io_bank": 12,
+      "schematic_vcco_V": 3.3,
+      "schematic_iostandard": "LVCMOS33"
+    }
+  },
+  "common_ground": {"header": "J17", "physical_pin": 2},
+  "rejected_previous_wiring": {
+    "pan": {"physical_pin": 3, "net": "HR_IO12_1P", "package_pin": "AC21", "io_bank": 13},
+    "tilt": {"physical_pin": 5, "net": "HR_IO12_2P", "package_pin": "AE20", "io_bank": 13},
+    "header_note_V": 3.3,
+    "bank13_supply_net": "VCC1V8",
+    "bank13_supply_capacitor": "C158",
+    "hardware_voltage_measured": false,
+    "servo_input_high_threshold_verified_for_1V8": false,
+    "header11_supply_user_measured_V": 1.76,
+    "measurement_does_not_establish_gpio_or_bank_voltage": true
+  },
+  "deployment_allowed": false,
+  "constraints_applied": false,
+  "remaining": [
+    "User selected pan23/tilt21 with external servo power off; physical rewiring not independently observed",
+    "Verify actual board revision and idle/PWM signal voltage on selected pins before powered motion test",
+    "Full platform implementation, timing and rollback verification before firmware load"
+  ]
+}

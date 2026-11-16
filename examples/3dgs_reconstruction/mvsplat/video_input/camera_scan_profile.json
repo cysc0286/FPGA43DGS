@@ -1,0 +1,21 @@
+{
+  "name": "first_instrument_scan",
+  "calibration": {
+    "pan": {"kind": "position", "us_per_degree": 11.11111111111111, "direction": 1, "min_deg": -60, "max_deg": 60},
+    "tilt": {"kind": "position", "us_per_degree": 11.11111111111111, "direction": 1, "min_deg": -45, "max_deg": 45}
+  },
+  "scan": {
+    "mode": "raster",
+    "pan_start_deg": -30,
+    "pan_end_deg": 30,
+    "pan_step_deg": 15,
+    "tilt_rows_deg": [0],
+    "pan_speed_deg_s": 10,
+    "tilt_speed_deg_s": 10,
+    "settle_s": 0.3,
+    "dwell_s": 0.2,
+    "start_hold_s": 0.6,
+    "end_hold_s": 0.3,
+    "cycles": 1
+  }
+}

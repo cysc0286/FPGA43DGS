@@ -1,5 +1,18 @@
 # HeteroGS：板端视频重建与 NPU＋FPGA 渲染
 
+## test-branch：四步相机测试
+
+按顺序运行四个独立入口，详见[测试说明](examples/3dgs_reconstruction/mvsplat/video_input/acceptance/README.md)和[检查清单](examples/3dgs_reconstruction/mvsplat/video_input/acceptance/CHECKLIST.md)。全部命令默认预览；确认现场条件后才加 `--execute`。
+
+1. **电机测试**：`video_input/acceptance/01_motor.sh`，核验两轴小角度运动、方向和限位。
+2. **轨迹测试**：`video_input/acceptance/02_trajectory.sh`，执行三层弓字扫描，不打开摄像头。
+3. **同步录制**：`video_input/acceptance/03_sync_capture.sh`，录像出帧后启动运动，输出原视频交接文件。
+4. **重建渲染**：`video_input/acceptance/04_reconstruction.sh`，调用现有 NPU＋FPGA 主线并提供网页。
+
+命令在 `examples/3dgs_reconstruction/mvsplat/` 运行。默认两轴20°/s、俯仰 +30°/0°/−30°、水平 ±30°；计划运动16.66秒、录像17.66秒，20秒保护上限。参数与覆盖估算见[扫描方案](examples/3dgs_reconstruction/mvsplat/video_input/acceptance/SCAN_PLAN.md)。这些是规划值，真实运动、录像和画质须上板验收。
+
+本分支提交源码、配置及说明；正式 NPU 资产、板端环境和已匹配 PWM 固件须沿用部署，视频与运行输出保存在仓库之外。
+
 平台为悟净 30TAI Lite。主线：视频输入 → CPU 位姿估计 → MVSplat 生成 Gaussian → CPU＋FPGA 渲染 → 网页显示。
 固定预训练权重在视频前加载；新场景执行前向推理，换视角复用已生成的场景。
 
