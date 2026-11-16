@@ -8,6 +8,19 @@
 
 仓库根目录可执行`python tools/check_render_packages.py`与`python tools/check_camera_firmware.py`核对固件及配套源码。六部分结构和四步相机测试继续保留。
 
+## C++ 与 FPGA 源码入口
+
+主业务代码沿用 `examples/3dgs_reconstruction/mvsplat/` 路径。该目录是正式应用代码，已通过 `.gitattributes` 纠正 GitHub 对 `examples/` 的文档分类；第三方和自动生成代码仍按原规则识别。右侧语言比例不是源码文件清单。
+
+| 内容 | 源码入口 |
+|---|---|
+| ARM 常驻渲染、投影与排序（C++） | [live_renderer.cpp](examples/3dgs_reconstruction/mvsplat/rendering/live_renderer.cpp)、[depth_sort.hpp](examples/3dgs_reconstruction/mvsplat/rendering/depth_sort.hpp) |
+| FPGA 渲染流水线（HLS C++） | [pipeline.cpp](examples/3dgs_reconstruction/mvsplat/rendering/render_main/fpga/pipeline/pipeline.cpp)、[HLS/管线目录](examples/3dgs_reconstruction/mvsplat/rendering/render_main/fpga/) |
+| FPGA 顶层、寄存器、DMA 与生成的运算 RTL | [flicker_top.sv](examples/3dgs_reconstruction/mvsplat/rendering/render_main/rtl/flicker_top.sv)、[RTL 目录](examples/3dgs_reconstruction/mvsplat/rendering/render_main/rtl/) |
+| 相机云台 PWM、总线接口与约束 | [camera_servo_pwm.v](examples/3dgs_reconstruction/mvsplat/video_input/rtl/camera_servo_pwm.v)、[RTL/XDC 目录](examples/3dgs_reconstruction/mvsplat/video_input/rtl/) |
+
+NPU 的 SDK 调用桥接也使用 C++，见 [bridge.cpp](examples/3dgs_reconstruction/mvsplat/gaussian_generation/npu_branch/bridge.cpp)。上述源码与固件随同一仓库版本管理。
+
 ## 四步相机测试
 
 按顺序运行四个独立入口，详见[测试说明](examples/3dgs_reconstruction/mvsplat/video_input/acceptance/README.md)和[检查清单](examples/3dgs_reconstruction/mvsplat/video_input/acceptance/CHECKLIST.md)。全部命令默认预览；确认现场条件后才加 `--execute`。

@@ -6,3 +6,6 @@ examples/3dgs_reconstruction/mvsplat/video_input/firmware/** -text
 examples/3dgs_reconstruction/mvsplat/video_input/rtl/*.v text eol=lf
 examples/3dgs_reconstruction/mvsplat/video_input/rtl/*.xdc text eol=lf
 examples/3dgs_reconstruction/vendor/MVSplat_reference/** -text
+# This historical examples/ tree contains the production application, not docs.
+# Keep upstream-vendor and generated-code detection unchanged.
+examples/3dgs_reconstruction/mvsplat/** linguist-documentation=false
