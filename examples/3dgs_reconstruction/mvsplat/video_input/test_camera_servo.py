@@ -1,15 +1,24 @@
 import unittest
 
-from .camera_servo import (CONTROL, HEARTBEAT, PAN, TILT, UioServo,
-                           run_smoke, smoke_plan, validate_write)
+from .camera_servo import (CONTROL, HEARTBEAT, PAN, TILT, STOP, UioServo,
+                           finish_pulse, run_smoke, smoke_plan, validate_write)
 
 
 class FakeDevice:
     def __init__(self):
         self.writes = []
+        self.control = 0
+        self.status = 0
 
     def write(self, offset, value):
         self.writes.append((offset, value))
+        if offset == CONTROL:
+            self.control = self.status = value
+        if offset == STOP:
+            self.control = self.status = 0
+
+    def read(self, offset):
+        return self.control if offset == CONTROL else self.status
 
 
 class CameraServoTests(unittest.TestCase):
@@ -42,6 +51,7 @@ class CameraServoTests(unittest.TestCase):
             self.assertEqual(device.writes[0], (CONTROL, 0))
             self.assertIn((CONTROL, mask), device.writes)
             self.assertEqual(device.writes[-1], (CONTROL, 0))
+            self.assertEqual(device.writes[-2], (STOP, 1))
             pulses = [value for address, value in device.writes if address == offset]
             self.assertEqual(min(pulses), 1450)
             self.assertEqual(max(pulses), 1550)
@@ -58,6 +68,35 @@ class CameraServoTests(unittest.TestCase):
         with self.assertRaises(KeyboardInterrupt):
             run_smoke(device, "pan", sleep=interrupt)
         self.assertEqual(device.writes[-1], (CONTROL, 0))
+
+    def test_stop_requires_current_and_requested_disable(self):
+        device = FakeDevice()
+        device.control = device.status = 2
+        polls = []
+        def request_stop(offset, value):
+            self.assertEqual((offset, value), (STOP, 1))
+            device.control = 0
+        device.write = request_stop
+        def frame_boundary(_seconds):
+            polls.append(1)
+            if len(polls) == 3:
+                device.status = 0
+        finish_pulse(device, frame_boundary)
+        self.assertEqual(len(polls), 3)
+
+    def test_stop_timeout_watchdog_and_write_validation(self):
+        device = FakeDevice()
+        device.control = device.status = 2
+        device.write = lambda _offset, _value: None
+        with self.assertRaisesRegex(RuntimeError, 'not acknowledged'):
+            finish_pulse(device, lambda _seconds: None)
+        device.status = 0x100
+        with self.assertRaisesRegex(RuntimeError, 'watchdog'):
+            finish_pulse(device, lambda _seconds: None)
+        validate_write(STOP, 1)
+        for value in (0, 2, 0xFFFFFFFF):
+            with self.assertRaises(ValueError):
+                validate_write(STOP, value)
 
 
 if __name__ == "__main__":

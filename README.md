@@ -1,6 +1,17 @@
 # HeteroGS：板端视频重建与 NPU＋FPGA 渲染
 
-## 当前固件与画质流程
+## 当前版本：手动采集与 CPU＋FPGA 演示
+
+[2026-11-27 更新说明](docs/RELEASE_20261127.md)汇总本次相机、覆盖选帧和云台源码增量，沿用下方六部分目录。当前已验证部署由 **ARM CPU 生成高斯、FPGA 渲染**；NPU 十子图实现保留，当前服务未启用，也未在本轮重新资格验收。
+
+- USB 录制上限 **15 秒**，支持手动曝光、增益和亮度；默认按真实时间戳与实测帧率接收，不强制 60 fps，不补帧。
+- 电脑视频输入沿用 `/upload`；与 `/capture` 共用同一处理链，本地视频不套用 USB 标定。
+- 网页默认自动选择 **最多 2 个帧对、64 个候选帧**。`coverage` 策略支持跨帧选择有重叠的真实视角；主分支原有 `balanced` 与 `legacy` 策略继续保留。
+- 当前拍摄由用户手动转动云台；电机测试和 ABI3 固件保留源码及本机候选记录，不自动启动运动或刷写。
+
+同一历史录像的裁剪后水平视锥覆盖估计曾从 42° 扩大到 58°，该例实际只需一对。覆盖估计不等于完整三维、360°或画质验收，多对仍可能触及内存保护。详细时间、负结果与边界见 [MAINLINE.md](MAINLINE.md)。本次汇总没有新增板测成绩。
+
+## 已有固件与画质流程
 
 [2026-11-16更新说明](docs/RELEASE_20261116.md)汇总本次固件、渲染与画质代码。已验收的200MHz四路渲染包位于`rendering/render_main/`；最新J17 23/21相机PWM整板候选的[BOOT、位流和报告](examples/3dgs_reconstruction/mvsplat/video_input/firmware/j17_23_21_20261115/)已随源码提交，候选尚未完成实板运动验收。
 
@@ -65,7 +76,23 @@ python pipeline.py view --help
 `initialize` 管理视频前预热及视频后首帧；`web` 提供 `/capture`、`/upload` 和交互查看器；`view` 只恢复已有场景。
 原 OpenSplat／整段 SfM 冷链、旧发布包、独立渲染候选和重复兼容入口已移出当前代码树。
 
-推荐 NPU 配置显式选择已采纳的十个子图：
+当前网页演示配置如下。依赖路径均须替换为板端实际资产，命令不会烧录固件：
+
+```sh
+python pipeline.py web --out /path/to/new/sessions \
+  --weights /path/to/re10k.ckpt --vendor /path/to/MVSplat_reference \
+  --renderer /path/to/matching/renderer --live-renderer /path/to/live_exact \
+  --calibration /path/to/camera_calibration.json --backend cpu \
+  --max-seconds 15 --ring-pairs 2 --ring-auto-coverage --ring-min-pairs 1 \
+  --ring-candidates 64 --ring-selection-policy coverage --ring-coverage-target 1.0 \
+  --ring-max-gaussians 65536 --ring-appearance-strength 0 \
+  --host 127.0.0.1 --port 8081 --viewer-port 8080 \
+  --viewer-public-url http://127.0.0.1:18080/
+```
+
+回环地址需要已有 SSH 端口转发；查看器公开 URL 应指向浏览器可达的对应端口。后台进程仍有 30 分钟总时限，从预热启动即计时；超时保留场景，刷新页面不会延长进程寿命。
+
+NPU 历史配置显式选择十个子图，重新启用前必须验证当前固件、SDK、图包与验收记录身份：
 
 ```sh
 python pipeline.py initialize --video INPUT.mp4 --out NEW_RUN \
@@ -81,7 +108,7 @@ python pipeline.py initialize --video INPUT.mp4 --out NEW_RUN \
 ```
 
 这些路径为占位，实际权重、SDK、图和硬件需另行配置。NPU 失败不静默回退。
-CPU 对照显式选择 `--backend cpu` 并去掉 NPU 专用参数。
+当前 CPU 部署显式选择 `--backend cpu` 并去掉 NPU 专用参数；网页默认值也与该部署一致。
 注意力、代价体等部分仍在 CPU；不能将十子图方案称为全网 NPU。
 严格 TF32 张量门槛仍未关闭；图像资格、输入切换、资产身份、设备隔离和内存检查继续保留。
 目录变化会使旧源码身份失效，重新部署需重新生成匹配资格，不能复用旧 receipt 充当新验收。

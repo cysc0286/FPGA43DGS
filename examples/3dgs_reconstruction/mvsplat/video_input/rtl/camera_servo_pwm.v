@@ -9,8 +9,7 @@ module camera_servo_pwm #(
     parameter integer WATCHDOG_US = 500000,
     parameter integer PAN_MIN_PULSE_US = 500,
     parameter integer PAN_MAX_PULSE_US = 2500,
-    // User calibrated 1500 us to a level camera. Limit pitch to +/-45 deg
-    // with the manufacturer's nominal 500--2500 us / 180 deg mapping.
+    // Electrical limits only. Installed camera neutral is not necessarily 1500us.
     parameter integer TILT_MIN_PULSE_US = 1000,
     parameter integer TILT_MAX_PULSE_US = 2000
 ) (
@@ -35,6 +34,7 @@ module camera_servo_pwm #(
     reg [31:0] r_watchdog_us;
     reg [31:0] r_frame_count;
     reg r_expired;
+    reg r_stop_pending;
     reg [1:0] r_requested_enable;
     reg [1:0] r_active_enable;
     reg [15:0] r_pan_us;
@@ -64,7 +64,7 @@ module camera_servo_pwm #(
         begin
             case (address)
                 6'h00: read_register = 32'h53525631; // SRV1
-                6'h04: read_register = 32'd2;
+                6'h04: read_register = 32'd3;
                 6'h08: read_register = CLOCK_HZ;
                 6'h0c: read_register = FRAME_US;
                 6'h10: read_register = {30'd0, r_requested_enable};
@@ -78,6 +78,7 @@ module camera_servo_pwm #(
                 6'h30: read_register = WATCHDOG_US;
                 6'h34: read_register = (PAN_MAX_PULSE_US << 16) | PAN_MIN_PULSE_US;
                 6'h38: read_register = (TILT_MAX_PULSE_US << 16) | TILT_MIN_PULSE_US;
+                6'h3c: read_register = {31'd0, r_stop_pending};
                 default: read_register = 32'd0;
             endcase
         end
@@ -101,6 +102,7 @@ module camera_servo_pwm #(
             r_watchdog_us <= 0;
             r_frame_count <= 0;
             r_expired <= 1'b1;
+            r_stop_pending <= 1'b0;
             r_requested_enable <= 2'b00;
             r_active_enable <= 2'b00;
             r_pan_us <= 16'd1500;
@@ -115,7 +117,9 @@ module camera_servo_pwm #(
                     r_frame_count <= r_frame_count + 1'b1;
                     r_pan_active_us <= r_pan_us;
                     r_tilt_active_us <= r_tilt_us;
-                    r_active_enable <= r_expired ? 2'b00 : r_requested_enable;
+                    r_active_enable <= (r_expired || r_stop_pending) ? 2'b00 : r_requested_enable;
+                    if (r_stop_pending) r_requested_enable <= 2'b00;
+                    r_stop_pending <= 1'b0;
                 end else begin
                     r_phase_us <= r_phase_us + 1'b1;
                 end
@@ -137,6 +141,7 @@ module camera_servo_pwm #(
                     6'h10: begin
                         r_requested_enable <= i_awdata[1:0];
                         r_active_enable <= 2'b00;
+                        r_stop_pending <= 1'b0;
                     end
                     6'h14: r_pan_us <= clamp_pulse(i_awdata, PAN_MIN_PULSE_US, PAN_MAX_PULSE_US);
                     6'h18: r_tilt_us <= clamp_pulse(i_awdata, TILT_MIN_PULSE_US, TILT_MAX_PULSE_US);
@@ -144,6 +149,9 @@ module camera_servo_pwm #(
                         r_watchdog_us <= 0;
                         r_expired <= 1'b0;
                     end
+                    // Normal completion: finish the current pulse and disable
+                    // at the next frame boundary. CONTROL=0 remains immediate.
+                    6'h3c: if (i_awdata == 1) r_stop_pending <= 1'b1;
                     default: begin end
                 endcase
             end

@@ -85,7 +85,7 @@ def select_ring_pairs(poses, groups=2, *, intrinsic_normalized=None, size=128,
     Explicit 1/2/4 groups retain yaw-anchor selection. ``auto`` requires final
     cropped K and stops at the sampled coverage target or its bounded budget.
     """
-    if selection_policy not in ('balanced', 'legacy'):
+    if selection_policy not in ('balanced', 'legacy', 'coverage'):
         raise ValueError('Unknown panorama selection policy')
     if groups == 'auto':
         return _select_coverage_pairs(poses, intrinsic_normalized, size, max_pairs,
@@ -220,14 +220,39 @@ def _select_coverage_pairs(poses, intrinsic_normalized, size, max_pairs, min_pai
         raise ValueError('Too little observed rotation for sparse panorama')
     frusta = _selection_frusta(cameras, intrinsic_normalized, size)
     candidates = []
-    for n in range(len(indices)-2):
-        separation = float(np.degrees(np.arccos(np.clip(np.dot(forward[n], forward[n+2]), -1, 1))))
-        if not 5 <= separation <= 55 or not _cropped_pair_overlap(frusta, n, n+2, separation):
-            continue
-        candidates.append(dict(position=n, frames=(n, n+1, n+2), mask=7 << n, separation=separation,
-                               centre=float((yaw[n]+yaw[n+2])/2),
-                               visible=frusta['masks'][n] | frusta['masks'][n+2]))
-    if not candidates and selection_policy == 'legacy':
+    if selection_policy == 'coverage':
+        # Sampling densely must not remove usable pairs from a slow sweep. Search
+        # measured endpoint directions rather than requiring adjacent triples.
+        # At most 64 views give 1,953 endpoint pairs; only the chosen three views
+        # are reserved, leaving intermediate observations available to other groups.
+        for first in range(len(indices)-2):
+            for second in range(first+2, len(indices)):
+                yaw_separation = abs(float(np.degrees(yaw[second]-yaw[first])))
+                if not 5 <= yaw_separation <= 55:
+                    continue
+                separation = float(np.degrees(np.arccos(np.clip(
+                    np.dot(forward[first], forward[second]), -1, 1))))
+                if not 5 <= separation <= 55 or not _cropped_pair_overlap(frusta, first, second, separation):
+                    continue
+                low, high = sorted((yaw[first], yaw[second]))
+                middle = [i for i in range(first+1, second) if low <= yaw[i] <= high]
+                if not middle:
+                    continue
+                centre = float((yaw[first]+yaw[second])/2)
+                target = min(middle, key=lambda i: (abs(float(yaw[i])-centre), i))
+                positions = (first, target, second)
+                candidates.append(dict(position=first, frames=positions,
+                    mask=sum(1 << i for i in positions), separation=separation,
+                    centre=centre, visible=frusta['masks'][first] | frusta['masks'][second]))
+    else:
+        for n in range(len(indices)-2):
+            separation = float(np.degrees(np.arccos(np.clip(np.dot(forward[n], forward[n+2]), -1, 1))))
+            if not 5 <= separation <= 55 or not _cropped_pair_overlap(frusta, n, n+2, separation):
+                continue
+            candidates.append(dict(position=n, frames=(n, n+1, n+2), mask=7 << n, separation=separation,
+                                   centre=float((yaw[n]+yaw[n+2])/2),
+                                   visible=frusta['masks'][n] | frusta['masks'][n+2]))
+    if not candidates and selection_policy in ('legacy', 'coverage'):
         raise ValueError('No panorama pair with real cropped-frustum overlap; increase candidate sampling or check intrinsics')
     covered = np.zeros(360, dtype=bool)
     selected, used, gains = [], 0, []
@@ -326,6 +351,8 @@ def _select_coverage_pairs(poses, intrinsic_normalized, size, max_pairs, min_pai
             'bounded_greedy_cropped_frustum_gain_then_farthest_yaw' if min_pairs > 1 else
             'bounded_greedy_cropped_frustum_coverage_gain'),
         selection_stop_reason=reason, coverage_gain_degrees_per_pair=gains,
+        candidate_pairing=('measured_yaw_endpoints_with_held_out_midpoint'
+                           if selection_policy == 'coverage' else 'balanced_or_adjacent_triples'),
         eligible_triples=sum(c['frames'][2]-c['frames'][0] == 2 for c in candidates),
         eligible_pair_candidates=len(candidates), cropped_overlap_fov_ratio=.85,
         selected_context_axis_separation_degrees=[c['separation'] for c in selected],
@@ -480,5 +507,25 @@ def prepare_ring(video, out, *, groups=2, candidates=24, size=128,
         quality_scope='Fixed-centre angular preview only; learned depth is unconstrained by pure rotation',
         timing=dict(decode_seconds=decoded-started, rotation_and_prepare_seconds=time.monotonic()-decoded),
         seconds=time.monotonic()-started)
+    # SIFT/decoder workspaces and the 64 full preparation images are no longer
+    # needed: inference consumes the saved tiny contexts. Return freed native
+    # heap pages before the model allocates its cost volume on the 1 GiB board.
+    import gc
+    import ctypes
+    released = time.monotonic()
+    frames.clear()
+    arrays.clear()
+    gc.collect()
+    release = dict(allocator_trim_supported=False, allocator_trim_result=None)
+    try:
+        trim = ctypes.CDLL(None).malloc_trim
+    except (AttributeError, OSError, TypeError):
+        pass  # Non-glibc hosts retain their normal allocator behavior.
+    else:
+        trim.argtypes = [ctypes.c_size_t]
+        trim.restype = ctypes.c_int
+        release.update(allocator_trim_supported=True, allocator_trim_result=int(trim(0)))
+    release['seconds'] = time.monotonic()-released
+    record['preparation_memory_release'] = release
     save(out/'input.json', record)
     return record

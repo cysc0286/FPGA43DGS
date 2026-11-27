@@ -35,7 +35,7 @@ def main(argv=None):
     p.add_argument('--ring-coverage-target', type=float, default=1.)
     p.add_argument('--ring-min-pairs', type=int, default=1,
                    help='Continue auto selection to this many disjoint frame pairs after angular target is met')
-    p.add_argument('--ring-selection-policy', choices=('balanced', 'legacy'), default='balanced',
+    p.add_argument('--ring-selection-policy', choices=('balanced', 'legacy', 'coverage'), default='balanced',
                    help='Direction-balanced coverage or the previous consecutive-triple greedy selection')
     p.add_argument('--ring-max-gaussians', type=int, default=65536)
     p.add_argument('--ring-appearance-strength',type=float,default=None,

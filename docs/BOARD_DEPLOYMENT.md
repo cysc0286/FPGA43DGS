@@ -2,6 +2,8 @@
 
 目标板卡为悟净 30TAI Lite。当前仓库保留视频到高斯生成、NPU 适配、CPU＋FPGA 渲染及网页入口；源码包额外携带已冻结并有哈希清单的 FPGA 板端产物。
 
+2026-11-27 发布补记：当前运行选择为 CPU 生成＋FPGA 渲染、网页最多两对／15 秒、可调曝光及实测帧率接收。NPU 实现保留但未恢复启用。下方固件产物仍为各自原始版本，不随源代码更新而自动变成 ABI3；本次不部署或刷写开发板。当前命令和历史指标见 [README](../README.md)、[MAINLINE](../MAINLINE.md)。
+
 ## FPGA 渲染包
 
 `examples/3dgs_reconstruction/mvsplat/rendering/render_main/` 保存当前渲染主线：

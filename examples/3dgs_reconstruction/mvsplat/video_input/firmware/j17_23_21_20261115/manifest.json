@@ -77,9 +77,10 @@
   ],
   "sources": [
     {
-      "path": "examples/3dgs_reconstruction/mvsplat/video_input/rtl/camera_servo_pwm.v",
+      "path": "examples/3dgs_reconstruction/mvsplat/video_input/firmware/j17_23_21_20261115/camera_servo_pwm_abi2.v",
       "bytes": 7089,
-      "sha256": "69dddb83de1cc2c46aa4d3927e089d4d022fc0561d378d670aec81b2db373f98"
+      "sha256": "69dddb83de1cc2c46aa4d3927e089d4d022fc0561d378d670aec81b2db373f98",
+      "build_source_path": "examples/3dgs_reconstruction/mvsplat/video_input/rtl/camera_servo_pwm.v"
     },
     {
       "path": "examples/3dgs_reconstruction/mvsplat/video_input/rtl/camera_servo_bus.v",

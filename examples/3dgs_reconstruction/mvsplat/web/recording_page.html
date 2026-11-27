@@ -20,7 +20,19 @@ p.hint:not([role="status"]):not(#file-meta):not(#upload-status):not(#clip):not(#
 <section class="card" id="capture-card"><h2>1. 采集环视视频</h2>
 <div class="controls"><button id="start" disabled>开始录制（15秒自动结束）</button><button id="stop" disabled>提前结束并重建</button><button id="pause">暂停显示</button></div>
 <img id="camera" hidden alt="摄像头实时预览"><p id="capture-guidance" class="hint">环视采集约定：固定观察中心，镜头只绕竖直方向旋转 360°；尽量避免平移、俯仰和变焦。这样输入才与当前固定中心环视算法一致。</p><p id="preview-status" class="hint">正在连接摄像头…</p>
+<details id="camera-controls"><summary>曝光与画面亮度（录制前调整）</summary>
+<p class="hint">切换到手动曝光，调整后点击“应用到相机”，在实时预览中观察效果。录制和处理期间不能修改。</p>
+<div class="controls">
+<label>曝光模式 <select id="exposure-mode" aria-label="曝光模式"><option value="auto">自动曝光</option><option value="manual">手动曝光</option></select></label>
+<label id="exposure-field">曝光时间（ms） <input id="exposure-ms" type="number" aria-label="曝光时间（ms）" style="width:100px"></label>
+<label id="gain-field">增益 <input id="camera-gain" type="number" aria-label="相机增益" style="width:80px"></label>
+<label id="brightness-field">亮度 <input id="camera-brightness" type="number" aria-label="相机亮度" style="width:80px"></label>
+</div><div class="controls"><button id="camera-controls-apply" disabled>应用到相机</button><button id="camera-controls-read">读取当前设置</button></div>
+<p id="camera-controls-current" class="hint"></p><p id="camera-controls-status" class="hint" role="status"></p>
+<p id="camera-controls-hint" class="hint">增加曝光可能带来拖影和帧率下降；增益过高会增加噪点。设置稳定后再录制。</p>
+</details>
 <div class="record-meta"><span id="time">00:00.0</span><p id="record-status" role="status">正在读取状态…</p></div>
+<p id="capture-rate-policy" class="hint" role="status"></p>
 <p id="capture-countdown" class="hint">实际录制开始后计时；到时由板端自动保存并重建，无需手动结束。</p>
 <p id="limits" class="hint"></p><p id="clip" class="hint"></p>
 </section>
@@ -59,6 +71,7 @@ function buttons(){if(!last)return;const b=last.build||{},building=last.maintena
 $('start').disabled=busy||building||recording;$('start').textContent=b.phase==='initializing'&&!timer.started?'等待模型预热…':'开始录制（'+last.max_seconds+'秒自动结束）';
 $('stop').disabled=busy||last.state!=='recording';$('rebuild').disabled=busy||building||!last.clip||recording||last.input_kind==='uploaded_video';
 $('cleanup').disabled=busy||building||recording;$('clear-all').disabled=$('cleanup').disabled;
+if(window.updateCameraControlsLock)window.updateCameraControlsLock(building||recording);
 $('live-start').disabled=busy||building||recording;$('live-stop').disabled=busy||b.mode!=='streaming'||!['initializing','streaming'].includes(b.phase);}
 function attachViewer(id,url){const element=$(id);element.hidden=!url;if(url&&element.getAttribute('src')!==url)element.src=url;else if(!url)element.removeAttribute('src');}
 window.addEventListener('message',event=>{const data=event.data;if(!data||data.type!=='fpga43dgs-viewer-size'||!Number.isFinite(data.height)||data.height<200||data.height>6000)return;
@@ -68,6 +81,8 @@ const labels={idle:'尚未录制',starting:'正在准备，录像尚未开始',r
 $('record-status').textContent=s.input_kind==='uploaded_video'?'电脑视频任务：请前往电脑视频输入页查看进度':(labels[s.state]||s.state);$('time').textContent=duration(s.elapsed_seconds);
 $('limits').textContent='实际录制 '+s.max_seconds+' 秒后自动结束并重建 · 可用空间 '+Number(s.free_mib||0).toFixed(0)+' MiB。计时由板端执行，暂停显示或关闭网页不影响自动结束。';
 $('clip').textContent=s.clip?s.clip.frames+' 帧 · '+Number(s.clip.duration_seconds).toFixed(2)+' 秒 · '+Number(s.clip.measured_fps).toFixed(2)+' fps · '+s.clip.stop_label:'';
+$('capture-rate-policy').textContent=s.capture_fps_policy==='strict'?'帧率：严格匹配采集目标。':'帧率：按实测值接收，不要求达到 60 fps。';
+if(s.clip&&s.clip.fps_warning)$('clip').textContent+=' · '+s.clip.fps_warning;
 const phases={idle:'等待录制',warmed:'模型与渲染环境已预热，可以开始录制',initializing:timer.started?'正在准备处理环境…':'正在预热模型与 FPGA，预热不计入处理时间',reconstructing:'正在生成高斯与渲染首帧…',streaming:'连续更新中',stopping:'正在完成当前更新…',ready:b.processing_complete?'首帧已完成，可以选择观察方向':'等待板端首帧完成确认…',complete:'重建会话已结束',error:'处理失败，请查看原因'};
 $('build-status').textContent=s.state==='stopping'?'正在保存和检查视频，随后自动处理…':b.scene_restored?(b.phase==='ready'?'历史场景已恢复，可以选择观察方向':'正在恢复历史场景查看器…'):(phases[b.phase]||b.phase||'等待录制');
 const progress=b.progress||{},stageNames={decoding:'解码视频',decode:'解码视频',rotation:'估计相机转动',geometry:'准备相机与帧对',preparing:'准备输入',inference:'NPU 生成高斯',rendering:'FPGA 渲染首帧',publishing:'发布交互场景',complete:'首帧完成'};
@@ -92,4 +107,4 @@ function sendViewerViewport(frame){const src=frame.getAttribute('src');if(src&&f
 const viewportFrames=['result-viewer','live-viewer'].map(id=>document.getElementById(id));
 for(const frame of viewportFrames)frame.addEventListener('load',()=>sendViewerViewport(frame));
 window.addEventListener('resize',()=>viewportFrames.forEach(sendViewerViewport));
-</script></body></html>
+</script><script src="/camera_controls.js"></script></body></html>

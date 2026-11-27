@@ -75,8 +75,37 @@ def inspect_clip(path, ffprobe="ffprobe", *, decoded_frames=False):
     return stream, times
 
 
+def validate_recorded_capture(stream, times, width, height, fps, *, strict_fps=False):
+    """Keep original PTS; requested FPS is a target unless strict benchmarking is requested."""
+    import math
+    if type(strict_fps) is not bool:
+        raise ValueError('strict_fps must be boolean')
+    if (len(times)<3 or not all(math.isfinite(t) for t in times)
+            or any(b<=a for a,b in zip(times,times[1:]))):
+        raise ValueError('录像时间戳无效或有效帧不足')
+    if (stream['codec_name']!='mjpeg' or (stream['width'],stream['height'])!=(width,height)):
+        raise ValueError(f"摄像头模式不匹配：需要 MJPEG {width}×{height}，"
+                         f"实际 {stream['codec_name']} {stream['width']}×{stream['height']}")
+    reported=float(stream['fps'])
+    if not math.isfinite(reported) or reported<=0:
+        raise ValueError('录像标称帧率无效')
+    duration=times[-1]-times[0]
+    measured=(len(times)-1)/duration
+    gap=max(b-a for a,b in zip(times,times[1:]))
+    if gap>max(1.,3./measured):
+        raise ValueError(f'录像存在明显断流：相邻帧最大间隔 {gap:.3f} 秒')
+    mismatch=abs(reported-fps)>max(.1,fps*.01) or measured<fps*.9
+    if strict_fps and mismatch:
+        raise ValueError(f'严格帧率检查未通过：目标 {fps:g} fps，标称 {reported:g} fps，实测 {measured:.2f} fps')
+    warning=(f'目标 {fps:g} fps，实测 {measured:.2f} fps；已按真实时间戳接收，未补帧。'
+             if mismatch else None)
+    return dict(duration_seconds=duration,measured_fps=measured,reported_fps=reported,
+                requested_fps=fps,max_frame_gap_seconds=gap,
+                fps_policy='strict' if strict_fps else 'measured',fps_warning=warning)
+
+
 def capture_clip(device, out, *, width=1280, height=720, fps=30., seconds=5., settle=1.,
-                 events=None, ffmpeg="ffmpeg", ffprobe="ffprobe"):
+                 events=None, ffmpeg="ffmpeg", ffprobe="ffprobe", strict_fps=False):
     validate_capture(width, height, fps, seconds, settle)
     device = Path(device)
     if not device.as_posix().startswith("/dev/") or not device.exists():
@@ -107,21 +136,16 @@ def capture_clip(device, out, *, width=1280, height=720, fps=30., seconds=5., se
             subprocess.run(command, stdout=subprocess.DEVNULL, stderr=log,
                            timeout=seconds+settle+20, check=True)
         stream, timestamps = inspect_clip(partial, ffprobe)
-        if (stream["codec_name"] != "mjpeg" or (stream["width"], stream["height"]) != (width, height)
-                or abs(stream["fps"]-fps) > max(.1, fps*.01)):
-            raise ValueError("Camera negotiated another mode; inspect ffmpeg.log and probe formats")
+        observed=validate_recorded_capture(stream,timestamps,width,height,fps,strict_fps=strict_fps)
         # Catch early disconnects that return a successful but truncated recording.
         if timestamps[-1]-timestamps[0] < seconds - max(.25, 2/fps):
             raise ValueError("Captured clip shorter than requested; camera may have disconnected")
-        measured_fps = (len(timestamps)-1)/(timestamps[-1]-timestamps[0])
-        stream.update(measured_fps=measured_fps,
-                      max_frame_gap_seconds=max(b-a for a, b in zip(timestamps, timestamps[1:])))
-        if measured_fps < fps*.9:
-            raise ValueError("Capture lost over 10% of requested frame rate; inspect USB load/exposure")
+        stream.update(measured_fps=observed['measured_fps'],
+                      max_frame_gap_seconds=observed['max_frame_gap_seconds'])
         partial.rename(final)
         record.update(complete=True, path=str(final.resolve()), sha256=sha(final),
                       actual=stream, frame_pts_seconds=timestamps, frames=len(timestamps),
-                      acquisition_seconds=time.monotonic()-started)
+                      acquisition_seconds=time.monotonic()-started,**observed)
         if events is not None:
             events.emit("CAPTURE_COMPLETE", path=record["path"], frames=len(timestamps))
         return record
@@ -141,6 +165,7 @@ def main(argv=None):
     p.add_argument("--width", type=int, default=1280)
     p.add_argument("--height", type=int, default=720)
     p.add_argument("--fps", type=float, default=30.)
+    p.add_argument('--strict-fps',action='store_true',help='Require negotiated FPS and at least 90% of requested FPS; default accepts measured rate')
     p.add_argument("--seconds", type=float, default=5.)
     p.add_argument("--settle", type=float, default=1.)
     a = p.parse_args(argv)
@@ -150,7 +175,7 @@ def main(argv=None):
         p.error("--out is required for capture")
     else:
         print(json.dumps(capture_clip(a.device, a.out, width=a.width, height=a.height,
-            fps=a.fps, seconds=a.seconds, settle=a.settle), indent=2))
+            fps=a.fps, seconds=a.seconds, settle=a.settle,strict_fps=a.strict_fps), indent=2))
 
 
 if __name__ == "__main__":

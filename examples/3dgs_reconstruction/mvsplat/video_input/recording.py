@@ -9,8 +9,9 @@ import threading
 import time
 
 from common import save, sha
-from video_input.capture import inspect_clip, validate_capture
+from video_input.capture import inspect_clip, validate_capture, validate_recorded_capture
 from video_input.preview import Preview
+from video_input.camera_controls import CameraControls
 
 
 SESSION_PATTERN=r'(?:(?:clip|scene|stream)_\d{8}_\d{6}_[0-9a-f]{6}|upload_\d{8}_\d{6}_[0-9a-f]{8})'
@@ -61,7 +62,7 @@ def prune_stream_candidate(folder,root):
 
 class CameraRecorder:
     def __init__(self, device, width, height, fps, out, *, max_seconds=20, factory=Preview,
-                 auto_process=False):
+                 auto_process=False, strict_fps=False):
         validate_capture(width, height, fps, max_seconds, 0)
         self.device, self.width, self.height, self.fps = device, width, height, fps
         self.out, self.max_seconds, self.factory = Path(out), max_seconds, factory
@@ -74,11 +75,14 @@ class CameraRecorder:
         self.maintenance=False
         self.started, self.elapsed = None, 0.
         self.auto_process = auto_process
+        if type(strict_fps) is not bool:raise ValueError('strict_fps must be boolean')
+        self.strict_fps = strict_fps
         self.video_complete_monotonic = None
         self.video_complete_epoch = None
         self.input_kind='usb_camera'
         self.upload=None
         self.preview_error=None
+        self.camera_controls=CameraControls(device)
         try:self.resume_preview()
         except (OSError,ValueError,subprocess.SubprocessError) as exc:
             # The PC-file entry remains usable when the USB camera is absent.
@@ -112,6 +116,23 @@ class CameraRecorder:
             if self.preview is None:raise RuntimeError(self.preview_error or '摄像头预览尚未就绪')
             return self.preview.packet()
 
+    def _controls_locked(self):
+        return (self.closed or self.maintenance or self.state in ('starting','recording','stopping','uploading')
+                or bool(self.build and self.build.status()['phase'] in ('initializing','reconstructing','streaming','stopping')))
+
+    def get_camera_controls(self):
+        with self.lock:
+            result=self.camera_controls.read()
+            result.update(editable=not self._controls_locked(),requested_fps=self.fps)
+            return result
+
+    def set_camera_controls(self,updates):
+        with self.lock:
+            if self._controls_locked():raise ValueError('请等待录制、保存或重建结束后再调整曝光')
+            result=self.camera_controls.apply(updates)
+            result.update(editable=True,requested_fps=self.fps)
+            return result
+
     def start_stream(self):
         with self.lock:
             if self.closed or self.maintenance or self.state in ('starting','recording','stopping','uploading'):
@@ -142,7 +163,8 @@ class CameraRecorder:
         with self.lock:
             elapsed = time.monotonic()-self.started if self.started and self.state in ('recording','stopping') else self.elapsed
             clip = None if self.clip is None else {k:self.clip[k] for k in
-                ('frames','duration_seconds','measured_fps','stop_label')}
+                ('frames','duration_seconds','measured_fps','stop_label','fps_policy','fps_warning',
+                 'requested_fps','reported_fps') if k in self.clip}
             build=self.build.status() if self.build else dict(phase='idle',url=None)
             build['matches_clip']=bool(self.clip and build.get('clip_path')==self.clip['path'])
             # Include stop/finalization latency, before a validated clip can be
@@ -155,7 +177,7 @@ class CameraRecorder:
             if build.get('scene_restored'):post_elapsed=None
             return dict(state=self.state, elapsed_seconds=max(0.,elapsed), max_seconds=self.max_seconds,
                         free_mib=shutil.disk_usage(self.out).free/1024**2, clip=clip, error=self.error,
-                        preview_error=self.preview_error,
+                        preview_error=self.preview_error,capture_fps_policy='strict' if self.strict_fps else 'measured',
                         build=build,maintenance=self.maintenance,input_kind=self.input_kind,
                         upload=({k:v for k,v in self.upload.items() if k!='frame_pts_seconds'} if self.upload else None),
                         processing_started_epoch=None if build.get('scene_restored') else self.video_complete_epoch,
@@ -286,20 +308,17 @@ class CameraRecorder:
                 raise RuntimeError('摄像头或录像写入异常，请检查日志')
             with self.lock: self.state='stopping'
             stream,times=inspect_clip(partial)
-            duration=times[-1]-times[0]
-            measured=(len(times)-1)/duration
-            if duration<1.:
-                raise ValueError('短片不足 1 秒，请重新录制并缓慢水平转满一圈')
-            if (stream['codec_name']!='mjpeg' or (stream['width'],stream['height'])!=(self.width,self.height)
-                    or abs(stream['fps']-self.fps)>max(.1,self.fps*.01) or measured<self.fps*.9):
-                raise ValueError('摄像头模式或帧率未通过检查，短片未交付重建')
+            observed=validate_recorded_capture(stream,times,self.width,self.height,self.fps,
+                                               strict_fps=self.strict_fps)
+            duration=observed['duration_seconds']
+            if duration<1.:raise ValueError('短片不足 1 秒，请重新录制')
             if (not manual and boundary is None and duration<self.max_seconds-.3
                     and partial.stat().st_size<limit-max(1024**2,self.width*self.height*2)):
                 raise RuntimeError('摄像头提前断流，短片未交付重建，请检查连接')
             partial.rename(final)
             reason='manual' if manual else (boundary or ('time_limit' if duration>=self.max_seconds-.3 else 'storage_limit'))
             record.update(complete=True,path=str(final.resolve()),sha256=sha(final),frames=len(times),actual=stream,
-                frame_pts_seconds=times,duration_seconds=duration,measured_fps=measured,
+                frame_pts_seconds=times,**observed,
                 stop_reason=reason,stop_label={'manual':'手动结束','time_limit':'达到时长上限，自动结束','storage_limit':'达到空间上限，自动结束'}[reason])
             with self.lock: self.clip=record; self.elapsed=duration
         except (OSError,RuntimeError,ValueError,subprocess.SubprocessError,TimeoutError) as exc:

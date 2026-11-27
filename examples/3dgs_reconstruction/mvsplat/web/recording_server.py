@@ -34,6 +34,12 @@ def make_server(camera, host='127.0.0.1', port=8081):
                 self.reply(200,page.replace('__TOKEN__',json.dumps(token)).encode(),'text/html; charset=utf-8')
             elif self.path=='/api/status':
                 self.reply(200,json.dumps(camera.status(),ensure_ascii=False).encode())
+            elif self.path=='/api/camera-controls':
+                try:self.reply(200,json.dumps(camera.get_camera_controls(),ensure_ascii=False).encode())
+                except (OSError,ValueError,RuntimeError,subprocess.SubprocessError) as exc:
+                    self.reply(503,json.dumps(dict(error=str(exc)),ensure_ascii=False).encode())
+            elif self.path=='/camera_controls.js':
+                self.reply(200,Path(__file__).with_name('camera_controls.js').read_bytes(),'text/javascript; charset=utf-8')
             elif self.path.startswith('/frame.jpg'):
                 try:
                     frame,count,fps,captured=camera.packet()
@@ -50,6 +56,16 @@ def make_server(camera, host='127.0.0.1', port=8081):
             body_started=False
             try:
                 route=urlsplit(self.path)
+                if route.path=='/api/camera-controls':
+                    length=self.headers.get('Content-Length','')
+                    if (self.headers.get('Transfer-Encoding') or len(self.headers.get_all('Content-Length',[]))!=1
+                            or not length.isdecimal() or not 0<int(length)<=4096):
+                        raise ValueError('相机设置需要 1–4096 字节的 JSON 请求')
+                    body_started=True
+                    try:updates=json.loads(self.rfile.read(int(length)))
+                    except (ValueError,UnicodeError) as exc:raise ValueError('相机设置 JSON 无效') from exc
+                    result=camera.set_camera_controls(updates)
+                    self.reply(200,json.dumps(result,ensure_ascii=False).encode());return
                 if route.path=='/api/prepare/upload':
                     camera.prepare_upload();self.reply(202,b'{"accepted":true}');return
                 if route.path=='/api/upload':

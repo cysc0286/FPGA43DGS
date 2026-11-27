@@ -6,12 +6,15 @@
 struct FakeDevice {
     std::vector<std::pair<uint32_t,uint32_t>> writes;
     uint32_t control=0, status=0;
+    bool stop_fails=false;
+    unsigned normal_stops=0;
     void write(uint32_t offset, uint32_t value) {
         writes.push_back(std::make_pair(offset,value));
         if (offset==camera_scan::CONTROL) { control=value; status=(status&0x100)|value; }
         if (offset==camera_scan::HEARTBEAT) status &= ~0x100u;
     }
     uint32_t read(uint32_t offset) { return offset==camera_scan::CONTROL ? control : status; }
+    void stop() { ++normal_stops; if(stop_fails)throw std::runtime_error("stop ack missing");write(camera_scan::CONTROL,0); }
 };
 int checks=0;
 void check(bool ok, const std::string& message) {
@@ -48,6 +51,10 @@ int main(int argc,char** argv) {
         check(ticks==3 && traces==3,"one wait and trace per sample");
         check(device.writes.front()==std::make_pair(camera_scan::CONTROL,0u),"disable before arming");
         check(device.control==0 && device.writes.back()==std::make_pair(camera_scan::CONTROL,0u),"disable on completion");
+        check(device.normal_stops==1,"normal completion uses complete-pulse stop");
+        FakeDevice stop_failure;stop_failure.stop_fails=true;
+        rejects([&](){camera_scan::execute(plan,stop_failure,[](){},[](const camera_scan::Point&){});},"stop acknowledgement failure propagates");
+        check(stop_failure.control==0,"stop failure falls back to immediate disable");
         auto bad_plan=plan;bad_plan[1].tilt_us=2500;
         FakeDevice untouched;
         rejects([&](){camera_scan::execute(bad_plan,untouched,[](){},[](const camera_scan::Point&){});},"validate before write");

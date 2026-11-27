@@ -14,6 +14,8 @@
 #include <string>
 #include <thread>
 #include "camera_servo_scan.h"
+#include "camera_servo_jog.h"
+#include "camera_servo_stop.h"
 
 namespace {
 constexpr uint32_t BASE = 0x400c0300, MAGIC = 0x53525631;
@@ -51,6 +53,7 @@ class Servo {
     icraft::xrt::Device device;
     icraft::xrt::ZG330Device native;
     bool opened = false, verified = false, may_be_enabled = false;
+    uint32_t servo_abi = 0;
     void close_noexcept() noexcept {
         if (opened) {
             try { icraft::xrt::Device::Close(device); } catch (...) {}
@@ -59,7 +62,7 @@ class Servo {
         if (lock_fd >= 0) { ::close(lock_fd); lock_fd = -1; }
     }
 public:
-    Servo() {
+    explicit Servo(bool read_legacy_status=false) {
         lock_fd = ::open("/run/lock/fpga43dgs-gsc1.lock", O_CREAT | O_RDWR | O_CLOEXEC, 0600);
         if (lock_fd < 0) throw std::runtime_error("Cannot open board ownership lock");
         if (::flock(lock_fd, LOCK_EX | LOCK_NB)) {
@@ -81,10 +84,11 @@ public:
                 std::cerr << "Observed servo-window ID 0x" << std::hex << id << std::dec << '\n';
                 throw std::runtime_error("SRV1 is absent; no application register was written");
             }
-            if (read(4) != 2 || read(8) != 100000000 || read(0x0c) != 20000 ||
+            servo_abi = read(4);
+            if ((servo_abi != 3 && !(read_legacy_status && servo_abi == 2)) || read(8) != 100000000 || read(0x0c) != 20000 ||
                 read(0x30) != 500000 || read(0x34) != (500u | 2500u << 16) ||
                 read(0x38) != (1000u | 2000u << 16)) {
-                throw std::runtime_error("Servo ABI/clock/period/watchdog/limits mismatch; no application register was written");
+                throw std::runtime_error("Servo ABI3/clock/period/watchdog/limits required; ABI2 is status-only after stop-pulse incident; no application register was written");
             }
             // Check that the real clock is running at the expected rate before
             // arming. ABI parameters alone cannot establish the physical rate.
@@ -97,6 +101,8 @@ public:
             std::cout << "Observed frame-counter rate=" << frames_per_second << " Hz (software sampled)\n";
             if (frames_per_second < 40.0 || frames_per_second > 60.0)
                 throw std::runtime_error("Frame-counter rate inconsistent with 50Hz; no application register was written");
+            if (!read_legacy_status && (read(CONTROL) || (read(0x20) & 3)))
+                throw std::runtime_error("Outputs are already enabled; no application register was written");
             verified = true;
         } catch (...) { close_noexcept(); throw; }
     }
@@ -105,12 +111,14 @@ public:
     uint32_t read(uint32_t offset) { return native.defaultRegRegion().read(BASE + offset, false); }
     void write(uint32_t offset, uint32_t value) {
         if (!verified) throw std::runtime_error("Servo identity was not verified");
+        if (servo_abi != 3) throw std::runtime_error("ABI2 permits status only; no application register was written");
         if (interrupted && !(offset == CONTROL && value == 0))
             throw std::runtime_error("Interrupted; disabling PWM");
         if ((offset == PAN && (value < 500 || value > 2500)) ||
             (offset == TILT && (value < 1000 || value > 2000)) ||
             (offset == CONTROL && value > 3) ||
-            (offset != PAN && offset != TILT && offset != CONTROL && offset != HEARTBEAT)) {
+            (offset == camera_stop::REQUEST && value != 1) ||
+            (offset != PAN && offset != TILT && offset != CONTROL && offset != HEARTBEAT && offset != camera_stop::REQUEST)) {
             throw std::runtime_error("Rejected unsafe register request before write");
         }
         // Mark before the SDK call so a partially completed enable is cleaned up.
@@ -125,8 +133,16 @@ public:
         if (interrupted) throw std::runtime_error("Interrupted; disabling PWM");
         if (read(0x20) & 0x100) throw std::runtime_error("Hardware heartbeat expired; disabling PWM");
     }
+    void stop() {
+        camera_stop::finish(*this, [&]() {
+            if (interrupted) throw std::runtime_error("Interrupted during stop; disabling PWM");
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            if (interrupted) throw std::runtime_error("Interrupted during stop; disabling PWM");
+        });
+        may_be_enabled = false;
+    }
     void status() {
-        std::cout << "SRV1 ABI2, 100MHz, 50Hz, pan J17/23, tilt J17/21\n";
+        std::cout << "SRV1 ABI" << servo_abi << ", 100MHz, 50Hz, pan J17/23, tilt J17/21\n";
         for (uint32_t offset : {0x10u, 0x14u, 0x18u, 0x20u, 0x24u, 0x28u, 0x2cu})
             std::cout << "offset=0x" << std::hex << offset << " value=0x" << read(offset) << std::dec << '\n';
         std::cout << "status read only; no application register was written\n";
@@ -149,10 +165,21 @@ public:
             std::cout << "requested_pulse_us=" << current << std::endl;
             for (int frame = 0; frame < 15; ++frame) pause_frame();
         }
-        write(CONTROL, 0);
-        if (read(CONTROL) || (read(0x20) & 3))
-            throw std::runtime_error("PWM disable readback failed");
+        stop();
         std::cout << "Command sequence complete; PWM disabled. Physical movement requires observation.\n";
+    }
+    void jog(bool tilt, uint32_t from, uint32_t to) {
+        const auto wait = [&]() {
+            if (interrupted) throw std::runtime_error("Interrupted; disabling PWM");
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+            if (interrupted) throw std::runtime_error("Interrupted; disabling PWM");
+        };
+        std::cout << "JOG_BEGIN axis=" << (tilt ? "tilt" : "pan")
+                  << " from_us=" << from << " target_us=" << to
+                  << " slew_us_per_20ms=2 hold_seconds=5" << std::endl;
+        camera_jog::execute(tilt, from, to, *this, wait);
+        std::cout << "JOG_END target_us=" << to
+                  << "; PWM disabled. Installed angle requires observation." << std::endl;
     }
     void scan(const std::vector<camera_scan::Point>& points, ScanLog& log) {
         using Clock = std::chrono::steady_clock;
@@ -197,6 +224,28 @@ public:
 
 int main(int argc, char** argv) {
     try {
+        if (argc >= 2 && std::string(argv[1]) == "jog") {
+            const bool execute = argc == 7 && std::string(argv[5]) == "--execute" &&
+                std::string(argv[6]) == "--wiring-j17-23-21";
+            if ((argc != 5 && !execute) ||
+                (std::string(argv[2]) != "pan" && std::string(argv[2]) != "tilt"))
+                throw std::runtime_error("Usage: camera_servo_native jog pan|tilt FROM_US TO_US [--execute --wiring-j17-23-21]");
+            const bool tilt = std::string(argv[2]) == "tilt";
+            const auto from = camera_scan::unsigned_decimal(argv[3]);
+            const auto to = camera_scan::unsigned_decimal(argv[4]);
+            camera_jog::validate(tilt, from, to); // reject before opening hardware
+            if (!execute) {
+                std::cout << "DRY RUN; no device opened. Jog " << (tilt ? "tilt" : "pan")
+                          << " from_us=" << from << " target_us=" << to
+                          << "; slew <=2us/20ms, hold 5s, then disable PWM.\n";
+                return 0;
+            }
+            std::signal(SIGINT, stop_requested);
+            std::signal(SIGTERM, stop_requested);
+            Servo servo;
+            servo.jog(tilt, from, to);
+            return 0;
+        }
         if (argc >= 2 && std::string(argv[1]) == "scan") {
             const bool execute = argc == 7 && std::string(argv[3]) == "--execute" &&
                 std::string(argv[4]) == "--wiring-j17-23-21" && std::string(argv[5]) == "--log";
@@ -221,6 +270,7 @@ int main(int argc, char** argv) {
         if (argc == 2 && std::string(argv[1]) == "--help") {
             std::cout << "camera_servo_native [dry-run|status]\n"
                       << "camera_servo_native smoke pan|tilt --execute --wiring-j17-23-21\n"
+                      << "camera_servo_native jog pan|tilt FROM_US TO_US [--execute --wiring-j17-23-21]\n"
                       << "camera_servo_native scan PLAN.csv [--execute --wiring-j17-23-21 --log NEW.csv]\n";
             return 0;
         }
@@ -231,7 +281,7 @@ int main(int argc, char** argv) {
                       << "Slew <=2us/20ms; nominal pitch limit +/-45 degrees; PWM stops at exit\n";
             return 0;
         }
-        if (argc == 2 && std::string(argv[1]) == "status") { Servo servo; servo.status(); return 0; }
+        if (argc == 2 && std::string(argv[1]) == "status") { Servo servo(true); servo.status(); return 0; }
         if (argc != 5 || std::string(argv[1]) != "smoke" ||
             (std::string(argv[2]) != "pan" && std::string(argv[2]) != "tilt") ||
             std::string(argv[3]) != "--execute" || std::string(argv[4]) != "--wiring-j17-23-21")

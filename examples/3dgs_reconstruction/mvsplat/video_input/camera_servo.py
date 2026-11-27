@@ -14,8 +14,9 @@ import struct
 import time
 
 MAGIC = 0x53525631
-ABI = 2
+ABI = 3
 CONTROL, PAN, TILT, HEARTBEAT = 0x10, 0x14, 0x18, 0x1C
+STOP = 0x3C
 PULSE_LIMITS = {PAN: (500, 2500), TILT: (1000, 2000)}
 
 
@@ -29,6 +30,9 @@ def validate_write(offset: int, value: int) -> None:
     elif offset == CONTROL:
         if value & ~3:
             raise ValueError("only the pan/tilt enable bits may be set")
+    elif offset == STOP:
+        if value != 1:
+            raise ValueError("normal-stop request must be 1")
     elif offset != HEARTBEAT:
         raise ValueError("register is not writable")
 
@@ -80,6 +84,18 @@ class UioServo:
             self.fd = None
 
 
+def finish_pulse(device, sleep=time.sleep) -> None:
+    device.write(STOP, 1)
+    for _ in range(50):
+        status = device.read(0x20)
+        if status & 0x100:
+            raise RuntimeError("watchdog expired during complete-pulse stop")
+        if device.read(CONTROL) == 0 and (status & 3) == 0:
+            return
+        sleep(.001)
+    raise RuntimeError("complete-pulse stop was not acknowledged")
+
+
 def run_smoke(device, axis: str, sleep=time.sleep) -> None:
     plan = smoke_plan(axis)
     address, mask = (PAN, 1) if axis == "pan" else (TILT, 2)
@@ -99,6 +115,7 @@ def run_smoke(device, axis: str, sleep=time.sleep) -> None:
             for _ in range(15):
                 device.write(HEARTBEAT, 1)
                 sleep(0.02)
+        finish_pulse(device, sleep)
     finally:
         device.write(CONTROL, 0)
 

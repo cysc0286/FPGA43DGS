@@ -93,9 +93,7 @@ void execute(const std::vector<Point>& points, Device& device, Wait wait, Trace 
             if (device.read(STATUS) & 0x100)
                 throw std::runtime_error("Hardware watchdog expired during sample hold; scan aborted");
         }
-        device.write(CONTROL,0);
-        if (device.read(CONTROL) || (device.read(STATUS) & 3))
-            throw std::runtime_error("PWM disable readback failed");
+        device.stop(); // ABI3: normal completion keeps the final pulse intact.
     } catch (...) {
         try { device.write(CONTROL,0); } catch (...) {}
         throw;

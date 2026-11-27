@@ -66,7 +66,7 @@ module tb_camera_servo_pwm;
         #1000; check(!pan && !tilt, "reset outputs disabled");
         @(negedge clk); rst_n = 1;
         read_reg(6'h00, value); check(value == 32'h53525631, "module identity");
-        read_reg(6'h04, value); check(value == 2, "limited-pitch ABI");
+        read_reg(6'h04, value); check(value == 3, "complete-pulse-stop ABI");
         read_reg(6'h34, value); check(value == {16'd2500,16'd500}, "pan profile");
         read_reg(6'h38, value); check(value == {16'd2000,16'd1000}, "pitch profile");
         read_reg(6'h08, value); check(value == 10000000, "configured clock");

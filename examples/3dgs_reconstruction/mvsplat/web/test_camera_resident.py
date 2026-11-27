@@ -64,28 +64,27 @@ class ResidentCameraTests(unittest.TestCase):
             '--ring-selection-policy','balanced',
             '--ring-appearance-strength','1.0'])
 
-    def test_default_capture_uses_adaptive_pairs_with_eight_pair_limit(self):
+    def test_default_capture_uses_current_cpu_two_pair_profile(self):
         required=['--out','sessions','--weights','weights','--vendor','vendor',
                   '--renderer','renderer','--live-renderer','live','--focal-ratio','.525',
                   '--viewer-public-url','http://127.0.0.1:18434/']
         _,args=parse_args(required)
-        self.assertEqual(DEFAULT_RING_PAIRS,8)
+        self.assertEqual(DEFAULT_RING_PAIRS,2)
         self.assertEqual(DEFAULT_MAX_SECONDS,15)
         self.assertEqual(args.max_seconds,15)
-        self.assertEqual(args.backend,'npu')
+        self.assertEqual(args.backend,'cpu')
         self.assertEqual(args.ring_candidates,64)
         self.assertTrue(args.ring_auto_coverage)
         self.assertEqual(args.ring_coverage_target,1.)
         self.assertEqual(args.ring_min_pairs,1)
-        self.assertEqual(args.ring_selection_policy,'balanced')
+        self.assertEqual(args.ring_selection_policy,'coverage')
         self.assertEqual(ring_pipeline_args(args),[
-            '--ring-pairs','8','--ring-candidates','64','--ring-max-gaussians','65536',
+            '--ring-pairs','2','--ring-candidates','64','--ring-max-gaussians','65536',
             '--ring-auto-coverage','--ring-coverage-target','1.0','--ring-min-pairs','1',
-            '--ring-selection-policy','balanced',
-            '--ring-appearance-strength','1.0'])
-        with self.assertRaisesRegex(ValueError,'Non-CPU backend needs a bundle'):
-            from gaussian_generation.npu_branch.config import BackendConfig
-            BackendConfig.from_args(args)
+            '--ring-selection-policy','coverage',
+            '--ring-appearance-strength','0.0'])
+        from gaussian_generation.npu_branch.config import BackendConfig
+        self.assertEqual(BackendConfig.from_args(args).backend,'cpu')
 
     def test_camera_cpu_path_requires_explicit_selection(self):
         required=['--out','sessions','--weights','weights','--vendor','vendor',

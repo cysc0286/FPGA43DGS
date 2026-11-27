@@ -1,16 +1,26 @@
 # Read-only review of the isolated candidate after routing; never program hardware.
-if {$argc != 1} {error "Usage: review_camera_servo.tcl <candidate-platform-directory>"}
+if {$argc < 1 || $argc > 3} {
+    error "Usage: review_camera_servo.tcl <candidate-platform-directory> ?relative-checkpoint? ?relative-reports?"
+}
 set root [file normalize [lindex $argv 0]]
 if {[file tail $root] ne "camera_servo_platform_j17_23_21"} {
     error "Unexpected platform; refusing to review a different candidate"
 }
 set reports [file join $root servo_reports]
+set routed [file join $root fpai_demo_vivado.runs impl_1 ai7030_edif_top_routed.dcp]
+if {$argc >= 2} {set routed [file normalize [file join $root [lindex $argv 1]]]}
+if {$argc == 3} {set reports [file normalize [file join $root [lindex $argv 2]]]}
+foreach path [list $routed $reports] {
+    if {![string equal -nocase [string range $path 0 [string length $root]] "$root/"]} {
+        error "Review inputs and reports must stay inside the candidate"
+    }
+}
 file mkdir $reports
 set result [open [file join $reports review_status.txt] w]
 proc record {message} {global result; puts $message; puts $result $message; flush $result}
 if {[catch {
-    set routed [file join $root fpai_demo_vivado.runs impl_1 ai7030_edif_top_routed.dcp]
     if {![file exists $routed]} {error "No routed checkpoint"}
+    record "CHECKPOINT=$routed"
     open_checkpoint $routed
     foreach {port ball} {camera_pan_pwm AE13 camera_tilt_pwm W13} {
         set p [get_ports $port]
@@ -52,6 +62,8 @@ if {[catch {
     }
     report_timing_summary -file [file join $reports reviewed_timing_summary.rpt]
     report_utilization -file [file join $reports reviewed_utilization.rpt]
+    report_utilization -cells [get_cells U_camera_servo_bus] \
+        -file [file join $reports new_logic_utilization.rpt]
     report_io -file [file join $reports reviewed_io.rpt]
     report_drc -file [file join $reports reviewed_drc.rpt]
     if {!$all_pass} {error "New servo or register-routing timing failed"}

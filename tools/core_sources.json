@@ -62,9 +62,16 @@
     "examples/3dgs_reconstruction/mvsplat/rendering/render_main/manifest.json",
     "examples/3dgs_reconstruction/mvsplat/web/README.md",
     "docs/RELEASE_20261116.md",
+    "docs/RELEASE_20261127.md",
+    "examples/3dgs_reconstruction/mvsplat/video_input/CAMERA_EXPOSURE.md",
+    "examples/3dgs_reconstruction/mvsplat/video_input/CAPTURE_FPS.md",
+    "examples/3dgs_reconstruction/mvsplat/video_input/COVERAGE_SELECTION.md",
     "tools/check_camera_firmware.py",
     "examples/3dgs_reconstruction/mvsplat/video_input/firmware/j17_23_21_20261115/README.md",
-    "examples/3dgs_reconstruction/mvsplat/video_input/firmware/j17_23_21_20261115/manifest.json"
+    "examples/3dgs_reconstruction/mvsplat/video_input/firmware/j17_23_21_20261115/manifest.json",
+    "examples/3dgs_reconstruction/mvsplat/video_input/firmware/j17_23_21_20261115/camera_servo_pwm_abi2.v",
+    "examples/3dgs_reconstruction/mvsplat/video_input/rtl/camera_servo_bus.v",
+    "examples/3dgs_reconstruction/mvsplat/video_input/rtl/camera_servo_j17_23_21.xdc"
   ],
   "trees": [
     "examples/3dgs_reconstruction/mvsplat"
@@ -91,6 +98,7 @@
     "video_input": [
       "__init__.py",
       "calibration.py",
+      "camera_controls.py",
       "capture.py",
       "decode.py",
       "preview.py",
@@ -145,6 +153,7 @@
     "web": [
       "__init__.py",
       "camera_ui.py",
+      "camera_controls.js",
       "recording_page.html",
       "recording_server.py",
       "upload_page.html",

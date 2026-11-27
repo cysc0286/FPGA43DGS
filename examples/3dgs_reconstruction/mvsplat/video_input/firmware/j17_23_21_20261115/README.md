@@ -14,3 +14,7 @@
 全板Slice为19551/19650、BRAM36等效218.5/265、DSP252/400；setup/hold最差余量0.015/0.029ns。继承的厂商脉宽违例为−0.409ns，未声称全板时序签核。此前RTL的PWM53项、总线路由18项检查通过，实际输出波形和机械角度仍待测。
 
 从仓库根目录执行`python tools/check_camera_firmware.py`核对发布文件。已验收的四路渲染固件仍在`rendering/render_main/hardware/BOOT.bin`，身份为`b4e6d4d238d8a33bbf77c4d18df43143fa4304f7c713f09b479c6d5ccd39f9c6`；两者不能互换验收状态。先按[四步测试](../../acceptance/README.md)完成现场验证。
+
+## 2026-11-27 源码对应关系
+
+本目录 BOOT、bit 和实现报告保持原字节。ABI2 的构建源码快照保存为 `camera_servo_pwm_abi2.v`，由 manifest.sources 指向；原构建路径记录在 `build_source_path`。活动 `video_input/rtl/camera_servo_pwm.v` 已加入 ABI3 完整脉冲停止逻辑，不代表本目录旧固件已包含该修复。ABI3 本机候选状态见 `../../MOTOR_INCIDENT_20261116.md`；发布本次代码不烧写固件。

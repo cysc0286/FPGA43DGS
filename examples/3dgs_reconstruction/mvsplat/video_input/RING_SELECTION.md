@@ -16,7 +16,7 @@
 
 网页和直接入口默认最低一组、最高由`--ring-pairs`指定；两入口覆盖目标均默认1.0。实际数量由当前候选、有效视野与上限共同决定。总高斯预算沿用`--ring-max-gaussians`，不随组数直接倍增。
 
-默认`--ring-selection-policy balanced`。指定`--ring-selection-policy legacy`可恢复原连续三帧、覆盖增益贪心选组；指定`--ring-min-pairs 8`可恢复网页此前的强制八组要求。固定1/2/4组模式继续使用原角度锚点选择。
+直接初始化入口默认`--ring-selection-policy balanced`；当前网页演示默认`coverage`且最多两组，见 [覆盖策略与历史验证](COVERAGE_SELECTION.md)。`coverage`考虑所有合法跨帧端点和夹在两者之间的目标帧，优先补齐裁剪后覆盖缺口；它不提供`balanced`的扇区内部支持均衡保证。指定`--ring-selection-policy legacy`可恢复连续三帧覆盖贪心；显式`--ring-pairs 8 --ring-min-pairs 8`可恢复强制八组实验。固定1/2/4组模式继续使用原角度锚点选择。
 
 元数据同时记录实际覆盖、最大缺口、停止原因、中央支持比例和各扇区支持。达到八组仍不足时保留未覆盖方向，不伪造补齐。对候选帧本身漏掉的方向，需要增加有效采样或补录。
 

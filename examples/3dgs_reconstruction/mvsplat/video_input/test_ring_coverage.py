@@ -104,8 +104,37 @@ class PairCoverageTest(unittest.TestCase):
                                        size=128, max_pairs=8, coverage_target=.95)
         self.assertLessEqual(len(pairs), 8)
         self.assertEqual(meta['eligible_triples'], 62)
+        self.assertLessEqual(meta['eligible_pair_candidates'], 1953)
         self.assertGreaterEqual(meta['sample_covered_fraction'], .95)
         self.check_unique(pairs)
+
+    def test_dense_slow_sweep_keeps_endpoint_coverage_and_excludes_targets(self):
+        # Every adjacent triple spans <1 degree and used to be rejected by the
+        # 5-degree gate, despite a valid 27-degree observed sweep.
+        for start, end in ((0., 27.), (350., 377.), (27., 0.)):
+            poses = self.poses(start, end, 64)
+            k = intrinsics(1.787)
+            pairs, meta = select_ring_pairs(poses, 'auto', intrinsic_normalized=k,
+                                           max_pairs=8, min_pairs=1, coverage_target=1., selection_policy='coverage')
+            possible = horizontal_frustum_coverage(list(poses.values()), k)
+            self.assertEqual(meta['sample_covered_degrees'], possible['sample_covered_degrees'])
+            self.assertGreaterEqual(len(pairs), 1)
+            self.assertLessEqual(len(pairs), 8)
+            self.assertFalse(meta['target_met'])  # partial capture stays partial
+            self.check_unique(pairs)
+            self.assertTrue(all(5 <= x <= 55 for x in meta['selected_context_axis_separation_degrees']))
+            self.assertTrue(all(a <= b+1e-10 for a, b in zip(
+                meta['selected_context_axis_separation_degrees'],
+                meta['selected_context_axis_limit_degrees'])))
+
+    def test_dense_out_and_back_sweep_does_not_spend_budget_on_zero_gain(self):
+        angles = np.r_[np.linspace(0., 27., 40), np.linspace(27., 10., 24)]
+        poses = {i:camera(angle) for i, angle in enumerate(angles)}
+        pairs, meta = select_ring_pairs(poses, 'auto', intrinsic_normalized=intrinsics(1.787),
+                                       max_pairs=8, min_pairs=1, coverage_target=1., selection_policy='coverage')
+        self.check_unique(pairs)
+        self.assertTrue(all(gain > 0 for gain in meta['coverage_gain_degrees_per_pair']))
+        self.assertGreaterEqual(meta['sample_covered_degrees'], 57)
 
     def test_auto_minimum_pair_budget_continues_after_frustum_target(self):
         poses = {i:camera(angle) for i, angle in enumerate(np.linspace(0., 360., 64, endpoint=False))}
@@ -124,7 +153,7 @@ class PairCoverageTest(unittest.TestCase):
         # Six usable triples cover the horizontal rays, but cannot satisfy the
         # requested eight independent pair groups used for the demo scene.
         pairs, meta = select_ring_pairs(poses, 'auto', intrinsic_normalized=intrinsics(.5),
-                                       max_pairs=8, min_pairs=1, coverage_target=1.)
+                                       max_pairs=8, min_pairs=1, coverage_target=1., selection_policy='coverage')
         self.assertTrue(meta['target_met'])
         self.assertLess(len(pairs), 8)
         with self.assertRaisesRegex(ValueError, 'Panorama.*minimum.*8'):
@@ -268,7 +297,7 @@ class AutomaticCoverageSelectionTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'overlapping panorama pair'):
             select_ring_pairs(poses,2,intrinsic_normalized=intrinsics(10.))
 
-    def test_every_target_is_held_between_its_contexts_and_globally_disjoint(self):
+    def test_every_target_and_context_is_globally_disjoint_and_time_ordered(self):
         poses=self.poses();indices=sorted(poses)
         pairs,meta=select_ring_pairs(poses,'auto',intrinsic_normalized=intrinsics(1.))
         context=[i for pair in pairs for i in pair['context']];targets=[pair['target'] for pair in pairs]
@@ -276,8 +305,13 @@ class AutomaticCoverageSelectionTest(unittest.TestCase):
         self.assertFalse(set(context)&set(targets))
         for pair,separation,limit in zip(pairs,meta['selected_context_axis_separation_degrees'],
                                         meta['selected_context_axis_limit_degrees']):
-            self.assertLess(pair['context'][0], pair['target'])
-            self.assertLess(pair['target'], pair['context'][1])
+            start=indices.index(pair['context'][0]);end=indices.index(pair['context'][1])
+            target=indices.index(pair['target'])
+            self.assertLess(start,target);self.assertLess(target,end)
+            headings=np.unwrap([np.arctan2(poses[i][0,2],poses[i][2,2]) for i in indices])
+            centre=(headings[start]+headings[end])/2
+            self.assertAlmostEqual(abs(headings[target]-centre),
+                                   min(abs(headings[i]-centre) for i in range(start+1,end)))
             self.assertLessEqual(separation,limit+1e-10)
 
     def test_partial_capture_does_not_turn_into_a_full_circle(self):

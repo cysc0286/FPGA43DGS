@@ -15,7 +15,7 @@ from video_input.recording import CameraRecorder
 from web.recording_server import make_server
 from gaussian_generation.npu_branch.config import add_arguments, BackendConfig
 
-DEFAULT_RING_PAIRS = 8
+DEFAULT_RING_PAIRS = 2
 DEFAULT_RING_CANDIDATES = 64
 DEFAULT_RING_AUTO_COVERAGE = True
 DEFAULT_RING_COVERAGE_TARGET = 1.0
@@ -372,11 +372,12 @@ def build_parser():
     p.add_argument('--width',type=int,default=1280)
     p.add_argument('--height',type=int,default=720)
     p.add_argument('--fps',type=float,default=60.)
+    p.add_argument('--strict-fps',action='store_true',help='Opt-in fixed-rate benchmark; normally accept measured FPS without resampling')
     p.add_argument('--max-seconds',type=float,default=DEFAULT_MAX_SECONDS,
                    help='Maximum capture duration; increase only within the camera/storage limits')
     p.add_argument('--manual-process',action='store_true',help='Legacy explicit reconstruct button instead of automatic stop-to-process')
     p.add_argument('--ring-pairs',type=int,choices=(0,1,2,4,8),default=DEFAULT_RING_PAIRS,
-                   help='Fixed-centre capture defaults to at most eight adaptive pairs; 0 selects ordinary translation mode')
+                   help='Fixed-centre capture defaults to at most two adaptive pairs; 0 selects ordinary translation mode')
     p.add_argument('--ring-candidates',type=int,default=DEFAULT_RING_CANDIDATES)
     p.add_argument('--ring-feature-contrast',type=float,default=.04,
                    help='Explicit weak-texture feature detection; does not relax rotation validation')
@@ -389,9 +390,9 @@ def build_parser():
     p.add_argument('--ring-coverage-target',type=float,default=DEFAULT_RING_COVERAGE_TARGET)
     p.add_argument('--ring-min-pairs',type=int,default=None,
                    help='Defaults to one, matching the direct entry; set explicitly to force more pairs')
-    p.add_argument('--ring-selection-policy',choices=('balanced','legacy'),default='balanced')
+    p.add_argument('--ring-selection-policy',choices=('balanced','legacy','coverage'),default='coverage')
     p.add_argument('--ring-max-gaussians',type=int,default=65536)
-    p.add_argument('--ring-appearance-strength',type=float,default=1.,
+    p.add_argument('--ring-appearance-strength',type=float,default=0.,
                    help='Context-only colour correction for ring scenes; 0 restores previous colours')
     p.add_argument('--host',default='127.0.0.1')
     p.add_argument('--port',type=int,default=8081)
@@ -410,10 +411,8 @@ def build_parser():
     p.add_argument('--viewer-port',type=int,default=8080)
     p.add_argument('--viewer-host',default='127.0.0.1')
     p.add_argument('--viewer-public-url',required=True,help='URL reachable in the user browser, without token')
-    # A ring capture is intended to exercise the adopted NPU generation path.
-    # Missing/mismatched NPU assets fail closed in BackendConfig instead of
-    # silently producing a CPU-only scene that looks like a full deployment.
-    add_arguments(p, default_backend='npu')
+    # Match the current CPU + FPGA deployment; NPU requires explicit assets.
+    add_arguments(p, default_backend='cpu')
     return p
 
 
@@ -454,7 +453,7 @@ def main(argv=None):
         if value is not None: setattr(a,key,value.resolve())
     def interrupted(signum,frame): raise KeyboardInterrupt
     signal.signal(signal.SIGTERM,interrupted)
-    camera=CameraRecorder(a.device,a.width,a.height,a.fps,a.out,max_seconds=a.max_seconds,
+    camera=CameraRecorder(a.device,a.width,a.height,a.fps,a.out,max_seconds=a.max_seconds,strict_fps=a.strict_fps,
                           auto_process=not a.manual_process)
     camera.build=ReconstructionJob(camera,a)
     server=None
